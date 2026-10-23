@@ -1,0 +1,122 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { router } from 'expo-router';
+import { Pressable, View } from 'react-native';
+import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
+
+import { memberById, useSpace } from '@/features/space/store';
+import { useTasks } from '@/features/tasks/store';
+import type { Task } from '@/features/types';
+import { formatTime, relativeDayLabel, todayKey } from '@/lib/dates';
+import { radius, space, useTheme } from '@/theme';
+
+import { Avatar } from '../ui/primitives';
+import { Checkbox } from '../ui/Checkbox';
+import { Text } from '../ui/Text';
+
+type Props = {
+  task: Task;
+  onCompleted?: (task: Task) => void;
+  showDate?: boolean;
+  /** Render as a standalone card (Home) instead of a list row. */
+  card?: boolean;
+  reorder?: { onUp?: () => void; onDown?: () => void };
+};
+
+export function TaskRow({ task, onCompleted, showDate = true, card, reorder }: Props) {
+  const { palette } = useTheme();
+  const toggle = useTasks((s) => s.toggleComplete);
+  const category = useTasks((s) => s.categories.find((c) => c.id === task.categoryId));
+  const space_ = useSpace((s) => s.space);
+  const assignee = memberById(space_, task.assigneeId);
+  const done = !!task.completedAt;
+  const overdue = !done && !!task.due && task.due < todayKey();
+  const accent = category?.color ?? 'lavender';
+  const subDone = task.subtasks.filter((s) => s.done).length;
+
+  const meta: string[] = [];
+  if (showDate && task.due) meta.push(relativeDayLabel(task.due));
+  if (task.dueTime) meta.push(formatTime(task.dueTime));
+  if (task.subtasks.length) meta.push(`${subDone}/${task.subtasks.length}`);
+
+  return (
+    <Animated.View entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} layout={LinearTransition.springify().damping(18)}>
+      <Pressable
+        onPress={() => router.push({ pathname: '/task/[id]', params: { id: task.id } })}
+        accessibilityRole="button"
+        accessibilityLabel={`${task.title}${task.due ? `, due ${relativeDayLabel(task.due)}` : ''}${done ? ', completed' : ''}`}
+        accessibilityHint="Opens task details"
+        style={({ pressed }) => ({
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: space.md,
+          paddingVertical: space.md,
+          paddingHorizontal: card ? space.lg : space.xs,
+          backgroundColor: card ? palette.surface : 'transparent',
+          borderRadius: card ? radius.lg : 0,
+          opacity: pressed ? 0.75 : 1,
+        })}>
+        <Checkbox
+          checked={done}
+          label={done ? `Mark ${task.title} as not done` : `Complete ${task.title}`}
+          onToggle={() => {
+            toggle(task.id);
+            if (!done) onCompleted?.(task);
+          }}
+        />
+        <View style={{ flex: 1, gap: 2 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            {task.isReminder ? <Ionicons name="notifications" size={14} color={palette.accents.sunshine.ink} /> : null}
+            <Text
+              variant="body"
+              numberOfLines={2}
+              style={{ flexShrink: 1, textDecorationLine: done ? 'line-through' : 'none' }}
+              tone={done ? 'tertiary' : 'primary'}>
+              {task.title}
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, flexWrap: 'wrap' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: palette.accents[accent].base }} />
+              <Text variant="caption" tone="secondary">
+                {category?.name ?? 'Other'}
+              </Text>
+            </View>
+            {meta.length ? (
+              <Text variant="caption" tone={overdue ? 'danger' : 'secondary'}>
+                · {meta.join(' · ')}
+              </Text>
+            ) : null}
+            {task.recurrence ? <Ionicons name="repeat" size={12} color={palette.textSecondary} accessibilityLabel="Repeats" /> : null}
+            {task.visibility === 'shared' ? (
+              <Ionicons name="people" size={12} color={palette.accents.sunshine.ink} accessibilityLabel="Shared" />
+            ) : null}
+            {task.priority === 'high' && !done ? (
+              <Ionicons name="flag" size={12} color={palette.accents.coral.ink} accessibilityLabel="High priority" />
+            ) : null}
+          </View>
+        </View>
+        {assignee ? <Avatar name={assignee.name} accent={assignee.color} size={26} /> : null}
+        {reorder ? (
+          <View style={{ gap: 2 }}>
+            <Pressable
+              onPress={reorder.onUp}
+              disabled={!reorder.onUp}
+              hitSlop={6}
+              accessibilityLabel={`Move ${task.title} up`}
+              style={{ opacity: reorder.onUp ? 1 : 0.25 }}>
+              <Ionicons name="chevron-up" size={20} color={palette.textSecondary} />
+            </Pressable>
+            <Pressable
+              onPress={reorder.onDown}
+              disabled={!reorder.onDown}
+              hitSlop={6}
+              accessibilityLabel={`Move ${task.title} down`}
+              style={{ opacity: reorder.onDown ? 1 : 0.25 }}>
+              <Ionicons name="chevron-down" size={20} color={palette.textSecondary} />
+            </Pressable>
+          </View>
+        ) : null}
+      </Pressable>
+    </Animated.View>
+  );
+}

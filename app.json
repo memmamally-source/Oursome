@@ -1,0 +1,66 @@
+{
+  "expo": {
+    "name": "Oursome",
+    "slug": "oursome",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "oursome",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#FFF9F2",
+    "ios": {
+      "bundleIdentifier": "app.oursome.ios",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "app.oursome.android",
+      "adaptiveIcon": {
+        "backgroundColor": "#FFF9F2",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "single",
+      "favicon": "./assets/images/favicon.png",
+      "name": "Oursome — Life’s better together",
+      "shortName": "Oursome",
+      "lang": "en",
+      "themeColor": "#FFF9F2",
+      "backgroundColor": "#FFF9F2",
+      "description": "A warm, colourful organiser for you and the people you live with: calendar, tasks, reminders, shopping lists and a shared Our Space."
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#FFF9F2",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 120,
+          "dark": {
+            "backgroundColor": "#17181F",
+            "image": "./assets/images/splash-icon.png"
+          }
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Oursome uses your photos only when you choose a screenshot or document to turn into events and tasks.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
