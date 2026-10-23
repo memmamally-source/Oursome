@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from './Icon';
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import {
@@ -124,7 +124,7 @@ export function ModalHeader({
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-        <Ionicons name="close" size={20} color={palette.text} />
+        <Icon name="close" size={20} color={palette.text} />
       </Pressable>
       <Text
         variant="subheading"

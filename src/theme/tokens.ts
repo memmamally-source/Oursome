@@ -111,13 +111,34 @@ export const radius = {
   pill: 999,
 } as const;
 
-export const fonts = {
+const nativeFonts = {
   display: 'Nunito_800ExtraBold',
   heading: 'Nunito_700Bold',
   body: 'NunitoSans_400Regular',
   bodyMedium: 'NunitoSans_600SemiBold',
   bodyBold: 'NunitoSans_700Bold',
 } as const;
+
+// Web: the same names are @font-face aliases (public/index.html) with a rounded
+// system fallback, so text renders immediately while the brand font loads.
+const webFallback = ", ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
+
+export const fonts = (
+  Platform.OS === 'web' ? Object.fromEntries(Object.entries(nativeFonts).map(([k, v]) => [k, v + webFallback])) : nativeFonts
+) as Record<keyof typeof nativeFonts, string>;
+
+const weights: Record<keyof typeof nativeFonts, TextStyle['fontWeight']> = {
+  display: '800',
+  heading: '700',
+  body: '400',
+  bodyMedium: '600',
+  bodyBold: '700',
+};
+
+/** Font family plus (on web) the matching weight, so fallback fonts look right too. */
+export function font(kind: keyof typeof nativeFonts): TextStyle {
+  return Platform.OS === 'web' ? { fontFamily: fonts[kind], fontWeight: weights[kind] } : { fontFamily: fonts[kind] };
+}
 
 export type TypeVariant =
   | 'display'
@@ -132,14 +153,14 @@ export type TypeVariant =
   | 'number';
 
 export const typography: Record<TypeVariant, TextStyle> = {
-  display: { fontFamily: fonts.display, fontSize: 32, lineHeight: 38, letterSpacing: -0.6 },
-  title: { fontFamily: fonts.display, fontSize: 26, lineHeight: 32, letterSpacing: -0.4 },
-  heading: { fontFamily: fonts.heading, fontSize: 20, lineHeight: 26, letterSpacing: -0.2 },
-  subheading: { fontFamily: fonts.heading, fontSize: 17, lineHeight: 22 },
-  body: { fontFamily: fonts.body, fontSize: 16, lineHeight: 23 },
-  bodyStrong: { fontFamily: fonts.bodyBold, fontSize: 16, lineHeight: 23 },
-  callout: { fontFamily: fonts.bodyMedium, fontSize: 14, lineHeight: 20 },
-  caption: { fontFamily: fonts.body, fontSize: 13, lineHeight: 18 },
+  display: { ...font('display'), fontSize: 32, lineHeight: 38, letterSpacing: -0.6 },
+  title: { ...font('display'), fontSize: 26, lineHeight: 32, letterSpacing: -0.4 },
+  heading: { ...font('heading'), fontSize: 20, lineHeight: 26, letterSpacing: -0.2 },
+  subheading: { ...font('heading'), fontSize: 17, lineHeight: 22 },
+  body: { ...font('body'), fontSize: 16, lineHeight: 23 },
+  bodyStrong: { ...font('bodyBold'), fontSize: 16, lineHeight: 23 },
+  callout: { ...font('bodyMedium'), fontSize: 14, lineHeight: 20 },
+  caption: { ...font('body'), fontSize: 13, lineHeight: 18 },
   overline: {
     fontFamily: fonts.bodyBold,
     fontSize: 12,
@@ -147,7 +168,7 @@ export const typography: Record<TypeVariant, TextStyle> = {
     letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
-  number: { fontFamily: fonts.display, fontSize: 28, lineHeight: 32, letterSpacing: -0.5 },
+  number: { ...font('display'), fontSize: 28, lineHeight: 32, letterSpacing: -0.5 },
 };
 
 export function elevation(palette: Palette, level: 1 | 2 | 3 = 1): ViewStyle {

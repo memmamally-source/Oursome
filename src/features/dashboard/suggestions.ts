@@ -1,4 +1,4 @@
-import { differenceInCalendarDays } from 'date-fns';
+import { differenceInCalendarDays } from 'date-fns/differenceInCalendarDays';
 
 import { findConflicts, findTightGaps } from '@/features/calendar/layout';
 import type { EventOccurrence, IconName, Task } from '@/features/types';

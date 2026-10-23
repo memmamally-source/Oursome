@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { router } from 'expo-router';
 import { View } from 'react-native';
 
@@ -60,7 +60,7 @@ export function EventCard({ occurrence, compact, now }: { occurrence: EventOccur
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, marginTop: 2, flexWrap: 'wrap' }}>
             {event.location ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, flexShrink: 1 }}>
-                <Ionicons name="location-outline" size={13} color={palette.textSecondary} />
+                <Icon name="location-outline" size={13} color={palette.textSecondary} />
                 <Text variant="caption" tone="secondary" numberOfLines={1}>
                   {event.location}
                 </Text>
@@ -68,13 +68,13 @@ export function EventCard({ occurrence, compact, now }: { occurrence: EventOccur
             ) : null}
             {event.visibility === 'shared' ? (
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-                <Ionicons name="people-outline" size={13} color={palette.textSecondary} />
+                <Icon name="people-outline" size={13} color={palette.textSecondary} />
                 <Text variant="caption" tone="secondary">
                   Shared
                 </Text>
               </View>
             ) : null}
-            {event.recurrence ? <Ionicons name="repeat" size={13} color={palette.textSecondary} accessibilityLabel="Repeats" /> : null}
+            {event.recurrence ? <Icon name="repeat" size={13} color={palette.textSecondary} accessibilityLabel="Repeats" /> : null}
           </View>
         ) : null}
       </View>

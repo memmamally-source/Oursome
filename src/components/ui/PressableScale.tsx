@@ -1,8 +1,5 @@
 import type { ReactNode } from 'react';
-import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+import { Platform, Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 
 type Props = Omit<PressableProps, 'style' | 'children'> & {
   style?: StyleProp<ViewStyle>;
@@ -11,24 +8,17 @@ type Props = Omit<PressableProps, 'style' | 'children'> & {
   scaleTo?: number;
 };
 
-/** Pressable with a gentle spring scale — the base micro-interaction. */
-export function PressableScale({ style, children, scaleTo = 0.97, onPressIn, onPressOut, ...rest }: Props) {
-  const scale = useSharedValue(1);
-  const animated = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+// On web a CSS transition keeps the press feedback off the JS thread.
+const webTransition = Platform.OS === 'web' ? ({ transitionProperty: 'transform', transitionDuration: '140ms' } as ViewStyle) : null;
+
+/** Pressable with a subtle press-in scale — the base micro-interaction. */
+export function PressableScale({ style, children, scaleTo = 0.97, ...rest }: Props) {
   return (
-    <AnimatedPressable
+    <Pressable
       accessibilityRole="button"
       {...rest}
-      onPressIn={(e) => {
-        scale.set(withSpring(scaleTo, { damping: 20, stiffness: 400 }));
-        onPressIn?.(e);
-      }}
-      onPressOut={(e) => {
-        scale.set(withSpring(1, { damping: 14, stiffness: 300 }));
-        onPressOut?.(e);
-      }}
-      style={[style, animated]}>
+      style={({ pressed }) => [style, webTransition, { transform: [{ scale: pressed ? scaleTo : 1 }] }]}>
       {children}
-    </AnimatedPressable>
+    </Pressable>
   );
 }

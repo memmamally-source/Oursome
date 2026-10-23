@@ -8,7 +8,10 @@
  * can highlight it. In Stage 4 the server-side AI returns the same
  * `ParseResult` shape, validated against a schema, so the UI is unchanged.
  */
-import { addDays, addMonths, getDaysInMonth, startOfWeek } from 'date-fns';
+import { addDays } from 'date-fns/addDays';
+import { addMonths } from 'date-fns/addMonths';
+import { getDaysInMonth } from 'date-fns/getDaysInMonth';
+import { startOfWeek } from 'date-fns/startOfWeek';
 
 import { guessCategory } from '@/features/shopping/logic';
 import type { Member } from '@/features/types';

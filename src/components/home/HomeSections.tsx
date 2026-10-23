@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
@@ -41,7 +41,7 @@ export function StatTile({
         gap: 4,
       }}>
       <View style={{ width: 30, height: 30, borderRadius: 10, backgroundColor: tone.base, alignItems: 'center', justifyContent: 'center' }}>
-        <Ionicons name={icon} size={16} color={palette.onAccent} />
+        <Icon name={icon} size={16} color={palette.onAccent} />
       </View>
       <Text variant="number" color={tone.ink} style={{ fontSize: 26, lineHeight: 30 }}>
         {value}
@@ -85,7 +85,7 @@ export function QuickCapture() {
         },
         elevation(palette, 1),
       ]}>
-      <Ionicons name="sparkles" size={20} color={palette.accents.lavender.base} />
+      <Icon name="sparkles" size={20} color={palette.accents.lavender.base} />
       <TextInput
         value={text}
         onChangeText={setText}
@@ -125,7 +125,7 @@ export function SuggestionCard({
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-          <Ionicons name={suggestion.icon} size={19} color={tone.ink} />
+          <Icon name={suggestion.icon} size={19} color={tone.ink} />
         </View>
         <View style={{ flex: 1, gap: 2 }}>
           <Text variant="overline" color={tone.ink}>
@@ -134,7 +134,7 @@ export function SuggestionCard({
           <Text variant="body">{suggestion.text}</Text>
         </View>
         <Pressable onPress={onDismiss} hitSlop={12} accessibilityRole="button" accessibilityLabel="Dismiss suggestion">
-          <Ionicons name="close" size={18} color={palette.textSecondary} />
+          <Icon name="close" size={18} color={palette.textSecondary} />
         </Pressable>
       </View>
       <Button
@@ -179,7 +179,7 @@ export function Timeline({ timed, allDay, nowTime }: { timed: EventOccurrence[];
       ))}
       {nowIndex === -1 && timed.length && timeKeyOf(timed[timed.length - 1].end) <= nowTime ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingLeft: 66, paddingTop: space.xs }}>
-          <Ionicons name="checkmark-done" size={16} color={palette.accents.mint.ink} />
+          <Icon name="checkmark-done" size={16} color={palette.accents.mint.ink} />
           <Text variant="callout" tone="mint">
             That’s everything on the calendar for today.
           </Text>
@@ -221,7 +221,7 @@ export function SpacePreview({ space: s, sharedTasks, sharedEvents }: { space: S
             Create an Our Space to share calendars, tasks and lists with the people you live with.
           </Text>
         </View>
-        <Ionicons name="arrow-forward-circle" size={32} color={palette.accents.sunshine.ink} />
+        <Icon name="arrow-forward-circle" size={32} color={palette.accents.sunshine.ink} />
       </Card>
     );
   }
@@ -240,7 +240,7 @@ export function SpacePreview({ space: s, sharedTasks, sharedEvents }: { space: S
             {sharedTasks === 1 ? 'task' : 'tasks'}
           </Text>
         </View>
-        <Ionicons name="chevron-forward" size={18} color={palette.textTertiary} />
+        <Icon name="chevron-forward" size={18} color={palette.textTertiary} />
       </View>
       {pinned ? (
         <View
@@ -251,7 +251,7 @@ export function SpacePreview({ space: s, sharedTasks, sharedEvents }: { space: S
             flexDirection: 'row',
             gap: space.sm,
           }}>
-          <Ionicons name="megaphone-outline" size={16} color={palette.accents.sunshine.ink} style={{ marginTop: 2 }} />
+          <Icon name="megaphone-outline" size={16} color={palette.accents.sunshine.ink} style={{ marginTop: 2 }} />
           <Text variant="callout" style={{ flex: 1 }} numberOfLines={2}>
             {author ? (
               <Text variant="callout" style={{ fontFamily: fonts.bodyBold }}>
@@ -283,8 +283,8 @@ export function ShoppingStrip({ lists }: { lists: { list: ShoppingList; remainin
             accessibilityLabel={`${list.name}, ${remaining} items`}
             style={{ width: 190, backgroundColor: tone.soft, borderRadius: radius.lg, padding: space.lg, gap: space.sm }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Ionicons name={list.icon} size={22} color={tone.ink} />
-              {list.visibility === 'shared' ? <Ionicons name="people" size={15} color={tone.ink} accessibilityLabel="Shared" /> : null}
+              <Icon name={list.icon} size={22} color={tone.ink} />
+              {list.visibility === 'shared' ? <Icon name="people" size={15} color={tone.ink} accessibilityLabel="Shared" /> : null}
             </View>
             <Text variant="subheading" numberOfLines={1}>
               {list.name}
@@ -308,7 +308,7 @@ export function ShoppingStrip({ lists }: { lists: { list: ShoppingList; remainin
           justifyContent: 'center',
           gap: 6,
         }}>
-        <Ionicons name="add" size={22} color={palette.textSecondary} />
+        <Icon name="add" size={22} color={palette.textSecondary} />
         <Text variant="caption" tone="secondary">
           New list
         </Text>
@@ -352,11 +352,7 @@ export function ImportantDates({ dates }: { dates: EventOccurrence[] }) {
               {relativeDayLabel(o.date)}
             </Text>
           </View>
-          <Ionicons
-            name={/birthday/i.test(o.event.title) ? 'gift-outline' : 'heart-outline'}
-            size={20}
-            color={palette.accents.sunshine.ink}
-          />
+          <Icon name={/birthday/i.test(o.event.title) ? 'gift-outline' : 'heart-outline'} size={20} color={palette.accents.sunshine.ink} />
         </Pressable>
       ))}
     </View>

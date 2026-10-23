@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Platform, Pressable, TextInput, View } from 'react-native';
@@ -299,7 +299,7 @@ export default function TaskEditor() {
                 accessibilityState={{ checked: st.done }}
                 accessibilityLabel={st.title}
                 hitSlop={8}>
-                <Ionicons
+                <Icon
                   name={st.done ? 'checkmark-circle' : 'ellipse-outline'}
                   size={22}
                   color={st.done ? palette.accents.mint.base : palette.textTertiary}
@@ -316,7 +316,7 @@ export default function TaskEditor() {
                 hitSlop={8}
                 accessibilityRole="button"
                 accessibilityLabel={`Remove ${st.title}`}>
-                <Ionicons name="close" size={18} color={palette.textTertiary} />
+                <Icon name="close" size={18} color={palette.textTertiary} />
               </Pressable>
             </View>
           ))}
@@ -329,7 +329,7 @@ export default function TaskEditor() {
               borderTopWidth: subtasks.length ? 1 : 0,
               borderTopColor: palette.border,
             }}>
-            <Ionicons name="add" size={22} color={palette.accents.mint.ink} />
+            <Icon name="add" size={22} color={palette.accents.mint.ink} />
             <TextInput
               value={subDraft}
               onChangeText={setSubDraft}

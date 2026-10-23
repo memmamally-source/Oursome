@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Platform, TextInput, View } from 'react-native';
@@ -246,7 +246,7 @@ export default function EventEditor() {
       </Field>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, opacity: 0.6 }}>
-        <Ionicons name="attach" size={18} color={palette.textSecondary} />
+        <Icon name="attach" size={18} color={palette.textSecondary} />
         <Text variant="callout" tone="secondary">
           Attachments arrive with cloud storage.
         </Text>

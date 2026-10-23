@@ -24,15 +24,24 @@ const version = `${sha}-${Date.now().toString(36)}`;
 fs.rmSync(dist, { recursive: true, force: true });
 execSync('npx expo export --platform web --output-dir dist', { cwd: root, stdio: 'inherit', env: process.env });
 
-// Everything the app loads on demand, for the service worker to precache.
+// Service worker file lists. CORE: what the first screen needs (cached at
+// install). WARM: every other screen, fetched quietly once the app is idle.
 const listFiles = (dir) =>
   fs
     .readdirSync(dir, { withFileTypes: true })
     .flatMap((e) => (e.isDirectory() ? listFiles(path.join(dir, e.name)) : [path.join(dir, e.name)]));
-const precache = ['_expo', 'assets', 'icons']
+const toUrl = (f) => `${base}/${path.relative(dist, f).split(path.sep).join('/')}`;
+const indexHtml = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
+const built = ['_expo', 'assets', 'fonts', 'icons']
   .filter((d) => fs.existsSync(path.join(dist, d)))
   .flatMap((d) => listFiles(path.join(dist, d)))
-  .map((f) => `${base}/${path.relative(dist, f).split(path.sep).join('/')}`);
+  .filter((f) => !f.endsWith('.map') && !f.endsWith('.txt'));
+const isCore = (f) => {
+  const name = path.basename(f);
+  return indexHtml.includes(name) || /^_layout-.*\.js$/.test(name) || /\.woff2$/.test(name);
+};
+const core = built.filter(isCore).map(toUrl);
+const warm = built.filter((f) => !isCore(f) && !/\/icons\//.test(f)).map(toUrl);
 
 const fill = (file) => {
   const p = path.join(dist, file);
@@ -41,7 +50,8 @@ const fill = (file) => {
     .replaceAll('__BASE__', base)
     .replaceAll('__SITE_URL__', siteUrl || base)
     .replaceAll('__VERSION__', version)
-    .replaceAll('__PRECACHE__', JSON.stringify(precache));
+    .replaceAll('__CORE__', JSON.stringify(core))
+    .replaceAll('__WARM__', JSON.stringify(warm));
   fs.writeFileSync(p, text);
 };
 ['index.html', 'manifest.webmanifest', 'sw.js'].forEach(fill);
@@ -53,8 +63,8 @@ fs.copyFileSync(path.join(dist, 'index.html'), path.join(dist, '404.html'));
 fs.writeFileSync(path.join(dist, '.nojekyll'), '');
 
 const leftover = ['index.html', 'manifest.webmanifest', 'sw.js'].filter((f) =>
-  /__BASE__|__VERSION__|__SITE_URL__|__PRECACHE__/.test(fs.readFileSync(path.join(dist, f), 'utf8')),
+  /__BASE__|__VERSION__|__SITE_URL__|__CORE__|__WARM__/.test(fs.readFileSync(path.join(dist, f), 'utf8')),
 );
 if (leftover.length) throw new Error(`Unreplaced placeholders in: ${leftover.join(', ')}`);
 
-console.log(`\nWebsite built in dist/ (base "${base || '/'}", version ${version}, ${precache.length} files precached).`);
+console.log(`\nWebsite built in dist/ (base "${base || '/'}", version ${version}, ${core.length} core + ${warm.length} warm files).`);

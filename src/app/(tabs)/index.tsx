@@ -1,8 +1,7 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import {
   ImportantDates,
@@ -60,18 +59,16 @@ export default function HomeScreen() {
         a.taskIds.forEach((id) => useTasks.getState().updateTask(id, { due: d.today }));
         break;
       case 'create-task':
-        useTasks
-          .getState()
-          .addTask({
-            title: a.title,
-            due: a.due,
-            categoryId: 'family',
-            priority: 'medium',
-            visibility: 'private',
-            isReminder: true,
-            dueTime: '09:00',
-            reminderMinutes: 0,
-          });
+        useTasks.getState().addTask({
+          title: a.title,
+          due: a.due,
+          categoryId: 'family',
+          priority: 'medium',
+          visibility: 'private',
+          isReminder: true,
+          dueTime: '09:00',
+          reminderMinutes: 0,
+        });
         break;
     }
   };
@@ -79,14 +76,9 @@ export default function HomeScreen() {
   const summary = buildSummary(d.timed.length + d.allDay.length, d.dueToday.length);
   const section = (key: DashboardSection, node: ReactNode) =>
     sections[key] ? (
-      <Animated.View
-        key={key}
-        entering={FadeInDown.delay(60 + dashboardSectionKeys.indexOf(key) * 60)
-          .springify()
-          .damping(18)}
-        style={{ marginBottom: space.xxl }}>
+      <View key={key} style={{ marginBottom: space.xxl }}>
         {node}
-      </Animated.View>
+      </View>
     ) : null;
 
   return (
@@ -126,7 +118,7 @@ export default function HomeScreen() {
             paddingHorizontal: space.md,
             marginBottom: space.xl,
           }}>
-          <Ionicons name="color-palette-outline" size={16} color={palette.textSecondary} />
+          <Icon name="color-palette-outline" size={16} color={palette.textSecondary} />
           <Text variant="caption" tone="secondary" style={{ flex: 1 }}>
             You’re viewing sample content.
           </Text>
@@ -213,7 +205,7 @@ export default function HomeScreen() {
               </View>
             ) : (
               <Card tint="mint" style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-                <Ionicons name="happy-outline" size={28} color={palette.accents.mint.ink} />
+                <Icon name="happy-outline" size={28} color={palette.accents.mint.ink} />
                 <View style={{ flex: 1 }}>
                   <Text variant="subheading">{d.completedToday.length ? 'All caught up!' : 'Nothing urgent today'}</Text>
                   <Text variant="callout" tone="secondary">
@@ -263,7 +255,7 @@ export default function HomeScreen() {
         onPress={() => router.push('/settings')}
         accessibilityRole="button"
         style={{ alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 6, padding: space.sm }}>
-        <Ionicons name="options-outline" size={16} color={palette.textTertiary} />
+        <Icon name="options-outline" size={16} color={palette.textTertiary} />
         <Text variant="caption" tone="tertiary">
           Customise your Home
         </Text>

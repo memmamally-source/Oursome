@@ -1,7 +1,6 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { useState } from 'react';
 import { TextInput, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { describeWhen, type Proposal } from '@/features/assistant/parser';
 import { memberById, useSpace } from '@/features/space/store';
@@ -50,10 +49,7 @@ export function ProposalCard({
   const done = status !== 'pending';
 
   return (
-    <Animated.View
-      entering={FadeInDown.delay(index * 80)
-        .springify()
-        .damping(16)}
+    <View
       style={{
         backgroundColor: palette.surface,
         borderRadius: radius.xl,
@@ -66,14 +62,14 @@ export function ProposalCard({
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
         <View
           style={{ width: 28, height: 28, borderRadius: 9, backgroundColor: tone.soft, alignItems: 'center', justifyContent: 'center' }}>
-          <Ionicons name={meta.icon} size={16} color={tone.ink} />
+          <Icon name={meta.icon} size={16} color={tone.ink} />
         </View>
         <Text variant="overline" color={tone.ink}>
           {meta.label}
         </Text>
         {status === 'saved' ? (
           <View style={{ marginLeft: 'auto', flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <Ionicons name="checkmark-circle" size={16} color={palette.accents.mint.ink} />
+            <Icon name="checkmark-circle" size={16} color={palette.accents.mint.ink} />
             <Text variant="caption" tone="mint" style={{ fontFamily: fonts.bodyBold }}>
               Saved
             </Text>
@@ -120,7 +116,7 @@ export function ProposalCard({
         <View style={{ backgroundColor: palette.accents.sunshine.soft, borderRadius: radius.md, padding: space.md, gap: 4 }}>
           {proposal.assumptions.map((a) => (
             <View key={a} style={{ flexDirection: 'row', gap: 6, alignItems: 'flex-start' }}>
-              <Ionicons name="help-circle-outline" size={15} color={palette.accents.sunshine.ink} style={{ marginTop: 2 }} />
+              <Icon name="help-circle-outline" size={15} color={palette.accents.sunshine.ink} style={{ marginTop: 2 }} />
               <Text variant="caption" tone="sunshine" style={{ flex: 1 }}>
                 {a}
               </Text>
@@ -148,7 +144,7 @@ export function ProposalCard({
           <Button label="Dismiss" variant="ghost" accent="lavender" size="sm" onPress={onDismiss} />
         </View>
       ) : null}
-    </Animated.View>
+    </View>
   );
 }
 
@@ -156,7 +152,7 @@ function MetaLine({ icon, text }: { icon: IconName; text: string }) {
   const { palette } = useTheme();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-      <Ionicons name={icon} size={15} color={palette.textSecondary} />
+      <Icon name={icon} size={15} color={palette.textSecondary} />
       <Text variant="callout" tone="secondary">
         {text}
       </Text>

@@ -1,33 +1,44 @@
-import { Nunito_700Bold } from '@expo-google-fonts/nunito/700Bold';
-import { Nunito_800ExtraBold } from '@expo-google-fonts/nunito/800ExtraBold';
-import { NunitoSans_400Regular } from '@expo-google-fonts/nunito-sans/400Regular';
-import { NunitoSans_600SemiBold } from '@expo-google-fonts/nunito-sans/600SemiBold';
-import { NunitoSans_700Bold } from '@expo-google-fonts/nunito-sans/700Bold';
-import { useFonts } from 'expo-font';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider as NavigationThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider as NavigationThemeProvider, type ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Platform, Pressable, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useSession } from '@/features/session/store';
 import { useSettings } from '@/features/settings/store';
+import { useAppFonts } from '@/hooks/useAppFonts';
 import { useHydrated } from '@/hooks/useHydrated';
 import { ThemeProvider, useTheme } from '@/theme';
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
+/**
+ * Last-resort screen for render errors. On web a missing code chunk (left over
+ * from an older deploy) triggers a one-time reload to fetch the new version.
+ */
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  useEffect(() => {
+    if (Platform.OS === 'web') (globalThis as { __oursomeRecoverChunk?: (m: string) => void }).__oursomeRecoverChunk?.(error.message);
+  }, [error]);
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: '#FFF9F2', gap: 12 }}>
+      <Text style={{ fontSize: 22, fontWeight: '800', color: '#242632' }}>Something went wrong</Text>
+      <Text style={{ fontSize: 16, color: '#6B6D7B', textAlign: 'center' }}>Your information is safe. Let’s try that again.</Text>
+      <Pressable
+        onPress={retry}
+        accessibilityRole="button"
+        style={{ marginTop: 8, backgroundColor: '#FF7468', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 999 }}>
+        <Text style={{ fontSize: 16, fontWeight: '700', color: '#242632' }}>Try again</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({
-    Nunito_700Bold,
-    Nunito_800ExtraBold,
-    NunitoSans_400Regular,
-    NunitoSans_600SemiBold,
-    NunitoSans_700Bold,
-  });
+  const fontsReady = useAppFonts();
   const hydrated = useHydrated();
-  const ready = (fontsLoaded || !!fontError) && hydrated;
+  const ready = fontsReady && hydrated;
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync().catch(() => {});
@@ -36,13 +47,11 @@ export default function RootLayout() {
   if (!ready) return null;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <ThemeProvider>
-          <AppNavigator />
-        </ThemeProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <AppNavigator />
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }
 

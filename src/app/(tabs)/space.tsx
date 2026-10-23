@@ -1,9 +1,8 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { formatDistanceToNowStrict } from 'date-fns';
+import { Icon } from '@/components/ui/Icon';
+import { formatDistanceToNowStrict } from 'date-fns/formatDistanceToNowStrict';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Platform, Pressable, TextInput, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { EventCard } from '@/components/calendar/EventCard';
 import { TaskRow } from '@/components/tasks/TaskRow';
@@ -84,8 +83,7 @@ export default function SpaceScreen() {
   return (
     <Screen tabBar>
       {/* Hero */}
-      <Animated.View
-        entering={FadeInDown.springify().damping(18)}
+      <View
         style={{
           backgroundColor: palette.accents.sunshine.soft,
           borderRadius: radius.xxl,
@@ -152,7 +150,7 @@ export default function SpaceScreen() {
                 padding: space.md,
                 opacity: 0.6,
               }}>
-              <Ionicons name="link-outline" size={18} color={palette.textSecondary} />
+              <Icon name="link-outline" size={18} color={palette.textSecondary} />
               <Text variant="callout" tone="secondary" style={{ letterSpacing: 2 }}>
                 ••••-••••
               </Text>
@@ -167,7 +165,7 @@ export default function SpaceScreen() {
             Sample household — Jordan is a demo member.
           </Text>
         ) : null}
-      </Animated.View>
+      </View>
 
       {/* Announcements */}
       <SectionHeader title="Noticeboard" icon="megaphone-outline" accent="sunshine" />
@@ -219,7 +217,7 @@ export default function SpaceScreen() {
                     hitSlop={8}
                     accessibilityRole="button"
                     accessibilityLabel={a.pinned ? 'Unpin' : 'Pin'}>
-                    <Ionicons
+                    <Icon
                       name={a.pinned ? 'pin' : 'pin-outline'}
                       size={16}
                       color={a.pinned ? palette.accents.sunshine.ink : palette.textTertiary}
@@ -231,7 +229,7 @@ export default function SpaceScreen() {
                       hitSlop={8}
                       accessibilityRole="button"
                       accessibilityLabel="Delete note">
-                      <Ionicons name="trash-outline" size={16} color={palette.textTertiary} />
+                      <Icon name="trash-outline" size={16} color={palette.textTertiary} />
                     </Pressable>
                   ) : null}
                 </View>
@@ -302,7 +300,7 @@ export default function SpaceScreen() {
                     {items.filter((i) => i.listId === l.id && !i.purchased).length} items to get
                   </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={18} color={palette.textTertiary} />
+                <Icon name="chevron-forward" size={18} color={palette.textTertiary} />
               </Card>
             ))}
           </View>
@@ -355,7 +353,7 @@ function PrivacyNote() {
         borderRadius: radius.lg,
         padding: space.lg,
       }}>
-      <Ionicons name="lock-closed" size={18} color={palette.accents.lavender.ink} style={{ marginTop: 2 }} />
+      <Icon name="lock-closed" size={18} color={palette.accents.lavender.ink} style={{ marginTop: 2 }} />
       <View style={{ flex: 1, gap: 2 }}>
         <Text variant="bodyStrong" tone="lavender">
           Private stays private

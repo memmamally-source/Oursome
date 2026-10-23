@@ -1,7 +1,6 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { router } from 'expo-router';
 import { Pressable, View } from 'react-native';
-import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { memberById, useSpace } from '@/features/space/store';
 import { useTasks } from '@/features/tasks/store';
@@ -39,7 +38,7 @@ export function TaskRow({ task, onCompleted, showDate = true, card, reorder }: P
   if (task.subtasks.length) meta.push(`${subDone}/${task.subtasks.length}`);
 
   return (
-    <Animated.View entering={FadeIn.duration(220)} exiting={FadeOut.duration(180)} layout={LinearTransition.springify().damping(18)}>
+    <View>
       <Pressable
         onPress={() => router.push({ pathname: '/task/[id]', params: { id: task.id } })}
         accessibilityRole="button"
@@ -65,7 +64,7 @@ export function TaskRow({ task, onCompleted, showDate = true, card, reorder }: P
         />
         <View style={{ flex: 1, gap: 2 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            {task.isReminder ? <Ionicons name="notifications" size={14} color={palette.accents.sunshine.ink} /> : null}
+            {task.isReminder ? <Icon name="notifications" size={14} color={palette.accents.sunshine.ink} /> : null}
             <Text
               variant="body"
               numberOfLines={2}
@@ -86,12 +85,12 @@ export function TaskRow({ task, onCompleted, showDate = true, card, reorder }: P
                 · {meta.join(' · ')}
               </Text>
             ) : null}
-            {task.recurrence ? <Ionicons name="repeat" size={12} color={palette.textSecondary} accessibilityLabel="Repeats" /> : null}
+            {task.recurrence ? <Icon name="repeat" size={12} color={palette.textSecondary} accessibilityLabel="Repeats" /> : null}
             {task.visibility === 'shared' ? (
-              <Ionicons name="people" size={12} color={palette.accents.sunshine.ink} accessibilityLabel="Shared" />
+              <Icon name="people" size={12} color={palette.accents.sunshine.ink} accessibilityLabel="Shared" />
             ) : null}
             {task.priority === 'high' && !done ? (
-              <Ionicons name="flag" size={12} color={palette.accents.coral.ink} accessibilityLabel="High priority" />
+              <Icon name="flag" size={12} color={palette.accents.coral.ink} accessibilityLabel="High priority" />
             ) : null}
           </View>
         </View>
@@ -104,7 +103,7 @@ export function TaskRow({ task, onCompleted, showDate = true, card, reorder }: P
               hitSlop={6}
               accessibilityLabel={`Move ${task.title} up`}
               style={{ opacity: reorder.onUp ? 1 : 0.25 }}>
-              <Ionicons name="chevron-up" size={20} color={palette.textSecondary} />
+              <Icon name="chevron-up" size={20} color={palette.textSecondary} />
             </Pressable>
             <Pressable
               onPress={reorder.onDown}
@@ -112,11 +111,11 @@ export function TaskRow({ task, onCompleted, showDate = true, card, reorder }: P
               hitSlop={6}
               accessibilityLabel={`Move ${task.title} down`}
               style={{ opacity: reorder.onDown ? 1 : 0.25 }}>
-              <Ionicons name="chevron-down" size={20} color={palette.textSecondary} />
+              <Icon name="chevron-down" size={20} color={palette.textSecondary} />
             </Pressable>
           </View>
         ) : null}
       </Pressable>
-    </Animated.View>
+    </View>
   );
 }

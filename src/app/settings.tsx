@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
@@ -103,7 +103,7 @@ export default function SettingsScreen() {
           </View>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Ionicons name="globe-outline" size={15} color={palette.textSecondary} />
+          <Icon name="globe-outline" size={15} color={palette.textSecondary} />
           <Text variant="caption" tone="secondary">
             Time zone: {profile?.timeZone.replace(/_/g, ' ')} (from this device)
           </Text>
@@ -125,7 +125,7 @@ export default function SettingsScreen() {
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-          <Ionicons name="diamond" size={22} color={palette.onAccent} />
+          <Icon name="diamond" size={22} color={palette.onAccent} />
         </View>
         <View style={{ flex: 1 }}>
           <Text variant="subheading">{Brand.name} Premium</Text>
@@ -133,7 +133,7 @@ export default function SettingsScreen() {
             Free plan · See what’s coming
           </Text>
         </View>
-        <Ionicons name="chevron-forward" size={18} color={palette.accents.lavender.ink} />
+        <Icon name="chevron-forward" size={18} color={palette.accents.lavender.ink} />
       </Card>
 
       <View style={{ marginBottom: space.xxl }}>

@@ -24,6 +24,17 @@
     <meta property="og:image" content="__SITE_URL__/og-image.png" />
     <meta name="twitter:card" content="summary_large_image" />
 
+    <!-- Brand fonts: two small variable files, never blocking the first paint. -->
+    <link rel="preload" href="__BASE__/fonts/nunito-sans.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="__BASE__/fonts/nunito.woff2" as="font" type="font/woff2" crossorigin />
+    <style id="fonts">
+      /* One variable font per family; each named weight is pinned so existing font names keep working. */
+      @font-face { font-family: 'Nunito_700Bold'; src: url('__BASE__/fonts/nunito.woff2') format('woff2'); font-weight: 700; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+      @font-face { font-family: 'Nunito_800ExtraBold'; src: url('__BASE__/fonts/nunito.woff2') format('woff2'); font-weight: 800; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+      @font-face { font-family: 'NunitoSans_400Regular'; src: url('__BASE__/fonts/nunito-sans.woff2') format('woff2'); font-weight: 400; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+      @font-face { font-family: 'NunitoSans_600SemiBold'; src: url('__BASE__/fonts/nunito-sans.woff2') format('woff2'); font-weight: 600; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+      @font-face { font-family: 'NunitoSans_700Bold'; src: url('__BASE__/fonts/nunito-sans.woff2') format('woff2'); font-weight: 700; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+    </style>
     <style id="expo-reset">
       html,
       body {
@@ -91,10 +102,35 @@
       </div>
     </div>
     <script>
+      // If a screen's code from an older deploy is gone, reload once to get the new version.
+      (function () {
+        var KEY = 'oursome-reloaded-at';
+        function recover(message) {
+          if (!/Loading (module|chunk)|ChunkLoadError|dynamically imported module|Requiring unknown module/i.test(String(message))) return;
+          var last = Number(sessionStorage.getItem(KEY) || 0);
+          if (Date.now() - last < 30000) return;
+          sessionStorage.setItem(KEY, String(Date.now()));
+          location.reload();
+        }
+        window.addEventListener('error', function (e) { recover(e.message); });
+        window.addEventListener('unhandledrejection', function (e) { recover(e.reason && (e.reason.message || e.reason)); });
+        window.__oursomeRecoverChunk = recover;
+      })();
+
       // Offline support. Only registered in production builds, where __BASE__ has been replaced.
       if ('serviceWorker' in navigator && !'__BASE__'.startsWith('__')) {
         window.addEventListener('load', function () {
-          navigator.serviceWorker.register('__BASE__/sw.js', { scope: '__BASE__/' }).catch(function () {});
+          navigator.serviceWorker
+            .register('__BASE__/sw.js', { scope: '__BASE__/' })
+            .then(function () {
+              // Once the app is idle, let the worker fetch the remaining screens for offline use.
+              setTimeout(function () {
+                navigator.serviceWorker.ready.then(function (reg) {
+                  if (reg.active) reg.active.postMessage('warm');
+                });
+              }, 6000);
+            })
+            .catch(function () {});
         });
       }
     </script>

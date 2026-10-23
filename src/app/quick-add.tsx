@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { router, type Href } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
@@ -100,7 +100,7 @@ export default function QuickAdd() {
           borderWidth: 1.5,
           borderColor: palette.accents.lavender.soft,
         }}>
-        <Ionicons name="sparkles" size={20} color={palette.accents.lavender.base} />
+        <Icon name="sparkles" size={20} color={palette.accents.lavender.base} />
         <TextInput
           value={text}
           onChangeText={setText}
@@ -143,7 +143,7 @@ export default function QuickAdd() {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                <Ionicons name={a.icon} size={22} color={palette.onAccent} />
+                <Icon name={a.icon} size={22} color={palette.onAccent} />
               </View>
               <Text variant="callout" color={tone.ink} style={{ fontFamily: fonts.bodyBold }} numberOfLines={1}>
                 {a.label}

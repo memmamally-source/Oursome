@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from './Icon';
 import type { ReactNode } from 'react';
 import {
   ActivityIndicator,
@@ -18,11 +18,6 @@ import { elevation, fonts, radius, space, useTheme, type AccentKey } from '@/the
 
 import { PressableScale } from './PressableScale';
 import { Text } from './Text';
-
-export function Icon({ name, size = 20, color }: { name: IconName; size?: number; color?: string }) {
-  const { palette } = useTheme();
-  return <Ionicons name={name} size={size} color={color ?? palette.text} />;
-}
 
 /** Icon inside a softly tinted circle or rounded square. */
 export function IconBubble({
@@ -50,7 +45,7 @@ export function IconBubble({
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-      <Ionicons name={name} size={size * 0.5} color={solid ? palette.onAccent : tone.ink} />
+      <Icon name={name} size={size * 0.5} color={solid ? palette.onAccent : tone.ink} />
     </View>
   );
 }
@@ -165,7 +160,7 @@ export function Button({
         <ActivityIndicator color={fg} />
       ) : (
         <>
-          {icon ? <Ionicons name={icon} size={size === 'sm' ? 16 : 20} color={fg} /> : null}
+          {icon ? <Icon name={icon} size={size === 'sm' ? 16 : 20} color={fg} /> : null}
           <Text variant={size === 'sm' ? 'callout' : 'bodyStrong'} color={fg} numberOfLines={1}>
             {label}
           </Text>
@@ -214,7 +209,7 @@ export function IconButton({
         { width: size, height: size, borderRadius: size / 2, backgroundColor: bg, alignItems: 'center', justifyContent: 'center' },
         variant === 'surface' && elevation(palette, 1),
       ]}>
-      <Ionicons name={icon} size={size * 0.5} color={fg} />
+      <Icon name={icon} size={size * 0.5} color={fg} />
     </PressableScale>
   );
 }
@@ -260,7 +255,7 @@ export function Chip({
         opacity: pressed ? 0.8 : 1,
       })}>
       {dot ? <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: palette.accents[dot].base }} /> : null}
-      {icon ? <Ionicons name={icon} size={15} color={selected ? tone.ink : palette.textSecondary} /> : null}
+      {icon ? <Icon name={icon} size={15} color={selected ? tone.ink : palette.textSecondary} /> : null}
       <Text variant="callout" color={selected ? tone.ink : palette.text} numberOfLines={1}>
         {label}
       </Text>
@@ -283,7 +278,7 @@ export function Pill({ label, accent = 'lavender', icon }: { label: string; acce
         borderRadius: radius.pill,
         backgroundColor: tone.soft,
       }}>
-      {icon ? <Ionicons name={icon} size={12} color={tone.ink} /> : null}
+      {icon ? <Icon name={icon} size={12} color={tone.ink} /> : null}
       <Text variant="caption" color={tone.ink} style={{ fontFamily: fonts.bodyBold, fontSize: 12 }}>
         {label}
       </Text>
@@ -348,7 +343,7 @@ export function SectionHeader({
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: space.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, flexShrink: 1 }}>
-        {icon ? <Ionicons name={icon} size={18} color={accent ? palette.accents[accent].ink : palette.text} /> : null}
+        {icon ? <Icon name={icon} size={18} color={accent ? palette.accents[accent].ink : palette.text} /> : null}
         <Text variant="heading" accessibilityRole="header" numberOfLines={1}>
           {title}
         </Text>
@@ -390,7 +385,7 @@ export function TextField({
           borderColor: error ? palette.danger : palette.border,
           paddingHorizontal: space.md,
         }}>
-        {icon ? <Ionicons name={icon} size={18} color={palette.textTertiary} /> : null}
+        {icon ? <Icon name={icon} size={18} color={palette.textTertiary} /> : null}
         <TextInput
           placeholderTextColor={palette.textTertiary}
           accessibilityLabel={label ?? rest.placeholder}
@@ -459,7 +454,7 @@ export function Segmented<T extends string>({
               },
               active && elevation(palette, 1),
             ]}>
-            {o.icon ? <Ionicons name={o.icon} size={15} color={active ? palette.accents[accent].ink : palette.textSecondary} /> : null}
+            {o.icon ? <Icon name={o.icon} size={15} color={active ? palette.accents[accent].ink : palette.textSecondary} /> : null}
             <Text variant="callout" color={active ? palette.text : palette.textSecondary} numberOfLines={1}>
               {o.label}
             </Text>
@@ -516,7 +511,7 @@ export function SettingRow({
           ios_backgroundColor={palette.border}
         />
       ) : onPress ? (
-        <Ionicons name="chevron-forward" size={18} color={palette.textTertiary} />
+        <Icon name="chevron-forward" size={18} color={palette.textTertiary} />
       ) : null}
     </View>
   );

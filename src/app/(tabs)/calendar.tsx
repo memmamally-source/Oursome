@@ -1,9 +1,9 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { addMonths, addWeeks } from 'date-fns';
+import { Icon } from '@/components/ui/Icon';
+import { addMonths } from 'date-fns/addMonths';
+import { addWeeks } from 'date-fns/addWeeks';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EventCard } from '@/components/calendar/EventCard';
@@ -177,16 +177,16 @@ export default function CalendarScreen() {
           alignSelf: 'center',
         }}>
         {view === 'month' ? (
-          <Animated.View entering={FadeIn} style={{ gap: space.lg }}>
+          <View style={{ gap: space.lg }}>
             <Card>
               <MonthGrid anchor={anchor} selected={selected} today={today} onSelect={setSelected} dots={dots} />
             </Card>
             <DayList date={selected} items={selectedDay} nowTime={selected === today ? nowTime : undefined} />
-          </Animated.View>
+          </View>
         ) : null}
 
         {view === 'week' || view === 'day' ? (
-          <Animated.View entering={FadeIn} style={{ gap: space.md }}>
+          <View style={{ gap: space.md }}>
             <WeekStrip anchor={anchor} selected={selected} today={today} onSelect={(d) => setSelected(d)} dots={dots} />
             <AllDayRow items={(view === 'day' ? selectedDay : []).filter((o) => o.event.allDay)} />
             <TimeGrid
@@ -196,11 +196,11 @@ export default function CalendarScreen() {
               nowTime={nowTime}
               height={gridHeight}
             />
-          </Animated.View>
+          </View>
         ) : null}
 
         {view === 'agenda' ? (
-          <Animated.View entering={FadeIn} style={{ gap: space.xl }}>
+          <View style={{ gap: space.xl }}>
             {Object.keys(byDay).filter((d) => d >= selected).length === 0 ? (
               <Card>
                 <EmptyState
@@ -217,7 +217,7 @@ export default function CalendarScreen() {
                 .sort()
                 .map((d) => <DayList key={d} date={d} items={byDay[d]} nowTime={d === today ? nowTime : undefined} />)
             )}
-          </Animated.View>
+          </View>
         ) : null}
       </ScrollView>
     </View>
@@ -241,7 +241,7 @@ function DayList({ date, items, nowTime }: { date: DateKey; items: EventOccurren
           accessibilityRole="button"
           accessibilityLabel={`Add event on ${format(fromDateKey(date), 'EEEE d MMMM')}`}
           hitSlop={10}>
-          <Ionicons name="add-circle" size={26} color={palette.accents.sky.base} />
+          <Icon name="add-circle" size={26} color={palette.accents.sky.base} />
         </Pressable>
       </View>
       {items.length ? (

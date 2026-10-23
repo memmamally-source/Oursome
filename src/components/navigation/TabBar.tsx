@@ -1,9 +1,7 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { router } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
-import { useEffect } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 import type { IconName } from '@/features/types';
 import { haptic } from '@/lib/haptics';
@@ -28,11 +26,6 @@ function TabItem({ name, focused, onPress }: { name: string; focused: boolean; o
   const { palette } = useTheme();
   const meta = tabMeta[name];
   const tone = palette.accents[meta.accent];
-  const progress = useSharedValue(focused ? 1 : 0);
-  useEffect(() => {
-    progress.set(withSpring(focused ? 1 : 0, { damping: 18, stiffness: 220 }));
-  }, [focused, progress]);
-  const pill = useAnimatedStyle(() => ({ opacity: progress.value, transform: [{ scale: 0.7 + progress.value * 0.3 }] }));
 
   return (
     <Pressable
@@ -42,8 +35,8 @@ function TabItem({ name, focused, onPress }: { name: string; focused: boolean; o
       accessibilityLabel={meta.label}
       style={styles.item}>
       <View style={styles.iconWrap}>
-        <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: tone.soft, borderRadius: radius.pill }, pill]} />
-        <Ionicons name={focused ? meta.activeIcon : meta.icon} size={22} color={focused ? tone.ink : palette.textSecondary} />
+        {focused ? <View style={[StyleSheet.absoluteFill, { backgroundColor: tone.soft, borderRadius: radius.pill }]} /> : null}
+        <Icon name={focused ? meta.activeIcon : meta.icon} size={22} color={focused ? tone.ink : palette.textSecondary} />
       </View>
       <Text
         numberOfLines={1}
@@ -81,7 +74,7 @@ export function TabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
             { backgroundColor: palette.accents.coral.base, transform: [{ scale: pressed ? 0.94 : 1 }] },
             elevation(palette, 3),
           ]}>
-          <Ionicons name="add" size={30} color={palette.onAccent} />
+          <Icon name="add" size={30} color={palette.onAccent} />
         </Pressable>
       ) : null}
       <View style={[styles.bar, { backgroundColor: palette.surface, borderColor: palette.border }, elevation(palette, 3)]}>

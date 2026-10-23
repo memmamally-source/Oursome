@@ -1,19 +1,14 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { useEffect } from 'react';
-import { Pressable } from 'react-native';
-import Animated, {
-  interpolateColor,
-  useAnimatedStyle,
-  useSharedValue,
-  withSequence,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
+import { useState } from 'react';
+import { Animated, Platform, Pressable } from 'react-native';
 
 import { haptic } from '@/lib/haptics';
 import { useTheme, type AccentKey } from '@/theme';
 
-/** Round check that fills with mint and gives a small, satisfying pop. */
+import { Icon } from './Icon';
+
+const native = Platform.OS !== 'web';
+
+/** Round check that fills instantly and gives a small, satisfying pop. */
 export function Checkbox({
   checked,
   onToggle,
@@ -29,19 +24,7 @@ export function Checkbox({
 }) {
   const { palette } = useTheme();
   const tone = palette.accents[accent];
-  const progress = useSharedValue(checked ? 1 : 0);
-  const scale = useSharedValue(1);
-
-  useEffect(() => {
-    progress.set(withTiming(checked ? 1 : 0, { duration: 180 }));
-  }, [checked, progress]);
-
-  const boxStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(progress.value, [0, 1], ['transparent', tone.base]),
-    borderColor: interpolateColor(progress.value, [0, 1], [palette.textTertiary, tone.base]),
-    transform: [{ scale: scale.value }],
-  }));
-  const checkStyle = useAnimatedStyle(() => ({ opacity: progress.value, transform: [{ scale: 0.5 + progress.value * 0.5 }] }));
+  const [scale] = useState(() => new Animated.Value(1));
 
   return (
     <Pressable
@@ -50,22 +33,29 @@ export function Checkbox({
       accessibilityState={{ checked }}
       accessibilityLabel={label}
       onPress={() => {
+        // Update state first so the tick appears immediately; the pop is decoration.
+        onToggle();
         if (!checked) {
           haptic.success();
-          scale.set(withSequence(withSpring(1.25, { damping: 6, stiffness: 400 }), withSpring(1)));
+          scale.setValue(0.8);
+          Animated.spring(scale, { toValue: 1, friction: 4, tension: 220, useNativeDriver: native }).start();
         } else {
           haptic.tap();
         }
-        onToggle();
       }}>
       <Animated.View
-        style={[
-          { width: size, height: size, borderRadius: size / 2, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
-          boxStyle,
-        ]}>
-        <Animated.View style={checkStyle}>
-          <Ionicons name="checkmark" size={size * 0.68} color={palette.onAccent} />
-        </Animated.View>
+        style={{
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          borderWidth: 2,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: checked ? tone.base : 'transparent',
+          borderColor: checked ? tone.base : palette.textTertiary,
+          transform: [{ scale }],
+        }}>
+        {checked ? <Icon name="checkmark" size={size * 0.68} color={palette.onAccent} /> : null}
       </Animated.View>
     </Pressable>
   );

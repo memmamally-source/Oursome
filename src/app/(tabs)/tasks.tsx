@@ -1,8 +1,7 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { TaskRow } from '@/components/tasks/TaskRow';
 import { Button, Card, Celebration, Chip, EmptyState, IconButton, PressableScale, Screen, Segmented, Text } from '@/components/ui';
@@ -127,7 +126,7 @@ function TasksView() {
           },
           elevation(palette, 1),
         ]}>
-        <Ionicons name="add-circle-outline" size={22} color={palette.accents.mint.ink} />
+        <Icon name="add-circle-outline" size={22} color={palette.accents.mint.ink} />
         <TextInput
           value={draft}
           onChangeText={setDraft}
@@ -197,7 +196,7 @@ function TasksView() {
           </Card>
         ) : (
           groups.map((g) => (
-            <Animated.View key={g.key} entering={FadeIn} style={{ marginBottom: space.lg }}>
+            <View key={g.key} style={{ marginBottom: space.lg }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, marginBottom: space.xs }}>
                 <Text variant="subheading" tone={g.key === 'overdue' ? 'danger' : 'primary'}>
                   {taskGroupLabels[g.key]}
@@ -244,7 +243,7 @@ function TasksView() {
                   </View>
                 ))}
               </Card>
-            </Animated.View>
+            </View>
           ))
         )}
         <Celebration burstKey={burst} />
@@ -257,17 +256,12 @@ function TasksView() {
             accessibilityRole="button"
             accessibilityState={{ expanded: showDone }}
             style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingVertical: space.sm }}>
-            <Ionicons name="checkmark-done-circle" size={20} color={palette.accents.mint.ink} />
+            <Icon name="checkmark-done-circle" size={20} color={palette.accents.mint.ink} />
             <Text variant="subheading">Completed</Text>
             <Text variant="callout" tone="secondary">
               {completed.length}
             </Text>
-            <Ionicons
-              name={showDone ? 'chevron-up' : 'chevron-down'}
-              size={18}
-              color={palette.textSecondary}
-              style={{ marginLeft: 'auto' }}
-            />
+            <Icon name={showDone ? 'chevron-up' : 'chevron-down'} size={18} color={palette.textSecondary} style={{ marginLeft: 'auto' }} />
           </Pressable>
           {showDone ? (
             <Card padded={false} style={{ paddingHorizontal: space.md, marginTop: space.sm }}>
@@ -359,9 +353,9 @@ function ListsView() {
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}>
-                  <Ionicons name={l.icon} size={20} color={palette.onAccent} />
+                  <Icon name={l.icon} size={20} color={palette.onAccent} />
                 </View>
-                <Ionicons
+                <Icon
                   name={l.visibility === 'shared' ? 'people' : 'lock-closed'}
                   size={15}
                   color={tone.ink}
@@ -445,7 +439,7 @@ function ListsView() {
                   justifyContent: 'center',
                   backgroundColor: icon === i ? palette.accents[color].soft : palette.surfaceSunken,
                 }}>
-                <Ionicons name={i} size={20} color={icon === i ? palette.accents[color].ink : palette.textSecondary} />
+                <Icon name={i} size={20} color={icon === i ? palette.accents[color].ink : palette.textSecondary} />
               </Pressable>
             ))}
           </View>

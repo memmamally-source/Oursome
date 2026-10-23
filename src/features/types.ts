@@ -1,10 +1,9 @@
-import type { ComponentProps } from 'react';
-import type Ionicons from '@expo/vector-icons/Ionicons';
+import type { IconName } from '@/components/ui/icons.generated';
 
 import type { DateKey, LocalDateTime, TimeKey } from '@/lib/dates';
 import type { AccentKey } from '@/theme/tokens';
 
-export type IconName = ComponentProps<typeof Ionicons>['name'];
+export type { IconName };
 
 /**
  * Every user item is either private to its owner or shared with an Our Space.

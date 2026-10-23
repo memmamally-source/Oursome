@@ -1,9 +1,8 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 import type { ScrollViewInstance } from 'react-native';
-import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ProposalCard, type ProposalStatus } from '@/components/assistant/ProposalCard';
@@ -178,7 +177,7 @@ export default function AssistantScreen() {
         <Pill label="On-device preview · full AI assistant coming soon" icon="shield-checkmark-outline" accent="lavender" />
 
         {messages.length === 0 ? (
-          <Animated.View entering={FadeInDown.springify().damping(18)} style={{ alignItems: 'center', gap: space.md, marginTop: space.lg }}>
+          <View style={{ alignItems: 'center', gap: space.md, marginTop: space.lg }}>
             <Illustration name="assistant" width={190} />
             <Text variant="heading" align="center">
               Tell me what’s on your mind
@@ -189,7 +188,7 @@ export default function AssistantScreen() {
             </Text>
             <View style={{ alignSelf: 'stretch', gap: space.sm, marginTop: space.md }}>
               {examples.map((e, i) => (
-                <Animated.View key={e} entering={FadeInDown.delay(100 + i * 50)}>
+                <View key={e}>
                   <Pressable
                     onPress={() => send(e)}
                     accessibilityRole="button"
@@ -205,23 +204,22 @@ export default function AssistantScreen() {
                       borderWidth: 1,
                       borderColor: palette.border,
                     })}>
-                    <Ionicons name="sparkles-outline" size={16} color={palette.accents.lavender.ink} />
+                    <Icon name="sparkles-outline" size={16} color={palette.accents.lavender.ink} />
                     <Text variant="callout" style={{ flex: 1 }}>
                       {e}
                     </Text>
-                    <Ionicons name="arrow-forward" size={16} color={palette.textTertiary} />
+                    <Icon name="arrow-forward" size={16} color={palette.textTertiary} />
                   </Pressable>
-                </Animated.View>
+                </View>
               ))}
             </View>
-          </Animated.View>
+          </View>
         ) : (
           messages.map((m) => {
             if (m.role === 'user') {
               return (
-                <Animated.View
+                <View
                   key={m.id}
-                  entering={FadeInUp.springify().damping(18)}
                   style={{
                     alignSelf: 'flex-end',
                     maxWidth: '85%',
@@ -234,15 +232,12 @@ export default function AssistantScreen() {
                   <Text variant="body" color={palette.onAccent}>
                     {m.text}
                   </Text>
-                </Animated.View>
+                </View>
               );
             }
             if (m.role === 'assistant') {
               return (
-                <Animated.View
-                  key={m.id}
-                  entering={FadeInUp.delay(80).springify().damping(18)}
-                  style={{ flexDirection: 'row', gap: space.sm, maxWidth: '92%' }}>
+                <View key={m.id} style={{ flexDirection: 'row', gap: space.sm, maxWidth: '92%' }}>
                   <AssistantAvatar />
                   <View
                     style={{
@@ -255,12 +250,12 @@ export default function AssistantScreen() {
                     }}>
                     <Text variant="body">{m.text}</Text>
                   </View>
-                </Animated.View>
+                </View>
               );
             }
             if (m.role === 'clarify') {
               return (
-                <Animated.View key={m.id} entering={FadeInUp.delay(80).springify().damping(18)} style={{ gap: space.sm }}>
+                <View key={m.id} style={{ gap: space.sm }}>
                   <View style={{ flexDirection: 'row', gap: space.sm, maxWidth: '92%' }}>
                     <AssistantAvatar />
                     <View
@@ -304,7 +299,7 @@ export default function AssistantScreen() {
                       );
                     })}
                   </View>
-                </Animated.View>
+                </View>
               );
             }
             return (
@@ -383,7 +378,7 @@ function AssistantAvatar() {
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-      <Ionicons name="sparkles" size={16} color={palette.onAccent} />
+      <Icon name="sparkles" size={16} color={palette.onAccent} />
     </View>
   );
 }

@@ -1,4 +1,10 @@
-import { addDays, differenceInCalendarDays, format, isSameDay, parse, startOfDay, startOfWeek } from 'date-fns';
+import { addDays } from 'date-fns/addDays';
+import { differenceInCalendarDays } from 'date-fns/differenceInCalendarDays';
+import { format } from 'date-fns/format';
+import { isSameDay } from 'date-fns/isSameDay';
+import { parse } from 'date-fns/parse';
+import { startOfDay } from 'date-fns/startOfDay';
+import { startOfWeek } from 'date-fns/startOfWeek';
 
 /**
  * Date conventions (Stage 1, local-first):
