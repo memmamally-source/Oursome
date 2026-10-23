@@ -65,6 +65,28 @@ const svg = (body, { bg = C.cream, size = 1024, viewBox = '0 0 100 100' } = {}) 
   await render(svg(gathering(), { bg: null, size: 512 }), 'assets/images/splash-icon.png', 512, true);
   await render(svg(gathering(), { size: 196 }), 'assets/images/favicon.png', 196);
 
+  // Web app (PWA) icons. "maskable" keeps the mark inside the 80% safe zone.
+  fs.mkdirSync(out('public/icons'), { recursive: true });
+  const padded = (vb) => svg(gathering(), { size: 512 }).replace('viewBox="0 0 100 100"', `viewBox="${vb}"`).replace('<rect width="100" height="100"', '<rect x="-50" y="-50" width="200" height="200"');
+  await render(padded('-8 -8 116 116'), 'public/icons/icon-512.png', 512);
+  await render(padded('-8 -8 116 116').replace('width="512" height="512"', 'width="192" height="192"'), 'public/icons/icon-192.png', 192);
+  await render(padded('-22 -22 144 144'), 'public/icons/icon-maskable-512.png', 512);
+  await render(padded('-10 -10 120 120').replace('width="512" height="512"', 'width="180" height="180"'), 'public/icons/apple-touch-icon.png', 180);
+
+  // Social preview image (1200×630).
+  const og = `<div id="og" style="width:1200px;height:630px;background:${C.cream};position:relative;overflow:hidden;font-family:system-ui">
+    <div style="position:absolute;right:-120px;top:-140px;width:520px;height:520px;border-radius:50%;background:#FFF3D6"></div>
+    <div style="position:absolute;right:160px;bottom:-200px;width:380px;height:380px;border-radius:50%;background:#FFE8E4"></div>
+    <div style="position:absolute;right:110px;top:150px">${svg(gathering(), { size: 330, bg: null })}</div>
+    <div style="position:absolute;left:90px;top:170px;width:620px">
+      <div style="font:800 96px/1 system-ui;letter-spacing:-3px;color:${C.charcoal}">oursome<span style="color:${C.coral}">.</span></div>
+      <div style="font:700 44px/1.2 system-ui;color:${C.charcoal};margin-top:28px">Life’s better together.</div>
+      <div style="font:400 28px/1.4 system-ui;color:#6B6D7B;margin-top:18px">Calendar, tasks, reminders and shopping lists, shared with the people you live with.</div>
+    </div></div>`;
+  await page.setViewportSize({ width: 1200, height: 630 });
+  await page.setContent(`<html><body style="margin:0">${og}</body></html>`);
+  await page.locator('#og').screenshot({ path: out('public/og-image.png') });
+
   // Concept sheet for review.
   const concepts = [['Gathering (chosen)', gathering()], ['Petals', petals()], ['Linked days', linked()], ['Pieces', pieces()]];
   const tile = (name, body, dark) => `<figure style="margin:0;text-align:center;font:600 22px 'Nunito',system-ui;color:${C.charcoal}">

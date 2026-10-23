@@ -11,6 +11,7 @@
 | Stage | Status |
 | --- | --- |
 | 1. Beautiful foundation | ✅ Done (local-only, see below) |
+| 1b. Website first (PWA on GitHub Pages) | ✅ Built; goes live once Pages is enabled (see below) |
 | 2. Core functionality (Firebase auth, Firestore, notifications) | ⏭ Next |
 | 3. Household sharing | — |
 | 4. AI assistant (server) | — |
@@ -37,6 +38,16 @@ Everything used runs in **Expo Go** — no dev build needed yet.
 - **Demo content:** `features/demo/seed.ts`, generated relative to today, every record `isDemo`/`demo_` id; cleared from Home banner or Settings.
 - **Plans/limits:** `src/config/plans.ts` (display only). Real entitlements must be server-verified (Stage 6). No purchase UI exists.
 - **Navigation:** `src/app` routes. Root `Stack.Protected` guards: signed-out → onboarding/auth; signed-in → tabs + modals.
+
+## Website-first launch (same approach as Crossword Hub)
+
+Decision (23 Oct 2026): launch as a website first, like Crossword Hub. We reuse the Expo app's web build rather than rewriting it in plain HTML, so the website and the future store apps share one codebase.
+- `npm run build:web` (`scripts/build-web.js`) → `dist/`: Expo web export plus `public/` (HTML template with branded boot screen, manifest, icons, `sw.js`, `og-image.png`, `privacy/`, `support/`, `robots.txt`). The script fills in `__BASE__`, `__SITE_URL__`, `__VERSION__` and `__PRECACHE__`, copies `index.html` to `404.html` (single-page-app deep links on Pages) and adds `.nojekyll` (otherwise Pages drops `_expo/`).
+- Base path comes from `EXPO_BASE_URL` (via `app.config.js`); in CI it comes from `actions/configure-pages`, so a custom domain needs no code change.
+- Service worker: network-first for pages, cache-first for hashed files, and it precaches every built file because routes load lazily.
+- Workflows: `ci.yml` (PR checks + build) and `deploy-web.yml` (main → Pages).
+- **Blocker:** the repo is private. GitHub Pages needs a public repo (as Crossword Hub is) or a paid GitHub plan; Firebase Hosting is the alternative.
+- Verified against a local server that behaves like GitHub Pages: loads at `/Oursome/`, sign-up, deep-link reload, persistence, manifest and icons, service worker, offline reload, privacy and support pages, desktop layout.
 
 ## Stage 1 — what works (tested)
 

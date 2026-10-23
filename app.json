@@ -27,7 +27,13 @@
     },
     "web": {
       "output": "single",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "name": "Oursome — Life’s better together",
+      "shortName": "Oursome",
+      "lang": "en",
+      "themeColor": "#FFF9F2",
+      "backgroundColor": "#FFF9F2",
+      "description": "A warm, colourful organiser for you and the people you live with: calendar, tasks, reminders, shopping lists and a shared Our Space."
     },
     "plugins": [
       "expo-router",

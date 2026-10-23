@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="%LANG_ISO_CODE%">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>%WEB_TITLE%</title>
+    <meta name="description" content="A warm, colourful organiser for you and the people you live with: calendar, tasks, reminders, shopping lists and a shared Our Space." />
+    <meta name="theme-color" content="#FFF9F2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#17181F" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Installable web app (PWA). __BASE__ is filled in by scripts/build-web.js. -->
+    <link rel="manifest" href="__BASE__/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="__BASE__/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Oursome" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+    <!-- Link previews -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Oursome — Life’s better together" />
+    <meta property="og:description" content="Your calendar, tasks, reminders and shopping lists in one warm, colourful place, shared with the people you live with." />
+    <meta property="og:image" content="__SITE_URL__/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <style id="expo-reset">
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: #fff9f2;
+      }
+      body {
+        overflow: hidden;
+        -webkit-tap-highlight-color: transparent;
+      }
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+      /* Shown until the app's JavaScript renders, then replaced. */
+      #boot {
+        margin: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        font: 800 34px/1 'Nunito', ui-rounded, system-ui, sans-serif;
+        color: #242632;
+        letter-spacing: -1px;
+      }
+      #boot svg {
+        animation: boot-spin 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+      }
+      @keyframes boot-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      @media (prefers-color-scheme: dark) {
+        html,
+        body {
+          background: #17181f;
+        }
+        #boot {
+          color: #f5efe7;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #boot svg {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>Oursome needs JavaScript to run. Please enable it and reload.</noscript>
+    <div id="root">
+      <div id="boot" role="status" aria-label="Loading Oursome">
+        <svg width="72" height="72" viewBox="0 0 100 100" aria-hidden="true">
+          <path d="M 20.33 38.01 A 32 32 0 0 1 38.01 20.33" stroke="#FF7468" stroke-width="17" stroke-linecap="round" fill="none" />
+          <path d="M 61.99 20.33 A 32 32 0 0 1 79.67 38.01" stroke="#FFC857" stroke-width="17" stroke-linecap="round" fill="none" />
+          <path d="M 79.67 61.99 A 32 32 0 0 1 61.99 79.67" stroke="#79D6B0" stroke-width="17" stroke-linecap="round" fill="none" />
+          <path d="M 38.01 79.67 A 32 32 0 0 1 20.33 61.99" stroke="#76C8F5" stroke-width="17" stroke-linecap="round" fill="none" />
+          <circle cx="50" cy="50" r="7" fill="#B7A2ED" />
+        </svg>
+        <div>oursome<span style="color: #ff7468">.</span></div>
+      </div>
+    </div>
+    <script>
+      // Offline support. Only registered in production builds, where __BASE__ has been replaced.
+      if ('serviceWorker' in navigator && !'__BASE__'.startsWith('__')) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('__BASE__/sw.js', { scope: '__BASE__/' }).catch(function () {});
+        });
+      }
+    </script>
+  </body>
+</html>

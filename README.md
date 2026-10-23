@@ -4,7 +4,15 @@
 
 > The name “Oursome” is provisional pending trademark and store clearance. Branding lives in `src/config/brand.ts`.
 
-## Preview on your iPhone
+## The website
+
+Oursome launches as a website first, like Crossword Hub: one codebase that runs in the browser and installs to a phone's home screen. The App Store and Google Play apps come later from the same code.
+
+- `npm run build:web` builds the site into `dist/`: static files with offline support, a web app manifest, and privacy and support pages.
+- `.github/workflows/deploy-web.yml` publishes it to GitHub Pages whenever `main` changes. One-time setup: Settings → Pages → Source: **GitHub Actions**.
+- To install it on an iPhone, open the site in Safari, tap Share, then **Add to Home Screen**.
+
+## Preview the native app on your iPhone
 
 1. Install **Expo Go** from the App Store.
 2. On your computer (Node 20+):
@@ -25,6 +33,8 @@ You can also run `npm run web` for a quick look in the browser.
 | Command | What it does |
 | --- | --- |
 | `npm start` | Expo dev server |
+| `npm run web` | Run the website locally |
+| `npm run build:web` | Build the website into `dist/` |
 | `npm run check` | TypeScript, ESLint and unit tests |
 | `npm test` | Unit tests only |
 

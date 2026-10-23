@@ -54,7 +54,8 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "check": "npm run typecheck && npm run lint && npm test -- --ci",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\""
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "build:web": "node scripts/build-web.js"
   },
   "private": true,
   "jest": {
