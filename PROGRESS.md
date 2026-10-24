@@ -12,7 +12,7 @@
 | --- | --- |
 | 1. Beautiful foundation | ✅ Done (local-only, see below) |
 | 1b. Website first (PWA on GitHub Pages) | ✅ Live at memmamally-source.github.io/Oursome |
-| Overhaul (branch `overhaul-performance-ui-ai`) | 🔄 Phases A–C done; D (AI server) and E (E2E, PR) next — see below |
+| Overhaul (branch `overhaul-performance-ui-ai`) | 🔄 Phases A–C done; D built, not deployed (owner chose "build only"); E next — see below |
 | 2. Core functionality (Firebase auth, Firestore, notifications) | ⏭ Next |
 | 3. Household sharing | — |
 | 4. AI assistant (server) | — |
@@ -30,6 +30,7 @@ Merging to `main` deploys the website, so merge only with the owner's approval.
 - **C. Calendar, tasks, household:** Day / 3 days (Week when wide) / Month / List, with people filters and calendars behind one button. View maths is in `features/calendar/views.ts`. The task editor has "Who's doing it?" (choosing someone else shares the task) and shows suggested names. Tasks can be filtered by person. Our Space has a People list linking each person to their tasks and calendar.
 - **People model:** `Member.kind` is `person` (no account) or `account`, with optional `relationship` and `aliases` set only by the user. `Task.assigneeName` holds an unresolved suggested name. Unassigned tasks belong to the user (`features/people/logic.ts`).
 - **Assistant:** Interpretation (names only) → `resolve.ts` (directory, relationships, pronouns, refs validation) → Proposals → user approval → `execute.ts`, the only write path. Questions are answered from data in `query.ts`. `basic.ts` is the labelled offline "Basic mode". `remote.ts` calls `EXPO_PUBLIC_AI_ENDPOINT` (not set yet). Scenario tests are in `features/assistant/__tests__/scenarios.test.ts`.
+- **D. AI service (`server/ai`, built and tested, NOT deployed):** a Cloudflare Worker using `@anthropic-ai/sdk` structured outputs (`betaZodOutputFormat`, schema in `src/schema.ts`), with a cached system prompt, `fallbacks: "default"` on Opus/Sonnet 5.5, rate limits (per device, plus a global daily cap), a CORS allow-list, and token/cost logs that never include the message. The model is the `AI_MODEL` var (default `claude-opus-5-5`; `claude-haiku-5-5` is the cheap option), and the owner still has to choose. Costs and the approval-gated turn-on steps are in `server/ai/README.md`. The web build reads the repo variable `EXPO_PUBLIC_AI_ENDPOINT` (unset = Basic mode). `npm run check:server` runs in CI. `AI_EVAL_ENDPOINT=<url> npm run eval:ai` runs every scenario against the live service and fails if any message fell back to Basic mode.
 - **Zustand selectors:** never return a fresh `[]` or object; use `NO_MEMBERS` etc., or Zustand 5 re-renders in a loop.
 
 ## Stack (verified Oct 2026)

@@ -22,8 +22,8 @@ export type HistoryTurn = { role: 'user' | 'assistant'; text: string };
 
 const TIMEOUT_MS = 15_000;
 
-async function post(body: unknown, signal: AbortSignal): Promise<Response> {
-  return fetch(`${AI_ENDPOINT.replace(/\/$/, '')}/interpret`, {
+async function post(endpoint: string, body: unknown, signal: AbortSignal): Promise<Response> {
+  return fetch(`${endpoint.replace(/\/$/, '')}/interpret`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-Oursome-Device': deviceId() },
     body: JSON.stringify(body),
@@ -31,8 +31,13 @@ async function post(body: unknown, signal: AbortSignal): Promise<Response> {
   });
 }
 
-export async function interpretRemote(text: string, ctx: AssistantContext, history: HistoryTurn[]): Promise<Interpretation> {
-  if (!AI_ENDPOINT) throw new RemoteError('not_configured');
+export async function interpretRemote(
+  text: string,
+  ctx: AssistantContext,
+  history: HistoryTurn[],
+  endpoint: string = AI_ENDPOINT,
+): Promise<Interpretation> {
+  if (!endpoint) throw new RemoteError('not_configured');
   if (typeof navigator !== 'undefined' && navigator.onLine === false) throw new RemoteError('offline');
   const body = { message: text.slice(0, 1000), context: toModelContext(ctx), history: history.slice(-6) };
 
@@ -40,7 +45,7 @@ export async function interpretRemote(text: string, ctx: AssistantContext, histo
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
-      const res = await post(body, controller.signal);
+      const res = await post(endpoint, body, controller.signal);
       if (res.status === 429) throw new RemoteError('rate_limited');
       if (res.status >= 500) {
         if (attempt === 0) {

@@ -52,7 +52,9 @@
     "check": "npm run typecheck && npm run lint && npm test -- --ci",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
     "build:web": "node scripts/build-web.js",
-    "icons": "node scripts/generate-icons.js"
+    "icons": "node scripts/generate-icons.js",
+    "eval:ai": "jest src/features/assistant/__tests__/scenarios.test.ts",
+    "check:server": "npm --prefix server/ai run typecheck && npm --prefix server/ai test"
   },
   "private": true,
   "jest": {
@@ -66,7 +68,7 @@
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/.expo/"
+      "<rootDir>/server/"
     ]
   }
 }

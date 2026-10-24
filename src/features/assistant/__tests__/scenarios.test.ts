@@ -89,7 +89,23 @@ const only = (r: EngineResult): Proposal => {
 const assignee = (p: Proposal) => p.update?.changes.assignee ?? p.assignee;
 
 const engines: [string, Interpreter][] = [['basic', basic]];
-if (process.env.AI_EVAL_ENDPOINT) engines.push(['ai', interpretRemote]);
+const EVAL_ENDPOINT = process.env.AI_EVAL_ENDPOINT;
+/** Failed AI calls: the engine would quietly use Basic mode, so the eval counts them and fails. */
+const aiFailures: string[] = [];
+if (EVAL_ENDPOINT) {
+  engines.push([
+    'ai',
+    async (text, ctx, history) => {
+      try {
+        return await interpretRemote(text, ctx, history, EVAL_ENDPOINT);
+      } catch (e) {
+        aiFailures.push(`${text}: ${(e as Error).message}`);
+        throw e;
+      }
+    },
+  ]);
+  afterAll(() => expect(aiFailures).toEqual([]));
+}
 
 describe.each(engines)('%s interpreter', (_name, interp) => {
   const run = (setup: Setup, ...m: string[]) => chat(interp, setup, ...m);

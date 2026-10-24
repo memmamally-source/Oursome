@@ -39,6 +39,8 @@ jobs:
         run: npm run build:web
         env:
           EXPO_BASE_URL: ${{ steps.pages.outputs.base_path }}
+          # Empty until the owner approves and deploys the AI service; the app then uses Basic mode.
+          EXPO_PUBLIC_AI_ENDPOINT: ${{ vars.EXPO_PUBLIC_AI_ENDPOINT }}
           SITE_URL: ${{ steps.pages.outputs.base_url }}
       - uses: actions/upload-pages-artifact@v3
         with:

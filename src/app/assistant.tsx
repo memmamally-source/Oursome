@@ -109,6 +109,11 @@ export default function AssistantScreen() {
             <Text variant="body" tone="secondary">
               Tell me about tasks, plans, people or shopping in your own words. Ask what’s coming up. I’ll show you exactly what I’d save first.
             </Text>
+            <Text variant="caption" tone="tertiary">
+              {AI_ENDPOINT
+                ? 'Your message and the names, dates and titles it needs are sent to our AI service (powered by Claude) to understand it. They aren’t used to train models, and nothing changes until you approve.'
+                : 'Basic mode works on this device: your messages aren’t sent anywhere.'}
+            </Text>
             <View style={{ gap: space.sm }}>
               {EXAMPLES.map((e) => (
                 <Pressable
