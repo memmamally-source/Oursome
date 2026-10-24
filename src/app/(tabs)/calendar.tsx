@@ -1,37 +1,39 @@
 import { Icon } from '@/components/ui/Icon';
-import { addMonths } from 'date-fns/addMonths';
-import { addWeeks } from 'date-fns/addWeeks';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EventCard } from '@/components/calendar/EventCard';
-import { MonthGrid, WeekStrip } from '@/components/calendar/MonthGrid';
+import { MonthGrid } from '@/components/calendar/MonthGrid';
 import { TimeGrid } from '@/components/calendar/TimeGrid';
-import { Card, Chip, EmptyState, IconButton, Segmented, Text, useTabBarClearance } from '@/components/ui';
+import { Avatar, Card, Chip, EmptyState, IconButton, Segmented, Text, useTabBarClearance } from '@/components/ui';
 import { expandOccurrences } from '@/features/calendar/recurrence';
 import { useCalendar, visibleEvents } from '@/features/calendar/store';
-import type { EventOccurrence } from '@/features/types';
+import { columnsFor, onlyPerson, rangeFor, stepFor, type CalendarView } from '@/features/calendar/views';
+import { useSpace } from '@/features/space/store';
+import type { EventOccurrence, Member } from '@/features/types';
+import { useLayout } from '@/hooks/useLayout';
 import { useNow } from '@/hooks/useNow';
-import { addDays, format, fromDateKey, monthGrid, relativeDayLabel, toDateKey, weekDays, type DateKey } from '@/lib/dates';
-import { layout, space, useTheme, type AccentKey } from '@/theme';
-
-type View_ = 'day' | 'week' | 'month' | 'agenda';
+import { addDays, format, fromDateKey, relativeDayLabel, toDateKey, type DateKey } from '@/lib/dates';
+import { fonts, layout, radius, space, useTheme, type AccentKey } from '@/theme';
 
 export default function CalendarScreen() {
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
   const clearance = useTabBarClearance();
-  const { height } = useWindowDimensions();
-  const params = useLocalSearchParams<{ date?: string }>();
+  const { isWide } = useLayout();
+  const params = useLocalSearchParams<{ date?: string; person?: string }>();
   const now = useNow();
   const today = toDateKey(now);
-  const [view, setView] = useState<View_>('month');
+  const [view, setView] = useState<CalendarView>('days');
   const [selected, setSelected] = useState<DateKey>(params.date ?? today);
+  const [person, setPerson] = useState<string | null>(params.person ?? null);
+  const [showCalendars, setShowCalendars] = useState(false);
   const events = useCalendar((s) => s.events);
   const calendars = useCalendar((s) => s.calendars);
   const toggleCalendar = useCalendar((s) => s.toggleCalendar);
+  const members = useSpace((s) => s.space?.members ?? NO_MEMBERS);
 
   // Jump to a date when navigated here with one (e.g. from a Home suggestion).
   const [seenParam, setSeenParam] = useState(params.date);
@@ -43,20 +45,9 @@ export default function CalendarScreen() {
     }
   }
 
-  const anchor = fromDateKey(selected);
-  const range = useMemo(() => {
-    if (view === 'month') {
-      const grid = monthGrid(anchor);
-      return [toDateKey(grid[0]), toDateKey(grid[41])] as const;
-    }
-    if (view === 'agenda') return [selected, toDateKey(addDays(anchor, 30))] as const;
-    const week = weekDays(anchor);
-    return [toDateKey(week[0]), toDateKey(week[6])] as const;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, selected]);
-
+  const range = rangeFor(view, selected, isWide);
   const { byDay, dots } = useMemo(() => {
-    const occ = expandOccurrences(visibleEvents(events, calendars), range[0], range[1]);
+    const occ = onlyPerson(expandOccurrences(visibleEvents(events, calendars), range[0], range[1]), person, calendars);
     const colour = new Map(calendars.map((c) => [c.id, c.color]));
     const byDay: Record<DateKey, EventOccurrence[]> = {};
     const dots: Record<DateKey, AccentKey[]> = {};
@@ -71,24 +62,20 @@ export default function CalendarScreen() {
       }
     }
     return { byDay, dots };
-  }, [events, calendars, range]);
+  }, [events, calendars, range[0], range[1], person]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const step = (dir: 1 | -1) => {
-    const next =
-      view === 'month'
-        ? addMonths(anchor, dir)
-        : view === 'week'
-          ? addWeeks(anchor, dir)
-          : view === 'day'
-            ? addDays(anchor, dir)
-            : addDays(anchor, dir * 30);
-    setSelected(toDateKey(next));
-  };
-
-  const title = view === 'day' ? format(anchor, 'EEEE d MMMM') : format(anchor, 'MMMM yyyy');
+  const anchor = fromDateKey(selected);
+  const columns = columnsFor(view, selected, isWide);
+  const title =
+    view === 'day'
+      ? format(anchor, 'EEEE d MMMM')
+      : view === 'days'
+        ? rangeTitle(columns[0], columns[columns.length - 1])
+        : format(anchor, 'MMMM yyyy');
   const selectedDay = byDay[selected] ?? [];
   const nowTime = format(now, 'HH:mm');
-  const gridHeight = Math.max(360, height - insets.top - clearance - 250);
+  const hidden = calendars.filter((c) => !c.visible).length;
+  const showsToday = view === 'days' ? columns.includes(today) : selected === today;
 
   return (
     <View style={{ flex: 1, backgroundColor: palette.background }}>
@@ -96,9 +83,9 @@ export default function CalendarScreen() {
         style={{
           paddingTop: insets.top + space.lg,
           paddingHorizontal: layout.screenPadding,
-          gap: space.lg,
+          gap: space.md,
           width: '100%',
-          maxWidth: layout.maxContentWidth,
+          maxWidth: isWide ? layout.maxWideContentWidth : layout.maxContentWidth,
           alignSelf: 'center',
         }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
@@ -110,7 +97,7 @@ export default function CalendarScreen() {
               {title}
             </Text>
           </View>
-          {selected !== today ? (
+          {!showsToday ? (
             <Pressable
               onPress={() => setSelected(today)}
               accessibilityRole="button"
@@ -122,105 +109,189 @@ export default function CalendarScreen() {
                 backgroundColor: palette.accents.coral.soft,
                 justifyContent: 'center',
               }}>
-              <Text variant="callout" tone="coral">
+              <Text variant="callout" tone="coral" style={{ fontFamily: fonts.bodyBold }}>
                 Today
               </Text>
             </Pressable>
           ) : null}
-          <IconButton icon="chevron-back" label="Previous" size={36} onPress={() => step(-1)} />
-          <IconButton icon="chevron-forward" label="Next" size={36} onPress={() => step(1)} />
+          <IconButton icon="chevron-back" label="Previous" size={36} onPress={() => setSelected(stepFor(view, selected, -1, isWide))} />
+          <IconButton icon="chevron-forward" label="Next" size={36} onPress={() => setSelected(stepFor(view, selected, 1, isWide))} />
         </View>
+
         <Segmented
           value={view}
           onChange={setView}
           accent="sky"
           options={[
             { value: 'day', label: 'Day' },
-            { value: 'week', label: 'Week' },
+            { value: 'days', label: isWide ? 'Week' : '3 days' },
             { value: 'month', label: 'Month' },
-            { value: 'agenda', label: 'Agenda' },
+            { value: 'list', label: 'List' },
           ]}
         />
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: space.sm }}
-          style={{ marginHorizontal: -layout.screenPadding }}
-          contentInset={{ left: 0 }}>
-          <View style={{ width: layout.screenPadding - space.sm }} />
-          {calendars.map((c) => (
-            <Chip
-              key={c.id}
-              label={c.name}
-              small
-              dot={c.color}
-              accent={c.color}
-              selected={c.visible}
-              onPress={() => toggleCalendar(c.id)}
-            />
-          ))}
-          <View style={{ width: layout.screenPadding - space.sm }} />
-        </ScrollView>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ flex: 1 }}
+            contentContainerStyle={{ gap: space.sm, alignItems: 'center' }}>
+            {members.length > 1 ? (
+              <>
+                <Chip small label="Everyone" accent="sky" selected={!person} onPress={() => setPerson(null)} />
+                {members.map((m) => (
+                  <PersonChip key={m.id} member={m} selected={person === m.id} onPress={() => setPerson(person === m.id ? null : m.id)} />
+                ))}
+              </>
+            ) : null}
+          </ScrollView>
+          <Pressable
+            onPress={() => setShowCalendars(!showCalendars)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: showCalendars }}
+            accessibilityLabel="Choose calendars"
+            hitSlop={6}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 4,
+              height: 32,
+              paddingHorizontal: 10,
+              borderRadius: radius.pill,
+              backgroundColor: showCalendars ? palette.accents.sky.soft : palette.surfaceSunken,
+            }}>
+            <Icon name="options-outline" size={15} color={palette.textSecondary} />
+            {hidden || isWide || members.length <= 1 ? (
+              <Text variant="caption" tone="secondary" style={{ fontFamily: fonts.bodyBold }}>
+                {hidden ? `${calendars.length - hidden}/${calendars.length}` : 'Calendars'}
+              </Text>
+            ) : null}
+          </Pressable>
+        </View>
+        {showCalendars ? (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
+            {calendars.map((c) => (
+              <Chip
+                key={c.id}
+                label={c.name}
+                small
+                dot={c.color}
+                accent={c.color}
+                selected={c.visible}
+                onPress={() => toggleCalendar(c.id)}
+              />
+            ))}
+          </View>
+        ) : null}
       </View>
 
-      <ScrollView
-        style={{ flex: 1 }}
-        showsVerticalScrollIndicator={false}
-        scrollEnabled={view === 'month' || view === 'agenda'}
-        contentContainerStyle={{
-          paddingHorizontal: layout.screenPadding,
-          paddingTop: space.lg,
-          paddingBottom: clearance,
-          gap: space.lg,
-          width: '100%',
-          maxWidth: layout.maxContentWidth,
-          alignSelf: 'center',
-        }}>
-        {view === 'month' ? (
-          <View style={{ gap: space.lg }}>
-            <Card>
-              <MonthGrid anchor={anchor} selected={selected} today={today} onSelect={setSelected} dots={dots} />
-            </Card>
-            <DayList date={selected} items={selectedDay} nowTime={selected === today ? nowTime : undefined} />
-          </View>
-        ) : null}
-
-        {view === 'week' || view === 'day' ? (
-          <View style={{ gap: space.md }}>
-            <WeekStrip anchor={anchor} selected={selected} today={today} onSelect={(d) => setSelected(d)} dots={dots} />
-            <AllDayRow items={(view === 'day' ? selectedDay : []).filter((o) => o.event.allDay)} />
-            <TimeGrid
-              days={view === 'day' ? [selected] : weekDays(anchor).map(toDateKey)}
-              occurrences={byDay}
-              today={today}
-              nowTime={nowTime}
-              height={gridHeight}
-            />
-          </View>
-        ) : null}
-
-        {view === 'agenda' ? (
-          <View style={{ gap: space.xl }}>
-            {Object.keys(byDay).filter((d) => d >= selected).length === 0 ? (
-              <Card>
-                <EmptyState
-                  illustration="calendar"
-                  title="Nothing coming up"
-                  body="Your next 30 days are wide open."
-                  action="Add event"
-                  onAction={() => router.push({ pathname: '/event/[id]', params: { id: 'new', date: selected } })}
-                />
+      {view === 'day' || view === 'days' ? (
+        <View
+          style={{
+            flex: 1,
+            paddingHorizontal: layout.screenPadding,
+            paddingTop: space.md,
+            paddingBottom: isWide ? space.xl : clearance - space.xxl,
+            width: '100%',
+            maxWidth: isWide ? layout.maxWideContentWidth : layout.maxContentWidth,
+            alignSelf: 'center',
+          }}>
+          <TimeGrid
+            days={columns}
+            occurrences={byDay}
+            today={today}
+            nowTime={nowTime}
+            onSelectDay={(d) => {
+              setSelected(d);
+              setView('day');
+            }}
+          />
+        </View>
+      ) : (
+        <ScrollView
+          style={{ flex: 1 }}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingHorizontal: layout.screenPadding,
+            paddingTop: space.md,
+            paddingBottom: clearance,
+            gap: space.lg,
+            width: '100%',
+            maxWidth: isWide ? layout.maxWideContentWidth : layout.maxContentWidth,
+            alignSelf: 'center',
+          }}>
+          {view === 'month' ? (
+            <View style={isWide ? { flexDirection: 'row', gap: space.xl, alignItems: 'flex-start' } : { gap: space.lg }}>
+              <Card style={isWide ? { flex: 3 } : undefined}>
+                <MonthGrid anchor={anchor} selected={selected} today={today} onSelect={setSelected} dots={dots} />
               </Card>
-            ) : (
-              Object.keys(byDay)
-                .filter((d) => d >= selected)
-                .sort()
-                .map((d) => <DayList key={d} date={d} items={byDay[d]} nowTime={d === today ? nowTime : undefined} />)
-            )}
-          </View>
-        ) : null}
-      </ScrollView>
+              <View style={isWide ? { flex: 2 } : undefined}>
+                <DayList date={selected} items={selectedDay} nowTime={selected === today ? nowTime : undefined} />
+              </View>
+            </View>
+          ) : null}
+
+          {view === 'list' ? (
+            <View style={{ gap: space.xl }}>
+              {Object.keys(byDay).filter((d) => d >= selected).length === 0 ? (
+                <Card>
+                  <EmptyState
+                    illustration="calendar"
+                    title="Nothing coming up"
+                    body={person ? 'Nothing for this person in the next 30 days.' : 'Your next 30 days are wide open.'}
+                    action="Add event"
+                    onAction={() => router.push({ pathname: '/event/[id]', params: { id: 'new', date: selected } })}
+                  />
+                </Card>
+              ) : (
+                Object.keys(byDay)
+                  .filter((d) => d >= selected)
+                  .sort()
+                  .map((d) => <DayList key={d} date={d} items={byDay[d]} nowTime={d === today ? nowTime : undefined} />)
+              )}
+            </View>
+          ) : null}
+        </ScrollView>
+      )}
     </View>
+  );
+}
+
+const NO_MEMBERS: Member[] = [];
+
+function rangeTitle(a: DateKey, b: DateKey): string {
+  const x = fromDateKey(a);
+  const y = fromDateKey(b);
+  if (a.slice(0, 7) === b.slice(0, 7)) return `${format(x, 'd')} – ${format(y, 'd MMM')}`;
+  return `${format(x, 'd MMM')} – ${format(y, 'd MMM')}`;
+}
+
+function PersonChip({ member, selected, onPress }: { member: Member; selected: boolean; onPress: () => void }) {
+  const { palette } = useTheme();
+  const tone = palette.accents[member.color];
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      accessibilityLabel={`Show ${member.isMe ? 'my' : `${member.name}’s`} events`}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        height: 32,
+        paddingLeft: 3,
+        paddingRight: 12,
+        borderRadius: radius.pill,
+        borderWidth: 1.5,
+        borderColor: selected ? tone.base : palette.border,
+        backgroundColor: selected ? tone.soft : palette.surface,
+      }}>
+      <Avatar name={member.name} accent={member.color} size={24} />
+      <Text variant="caption" color={selected ? tone.ink : palette.text} style={{ fontFamily: fonts.bodyBold }}>
+        {member.isMe ? 'Me' : member.name.split(' ')[0]}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -253,17 +324,6 @@ function DayList({ date, items, nowTime }: { date: DateKey; items: EventOccurren
           </Text>
         </View>
       )}
-    </View>
-  );
-}
-
-function AllDayRow({ items }: { items: EventOccurrence[] }) {
-  if (!items.length) return null;
-  return (
-    <View style={{ gap: space.sm }}>
-      {items.map((o) => (
-        <EventCard key={o.key} occurrence={o} compact />
-      ))}
     </View>
   );
 }
