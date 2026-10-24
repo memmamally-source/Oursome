@@ -10,8 +10,11 @@ import { TimeGrid } from '@/components/calendar/TimeGrid';
 import { Avatar, Card, Chip, EmptyState, IconButton, Segmented, Text, useTabBarClearance } from '@/components/ui';
 import { expandOccurrences } from '@/features/calendar/recurrence';
 import { useCalendar, visibleEvents } from '@/features/calendar/store';
+import { taskOccurrences } from '@/features/calendar/tasks';
 import { columnsFor, onlyPerson, rangeFor, stepFor, type CalendarView } from '@/features/calendar/views';
+import { useSettings } from '@/features/settings/store';
 import { useSpace } from '@/features/space/store';
+import { useTasks } from '@/features/tasks/store';
 import type { EventOccurrence, Member } from '@/features/types';
 import { useLayout } from '@/hooks/useLayout';
 import { useNow } from '@/hooks/useNow';
@@ -33,6 +36,9 @@ export default function CalendarScreen() {
   const events = useCalendar((s) => s.events);
   const calendars = useCalendar((s) => s.calendars);
   const toggleCalendar = useCalendar((s) => s.toggleCalendar);
+  const tasks = useTasks((s) => s.tasks);
+  const tasksOn = useSettings((s) => s.tasksOnCalendar);
+  const setTasksOn = useSettings((s) => s.setTasksOnCalendar);
   const members = useSpace((s) => s.people);
 
   // Jump to a date when navigated here with one (e.g. from a Home suggestion).
@@ -54,7 +60,8 @@ export default function CalendarScreen() {
 
   const range = rangeFor(view, selected, isWide);
   const { byDay, dots } = useMemo(() => {
-    const occ = onlyPerson(expandOccurrences(visibleEvents(events, calendars), range[0], range[1]), person, calendars);
+    const shown = [...expandOccurrences(visibleEvents(events, calendars), range[0], range[1]), ...(tasksOn ? taskOccurrences(tasks, range[0], range[1]) : [])];
+    const occ = onlyPerson(shown, person, calendars).sort((a, b) => a.start.localeCompare(b.start));
     const colour = new Map(calendars.map((c) => [c.id, c.color]));
     const byDay: Record<DateKey, EventOccurrence[]> = {};
     const dots: Record<DateKey, AccentKey[]> = {};
@@ -64,12 +71,12 @@ export default function CalendarScreen() {
       const last = o.end.slice(0, 10);
       while (d <= last && d <= range[1]) {
         (byDay[d] ??= []).push(o);
-        (dots[d] ??= []).push(colour.get(o.event.calendarId) ?? 'sky');
+        (dots[d] ??= []).push(o.event.taskId ? 'mint' : (colour.get(o.event.calendarId) ?? 'sky'));
         d = toDateKey(addDays(fromDateKey(d), 1));
       }
     }
     return { byDay, dots };
-  }, [events, calendars, range[0], range[1], person]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [events, calendars, tasks, tasksOn, range[0], range[1], person]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const anchor = fromDateKey(selected);
   const columns = columnsFor(view, selected, isWide);
@@ -81,7 +88,7 @@ export default function CalendarScreen() {
         : format(anchor, 'MMMM yyyy');
   const selectedDay = byDay[selected] ?? [];
   const nowTime = format(now, 'HH:mm');
-  const hidden = calendars.filter((c) => !c.visible).length;
+  const hidden = calendars.filter((c) => !c.visible).length + (tasksOn ? 0 : 1);
   const showsToday = view === 'days' ? columns.includes(today) : selected === today;
 
   return (
@@ -170,7 +177,7 @@ export default function CalendarScreen() {
             <Icon name="options-outline" size={15} color={palette.textSecondary} />
             {hidden || isWide || members.length <= 1 ? (
               <Text variant="caption" tone="secondary" style={{ fontFamily: fonts.bodyBold }}>
-                {hidden ? `${calendars.length - hidden}/${calendars.length}` : 'Calendars'}
+                {hidden ? `${calendars.length + 1 - hidden}/${calendars.length + 1}` : 'Calendars'}
               </Text>
             ) : null}
           </Pressable>
@@ -188,6 +195,7 @@ export default function CalendarScreen() {
                 onPress={() => toggleCalendar(c.id)}
               />
             ))}
+            <Chip label="Tasks" small dot="mint" accent="mint" selected={tasksOn} onPress={() => setTasksOn(!tasksOn)} />
           </View>
         ) : null}
       </View>

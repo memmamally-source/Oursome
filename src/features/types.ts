@@ -88,6 +88,8 @@ export type CalendarEvent = {
   spaceId?: string;
   /** Whose event this is, when it belongs to one household member ("Sarah's dentist"). */
   personId?: string;
+  /** Set only on the calendar's read-only view of a dated task (never saved as an event). */
+  taskId?: string;
   /** Important dates (birthdays, anniversaries) get special treatment on Home. */
   isImportantDate?: boolean;
   createdAt: string;

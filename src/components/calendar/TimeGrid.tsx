@@ -5,11 +5,14 @@ import type { ScrollViewInstance } from 'react-native';
 
 import { layoutDay } from '@/features/calendar/layout';
 import { useCalendar } from '@/features/calendar/store';
+import { TASKS_CALENDAR_ID } from '@/features/calendar/tasks';
 import type { EventOccurrence } from '@/features/types';
 import { format, formatTime, fromDateKey, minutesOfDay, timeFromMinutes, timeKeyOf, type DateKey } from '@/lib/dates';
 import { fonts, radius, useTheme } from '@/theme';
 
 import { Text } from '../ui/Text';
+
+import { openOccurrence } from './EventCard';
 
 const HOUR = 56;
 const GUTTER = 46;
@@ -51,7 +54,7 @@ export function TimeGrid({ days, occurrences, today, nowTime, height, onSelectDa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [days.join()]);
 
-  const colour = (calendarId: string) => calendars.find((c) => c.id === calendarId)?.color ?? 'sky';
+  const colour = (calendarId: string) => (calendarId === TASKS_CALENDAR_ID ? 'mint' : (calendars.find((c) => c.id === calendarId)?.color ?? 'sky'));
 
   return (
     <View
@@ -103,7 +106,7 @@ export function TimeGrid({ days, occurrences, today, nowTime, height, onSelectDa
                   return (
                     <Pressable
                       key={o.key}
-                      onPress={() => router.push({ pathname: '/event/[id]', params: { id: o.event.id } })}
+                      onPress={() => openOccurrence(o)}
                       accessibilityRole="button"
                       accessibilityLabel={`${o.event.title}, all day`}
                       style={{ backgroundColor: tone.soft, borderRadius: 6, paddingHorizontal: 4, paddingVertical: 2 }}>
@@ -181,7 +184,7 @@ export function TimeGrid({ days, occurrences, today, nowTime, height, onSelectDa
                     return (
                       <Pressable
                         key={p.occurrence.key}
-                        onPress={() => router.push({ pathname: '/event/[id]', params: { id: p.occurrence.event.id } })}
+                        onPress={() => openOccurrence(p.occurrence)}
                         accessibilityRole="button"
                         accessibilityLabel={`${p.occurrence.event.title}, ${formatTime(timeKeyOf(p.occurrence.start))}`}
                         style={{

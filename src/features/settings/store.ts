@@ -37,12 +37,15 @@ type SettingsState = {
   notifications: NotificationPrefs;
   dismissedSuggestions: string[];
   taskSortMode: 'smart' | 'manual';
+  /** Show dated tasks on the calendar. */
+  tasksOnCalendar: boolean;
   setTheme: (theme: ThemePreference) => void;
   completeOnboarding: () => void;
   toggleSection: (section: DashboardSection) => void;
   setNotifications: (patch: Partial<NotificationPrefs>) => void;
   dismissSuggestion: (id: string) => void;
   setTaskSortMode: (mode: 'smart' | 'manual') => void;
+  setTasksOnCalendar: (on: boolean) => void;
   reset: () => void;
 };
 
@@ -62,6 +65,7 @@ const defaults = {
   },
   dismissedSuggestions: [] as string[],
   taskSortMode: 'smart' as const,
+  tasksOnCalendar: true,
 };
 
 export const useSettings = create<SettingsState>()(
@@ -74,6 +78,7 @@ export const useSettings = create<SettingsState>()(
       setNotifications: (patch) => set((s) => ({ notifications: { ...s.notifications, ...patch } })),
       dismissSuggestion: (id) => set((s) => ({ dismissedSuggestions: [...s.dismissedSuggestions.slice(-50), id] })),
       setTaskSortMode: (taskSortMode) => set({ taskSortMode }),
+      setTasksOnCalendar: (tasksOnCalendar) => set({ tasksOnCalendar }),
       reset: () => set({ ...defaults }),
     }),
     { name: 'oursome.settings', version: STORE_VERSION, storage: persistStorage },

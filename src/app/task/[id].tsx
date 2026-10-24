@@ -5,10 +5,12 @@ import { Alert, Platform, Pressable, TextInput, View } from 'react-native';
 
 import { ChipRow, DatePicker, Field, RepeatPicker, ReminderPicker, TimePicker } from '@/components/forms/Fields';
 import { Avatar, Button, Chip, ModalHeader, ModalScreen, Segmented, SettingRow, Text } from '@/components/ui';
+import { useAssistant } from '@/features/assistant/store';
 import { familyOf } from '@/features/space/families';
 import { ME_ID, useSpace } from '@/features/space/store';
 import { useTasks } from '@/features/tasks/store';
-import type { Priority, Subtask, Task } from '@/features/types';
+import { useSession } from '@/features/session/store';
+import type { Member, Priority, Subtask, Task } from '@/features/types';
 import { haptic } from '@/lib/haptics';
 import { createId } from '@/lib/id';
 import { formatTime } from '@/lib/dates';
@@ -23,6 +25,10 @@ type Params = {
   assigneeId?: string;
   reminder?: string;
   shared?: string;
+  /** A name the organiser heard for someone not yet in the household. */
+  assigneeName?: string;
+  /** The organiser card this page was opened from; saving completes it. */
+  proposal?: string;
 };
 
 export default function TaskEditor() {
@@ -46,10 +52,16 @@ export default function TaskEditor() {
   const [visibility, setVisibility] = useState(existing?.visibility ?? (params.shared || params.assigneeId ? 'shared' : 'private'));
   const [assigneeId, setAssigneeId] = useState(existing?.assigneeId ?? (params.assigneeId || undefined));
   // A name the organiser heard for someone not yet in the household.
-  const [suggested, setSuggested] = useState(existing?.assigneeId ? undefined : existing?.assigneeName);
+  const [suggested, setSuggested] = useState(
+    existing ? (existing.assigneeId ? undefined : existing.assigneeName) : params.assigneeName || undefined,
+  );
   const spaces = useSpace((s) => s.spaces);
   const people = useSpace((s) => s.people);
-  const [spaceId, setSpaceId] = useState(existing?.spaceId ?? useSpace.getState().activeId ?? undefined);
+  const profile = useSession((s) => s.profile);
+  const me: Member = { id: ME_ID, name: profile?.name ?? 'You', color: profile?.color ?? 'coral', role: 'admin', isMe: true };
+  const [spaceId, setSpaceId] = useState(
+    existing?.spaceId ?? familyOf(params.assigneeId, useSpace.getState().spaces)?.id ?? useSpace.getState().activeId ?? undefined,
+  );
   const assign = (id: string) => {
     setAssigneeId(id === ME_ID ? undefined : id);
     setSuggested(undefined);
@@ -85,7 +97,10 @@ export default function TaskEditor() {
       isDemo: existing?.isDemo,
     };
     if (existing) updateTask(existing.id, data);
-    else addTask(data);
+    else {
+      const task = addTask(data);
+      if (params.proposal) useAssistant.getState().complete(params.proposal, { kind: 'task', id: task.id });
+    }
     haptic.success();
     router.back();
   };
@@ -249,57 +264,64 @@ export default function TaskEditor() {
         />
       </View>
 
-      {space_ ? (
-        <Field icon="person-outline" label="Who’s doing it?" accent="lavender">
-          <ChipRow>
-            {people.map((m) => (
-              <Pressable
-                key={m.id}
-                onPress={() => assign(m.id)}
-                accessibilityRole="radio"
-                aria-selected={(assigneeId ?? ME_ID) === m.id}
-                accessibilityLabel={`Assign to ${m.isMe ? 'me' : m.name}`}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 6,
-                  paddingLeft: 4,
-                  paddingRight: 12,
-                  height: 32,
-                  borderRadius: radius.pill,
-                  borderWidth: 1.5,
-                  borderColor: (assigneeId ?? ME_ID) === m.id && !suggested ? palette.accents[m.color].base : palette.border,
-                  backgroundColor: (assigneeId ?? ME_ID) === m.id && !suggested ? palette.accents[m.color].soft : palette.surface,
-                }}>
-                <Avatar name={m.name} accent={m.color} size={24} />
-                <Text variant="callout">{m.id === ME_ID ? 'Me' : m.name}</Text>
-              </Pressable>
-            ))}
-            <Chip
-              label="Someone new"
-              small
-              icon="person-add-outline"
-              accent="sunshine"
-              onPress={() => router.push({ pathname: '/person/[id]', params: { id: 'new' } })}
-            />
-          </ChipRow>
-          {suggested ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, backgroundColor: palette.accents.sunshine.soft, borderRadius: radius.md, padding: space.md }}>
-              <Text variant="callout" style={{ flex: 1 }}>
-                Noted for “{suggested}”, who isn’t in your household yet.
+      {/* Always shown, so a name the organiser heard can be seen and added even before any people exist. */}
+      <Field icon="person-outline" label="Who’s doing it?" accent="lavender">
+        <ChipRow>
+          {(people.length ? people : [me]).map((m) => (
+            <Pressable
+              key={m.id}
+              onPress={() => assign(m.id)}
+              accessibilityRole="radio"
+              aria-selected={(assigneeId ?? ME_ID) === m.id}
+              accessibilityLabel={`Assign to ${m.isMe ? 'me' : m.name}`}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
+                paddingLeft: 4,
+                paddingRight: 12,
+                height: 32,
+                borderRadius: radius.pill,
+                borderWidth: 1.5,
+                borderColor: (assigneeId ?? ME_ID) === m.id && !suggested ? palette.accents[m.color].base : palette.border,
+                backgroundColor: (assigneeId ?? ME_ID) === m.id && !suggested ? palette.accents[m.color].soft : palette.surface,
+              }}>
+              <Avatar name={m.name} accent={m.color} size={24} />
+              <Text variant="callout">{m.id === ME_ID ? 'Me' : m.name}</Text>
+            </Pressable>
+          ))}
+          <Chip
+            label="Someone new"
+            small
+            icon="person-add-outline"
+            accent="sunshine"
+            onPress={() => router.push({ pathname: '/person/[id]', params: { id: 'new' } })}
+          />
+        </ChipRow>
+        {suggested ? (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: space.sm,
+              backgroundColor: palette.accents.sunshine.soft,
+              borderRadius: radius.md,
+              padding: space.md,
+            }}>
+            <Text variant="callout" style={{ flex: 1 }}>
+              Noted for “{suggested}”, who isn’t in your household yet.
+            </Text>
+            <Pressable
+              onPress={() => router.push({ pathname: '/person/[id]', params: { id: 'new', name: suggested } })}
+              accessibilityRole="button"
+              hitSlop={8}>
+              <Text variant="callout" tone="sunshine" style={{ fontFamily: fonts.bodyBold }}>
+                Add {suggested}
               </Text>
-              <Pressable
-                onPress={() => router.push({ pathname: '/person/[id]', params: { id: 'new', name: suggested } })}
-                accessibilityRole="button"
-                hitSlop={8}>
-                <Text variant="callout" tone="sunshine" style={{ fontFamily: fonts.bodyBold }}>
-                  Add {suggested}
-                </Text>
-              </Pressable>
-            </View>
-          ) : null}
-        </Field>
-      ) : null}
+            </Pressable>
+          </View>
+        ) : null}
+      </Field>
 
       {space_ ? (
         <Field icon="people-outline" label="Sharing" accent="sunshine">

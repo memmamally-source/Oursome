@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { View } from 'react-native';
 
 import { useCalendar } from '@/features/calendar/store';
+import { TASKS_CALENDAR_ID } from '@/features/calendar/tasks';
 import type { EventOccurrence } from '@/features/types';
 import { formatTime, timeKeyOf } from '@/lib/dates';
 import { fonts, radius, space, useTheme, type AccentKey } from '@/theme';
@@ -11,7 +12,13 @@ import { PressableScale } from '../ui/PressableScale';
 import { Text } from '../ui/Text';
 
 export function useCalendarAccent(calendarId: string): AccentKey {
-  return useCalendar((s) => s.calendars.find((c) => c.id === calendarId)?.color ?? 'sky');
+  return useCalendar((s) => (calendarId === TASKS_CALENDAR_ID ? 'mint' : (s.calendars.find((c) => c.id === calendarId)?.color ?? 'sky')));
+}
+
+/** Open what a calendar entry stands for: the task for a dated task, otherwise the event. */
+export function openOccurrence(o: EventOccurrence) {
+  if (o.event.taskId) router.push({ pathname: '/task/[id]', params: { id: o.event.taskId } });
+  else router.push({ pathname: '/event/[id]', params: { id: o.event.id } });
 }
 
 /** Colour-coded event card used on Home, Day and Agenda views. */
@@ -27,8 +34,8 @@ export function EventCard({ occurrence, compact, now }: { occurrence: EventOccur
 
   return (
     <PressableScale
-      onPress={() => router.push({ pathname: '/event/[id]', params: { id: event.id } })}
-      accessibilityLabel={`${event.title}, ${event.allDay ? 'all day' : `${formatTime(start)} to ${formatTime(end)}`}${event.location ? `, at ${event.location}` : ''}`}
+      onPress={() => openOccurrence(occurrence)}
+      accessibilityLabel={`${event.taskId ? 'Task: ' : ''}${event.title}, ${event.allDay ? 'all day' : `${formatTime(start)} to ${formatTime(end)}`}${event.location ? `, at ${event.location}` : ''}`}
       style={{
         flexDirection: 'row',
         backgroundColor: tone.soft,
@@ -42,8 +49,9 @@ export function EventCard({ occurrence, compact, now }: { occurrence: EventOccur
       <View style={{ width: 5, borderRadius: 3, backgroundColor: tone.base }} />
       <View style={{ flex: 1, gap: 2 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          {event.taskId ? <Icon name="checkmark-circle-outline" size={14} color={tone.ink} /> : null}
           <Text variant="caption" color={tone.ink} style={{ fontFamily: fonts.bodyBold }}>
-            {event.allDay ? 'All day' : `${formatTime(start)} – ${formatTime(end)}`}
+            {event.taskId ? (event.allDay ? 'Task' : `Task · ${formatTime(start)}`) : event.allDay ? 'All day' : `${formatTime(start)} – ${formatTime(end)}`}
           </Text>
           {isNow ? (
             <View style={{ backgroundColor: tone.base, borderRadius: radius.pill, paddingHorizontal: 6, paddingVertical: 1 }}>

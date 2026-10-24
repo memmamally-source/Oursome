@@ -57,7 +57,6 @@ function TasksView() {
   const { palette } = useTheme();
   const tasks = useTasks((s) => s.tasks);
   const categories = useTasks((s) => s.categories);
-  const addTask = useTasks((s) => s.addTask);
   const move = useTasks((s) => s.move);
   const sortMode = useSettings((s) => s.taskSortMode);
   const setSortMode = useSettings((s) => s.setTaskSortMode);
@@ -88,7 +87,8 @@ function TasksView() {
   const quickAdd = () => {
     const text = draft.trim();
     if (!text) return;
-    // Reuse the capture parser so "Call mum tomorrow at 5" gets a date and time.
+    // Reuse the capture parser so "Call mum tomorrow at 5" arrives with its date and time,
+    // then open the full task page to check the details and save.
     const parsed = parseCapture(text, { now: new Date(), members: [] });
     const p =
       parsed.type === 'proposals'
@@ -96,17 +96,22 @@ function TasksView() {
         : parsed.type === 'clarify'
           ? parsed.pending[0]
           : undefined;
-    addTask({
-      title: p?.title ?? text,
-      due: p?.date ?? (filter === 'today' ? today : undefined),
-      dueTime: p?.allDay ? undefined : p?.time,
-      categoryId: filter.startsWith('cat:') ? filter.slice(4) : (p?.categoryId ?? 'personal'),
-      priority: 'medium',
-      visibility: filter === 'shared' ? 'shared' : 'private',
-      isReminder: p?.kind === 'reminder',
-    });
-    haptic.success();
+    const person = filter.startsWith('person:') ? members.find((m) => m.id === filter.slice(7)) : undefined;
+    haptic.tap();
     setDraft('');
+    router.push({
+      pathname: '/task/[id]',
+      params: {
+        id: 'new',
+        title: p?.title ?? text,
+        date: p?.date ?? (filter === 'today' ? today : ''),
+        time: p?.allDay ? '' : (p?.time ?? ''),
+        categoryId: filter.startsWith('cat:') ? filter.slice(4) : (p?.categoryId ?? ''),
+        reminder: p?.kind === 'reminder' ? '1' : '',
+        shared: filter === 'shared' ? '1' : '',
+        assigneeId: person && !person.isMe ? person.id : '',
+      },
+    });
   };
 
   const onCompleted = (t: Task) => {
@@ -137,7 +142,7 @@ function TasksView() {
           onSubmitEditing={quickAdd}
           returnKeyType="done"
           blurOnSubmit={false}
-          placeholder="Add a task — “Call the bank Friday”"
+          placeholder="Add a task…"
           placeholderTextColor={palette.textTertiary}
           accessibilityLabel="New task"
           style={{ flex: 1, fontFamily: fonts.body, fontSize: 16, color: palette.text, paddingVertical: space.md }}

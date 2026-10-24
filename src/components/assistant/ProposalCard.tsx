@@ -179,6 +179,26 @@ export function ProposalCard({ proposal: p }: { proposal: Proposal }) {
     if (!err) haptic.success();
   };
 
+  // New tasks and reminders open the full task page, filled in, so every detail can be set before saving.
+  const isTask = p.kind === 'task' || p.kind === 'reminder';
+  const openFull = () => {
+    const who = p.assignee;
+    router.push({
+      pathname: '/task/[id]',
+      params: {
+        id: 'new',
+        proposal: p.id,
+        title: p.title,
+        date: p.date ?? '',
+        time: p.time ?? '',
+        categoryId: p.categoryId ?? '',
+        reminder: p.kind === 'reminder' ? '1' : '',
+        assigneeId: who?.status === 'member' ? who.memberId : '',
+        assigneeName: who?.status === 'unknown' || who?.status === 'suggested' ? who.name : '',
+      },
+    });
+  };
+
   return (
     <View
       style={{
@@ -263,8 +283,12 @@ export function ProposalCard({ proposal: p }: { proposal: Proposal }) {
       ) : null}
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, paddingLeft: indent }}>
-        <Button label={meta.add} size="sm" icon="checkmark" onPress={save} disabled={!!issue} />
-        {p.kind !== 'person' && p.kind !== 'shopping' ? (
+        {isTask ? (
+          <Button label={meta.add} size="sm" icon="create-outline" onPress={openFull} accessibilityHint="Opens the full task page to check the details and save" />
+        ) : (
+          <Button label={meta.add} size="sm" icon="checkmark" onPress={save} disabled={!!issue} />
+        )}
+        {!isTask && p.kind !== 'person' && p.kind !== 'shopping' ? (
           <Button
             label={editing === 'all' ? 'Done' : 'Edit'}
             size="sm"
@@ -272,7 +296,7 @@ export function ProposalCard({ proposal: p }: { proposal: Proposal }) {
             onPress={() => setEditing(editing === 'all' ? 'none' : 'all')}
           />
         ) : null}
-        {!date && p.kind !== 'shopping' && p.kind !== 'person' && editing === 'none' ? (
+        {!isTask && !date && p.kind !== 'shopping' && p.kind !== 'person' && editing === 'none' ? (
           <Button label="Choose date" size="sm" variant="ghost" accent="coral" icon="calendar-outline" onPress={() => setEditing('date')} />
         ) : null}
       </View>
