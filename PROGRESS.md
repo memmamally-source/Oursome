@@ -36,6 +36,7 @@ Merging to `main` deploys the website, so merge only with the owner's approval.
   - Returning user: Home visible in 4.2 s (baseline 7.8 s, Phase A 3.9 s), 572 KB transferred. Tab switches 0.2–0.9 s; ticking a task 0.27–0.30 s (baseline 0.66 s).
   - A Playwright E2E script (scratchpad, not in the repo) ran 29 checks: onboarding, organiser flows (unknown person, approve, follow-up, multiple actions, dismiss, data question), people across Tasks / Our Space / the person page, calendar views and person filter, task assignment, deep links, persistence, PWA manifest, service worker, offline, the privacy and support pages, and desktop layout. All pass, with no console errors apart from the expected deep-link 404s that GitHub Pages serves by design.
   - Not done: real-device (iPhone) testing, and any live AI evaluation (no key; not deployed).
+- **Loading fix (after the overhaul went live):** on a patchy signal a returning visit could hang forever, because the service worker waited on the network for pages with no limit (reproduced: "not loaded after 60 s"). Pages now wait at most 3 s, then open the shell saved at install (4.2 s in the same test). The loading screen offers "Try again" after 10 s, and font preloads are low priority. First visits are still 3–8 s on 4G to 3G, and most of that is the framework (expo-router 439 KB, react-native-web 310 KB, react-dom 204 KB raw), which is a follow-up.
 - **Zustand selectors:** never return a fresh `[]` or object; use `NO_MEMBERS` etc., or Zustand 5 re-renders in a loop.
 
 ## Stack (verified Oct 2026)
