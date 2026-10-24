@@ -1,6 +1,7 @@
 import { PERSONAL_CALENDAR_ID, useCalendar } from '@/features/calendar/store';
 import { addPerson, claimSuggestedTasks } from '@/features/people/service';
 import { useShopping } from '@/features/shopping/store';
+import { familyOf } from '@/features/space/families';
 import { ME_ID, useSpace } from '@/features/space/store';
 import { useTasks } from '@/features/tasks/store';
 import type { Member, Task } from '@/features/types';
@@ -9,6 +10,12 @@ import { combine, dateKeyOf, deviceTimeZone, fromLocalDateTime, minutesOfDay, ti
 import { blockingIssue, type Assignee, type Proposal } from './proposals';
 
 /** Task fields for an assignee: an ID only for real household members. */
+function familyIdFor(a: Assignee | undefined): string | undefined {
+  if (!a || a.status !== 'member') return undefined;
+  const { spaces } = useSpace.getState();
+  return familyOf(a.memberId, spaces)?.id;
+}
+
 function assigneeFields(a: Assignee | undefined): Pick<Task, 'assigneeId' | 'assigneeName'> {
   if (!a) return { assigneeId: undefined, assigneeName: undefined };
   if (a.status === 'me' || a.status === 'member') return { assigneeId: a.memberId, assigneeName: undefined };
@@ -40,6 +47,8 @@ export function executeProposal(p: Proposal): Proposal {
   const issue = blockingIssue(p);
   if (issue) throw new ProposalError(issue);
   const shared = !!p.assignee && p.assignee.status !== 'me';
+  // Something for Mum goes to the family Mum is in; otherwise the family being viewed.
+  const spaceId = shared ? familyIdFor(p.assignee) : undefined;
 
   switch (p.kind) {
     case 'task':
@@ -53,6 +62,7 @@ export function executeProposal(p: Proposal): Proposal {
         isReminder: p.kind === 'reminder',
         reminderMinutes: p.kind === 'reminder' ? 0 : null,
         visibility: shared ? 'shared' : 'private',
+        spaceId,
         ...assigneeFields(p.assignee),
       });
       return { ...p, status: 'saved', savedRef: { kind: 'task', id: task.id } };
@@ -71,6 +81,7 @@ export function executeProposal(p: Proposal): Proposal {
         personId: personId === ME_ID ? undefined : personId,
         location: p.location,
         visibility: shared ? 'shared' : 'private',
+        spaceId,
         reminderMinutes: 30,
       });
       return { ...p, status: 'saved', savedRef: { kind: 'event', id: event.id } };
@@ -102,7 +113,10 @@ export function executeProposal(p: Proposal): Proposal {
         if (changes.time) patch.dueTime = changes.time;
         if (changes.assignee) {
           Object.assign(patch, assigneeFields(changes.assignee));
-          if (changes.assignee.status !== 'me') patch.visibility = 'shared';
+          if (changes.assignee.status !== 'me') {
+            patch.visibility = 'shared';
+            patch.spaceId = familyIdFor(changes.assignee) ?? task.spaceId;
+          }
         }
         useTasks.getState().updateTask(task.id, patch);
       } else {

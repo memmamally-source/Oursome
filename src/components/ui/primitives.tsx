@@ -240,7 +240,7 @@ export function Chip({
         onPress?.();
       }}
       accessibilityRole="button"
-      accessibilityState={{ selected: !!selected }}
+      aria-selected={!!selected}
       accessibilityLabel={label}
       style={({ pressed }) => ({
         flexDirection: 'row',
@@ -435,7 +435,7 @@ export function Segmented<T extends string>({
           <Pressable
             key={o.value}
             accessibilityRole="tab"
-            accessibilityState={{ selected: active }}
+            aria-selected={active}
             accessibilityLabel={o.label}
             onPress={() => {
               haptic.tap();

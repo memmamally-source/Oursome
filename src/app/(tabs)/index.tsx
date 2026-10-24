@@ -13,6 +13,7 @@ import { clearDemoContent } from '@/features/demo/seed';
 import { plateCounts, todayTasks } from '@/features/people/logic';
 import { useSession } from '@/features/session/store';
 import { useSettings } from '@/features/settings/store';
+import { useSpace } from '@/features/space/store';
 import { useTasks } from '@/features/tasks/store';
 import { useLayout } from '@/hooks/useLayout';
 import { useNow } from '@/hooks/useNow';
@@ -32,7 +33,7 @@ export default function HomeScreen() {
   const calendars = useCalendar((s) => s.calendars);
   const hasDemo = tasks.some((t) => t.isDemo);
   const d = useDashboard(now);
-  const people = d.space?.members ?? [];
+  const people = useSpace((s) => s.people);
   const toDo = todayTasks(tasks, d.today);
   const counts = plateCounts(people, tasks, d.todayOcc, calendars, d.today);
   const events = [...d.allDay, ...d.timed];

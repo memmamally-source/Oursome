@@ -1,18 +1,14 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
-import { View } from 'react-native';
 
 import { AuthShell, PreviewNotice } from '@/components/auth/AuthShell';
-import { Button, SettingRow, Text, TextField } from '@/components/ui';
-import { loadDemoContent } from '@/features/demo/seed';
+import { Button, Text, TextField } from '@/components/ui';
 import { auth } from '@/features/session/store';
-import { space } from '@/theme';
 
 export default function SignUp() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [withSamples, setWithSamples] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -21,7 +17,6 @@ export default function SignUp() {
     const result = await auth.signUp({ name, email, password });
     setBusy(false);
     if (!result.ok) return setError(result.error);
-    if (withSamples) loadDemoContent();
   };
 
   return (
@@ -70,16 +65,6 @@ export default function SignUp() {
         error={error}
         onSubmitEditing={submit}
       />
-      <View style={{ marginHorizontal: -space.xs }}>
-        <SettingRow
-          icon="color-palette-outline"
-          accent="sunshine"
-          label="Explore with sample content"
-          detail="See Oursome in action. Clear it any time."
-          value={withSamples}
-          onValueChange={setWithSamples}
-        />
-      </View>
       <Button label="Create account" size="lg" fullWidth loading={busy} onPress={submit} />
       <PreviewNotice />
       <Text variant="caption" tone="tertiary" align="center">

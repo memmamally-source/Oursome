@@ -37,6 +37,13 @@ Merging to `main` deploys the website, so merge only with the owner's approval.
   - A Playwright E2E script (scratchpad, not in the repo) ran 29 checks: onboarding, organiser flows (unknown person, approve, follow-up, multiple actions, dismiss, data question), people across Tasks / Our Space / the person page, calendar views and person filter, task assignment, deep links, persistence, PWA manifest, service worker, offline, the privacy and support pages, and desktop layout. All pass, with no console errors apart from the expected deep-link 404s that GitHub Pages serves by design.
   - Not done: real-device (iPhone) testing, and any live AI evaluation (no key; not deployed).
 - **Loading fix (after the overhaul went live):** on a patchy signal a returning visit could hang forever, because the service worker waited on the network for pages with no limit (reproduced: "not loaded after 60 s"). Pages now wait at most 3 s, then open the shell saved at install (4.2 s in the same test). The loading screen offers "Try again" after 10 s, and font preloads are low priority. First visits are still 3–8 s on 4G to 3G, and most of that is the framework (expo-router 439 KB, react-native-web 310 KB, react-dom 204 KB raw), which is a follow-up.
+- **Clean start and multiple families (Oct 24):**
+  - No sample content for new accounts, and no example prompts in the organiser. Accounts that already have sample content can still clear it.
+  - The space store holds `spaces[]` and `activeId`, with derived `space` (the family being viewed) and `people` (everyone, deduped). It is persisted as v2; `migrateSpaces` turns the old single `space` into the first family, without loss.
+  - Shared tasks, events and lists carry `spaceId`, stamped by the stores (`withFamily`). Items without it belong to the first family (`belongsTo`).
+  - Our Space has a Families switcher and shows the chosen family's people, noticeboard and shared items. Today, Tasks and Calendar show everything.
+  - The organiser and the task editor put work for someone into that person's family.
+  - Selected, checked and expanded states now use `aria-*` props; `accessibilityState` emitted nothing on web.
 - **Zustand selectors:** never return a fresh `[]` or object; use `NO_MEMBERS` etc., or Zustand 5 re-renders in a loop.
 
 ## Stack (verified Oct 2026)

@@ -41,9 +41,10 @@ export function buildContext(
   conversation: { proposals: Proposal[]; lastPersonId?: string; lastPersonName?: string },
 ): AssistantContext {
   const profile = useSession.getState().profile;
-  const space = useSpace.getState().space;
+  const { people: everyone } = useSpace.getState();
   const me: Member = { id: ME_ID, name: profile?.name ?? 'You', color: profile?.color ?? 'coral', role: 'admin', isMe: true };
-  const people = space ? space.members.map((m) => (m.isMe ? { ...m, name: profile?.name ?? m.name } : m)) : [me];
+  // Everyone across all families, so "Mum" works whichever family she's in.
+  const people = everyone.length ? everyone.map((m) => (m.isMe ? { ...m, name: profile?.name ?? m.name } : m)) : [me];
   const { events, calendars } = useCalendar.getState();
   return {
     now,

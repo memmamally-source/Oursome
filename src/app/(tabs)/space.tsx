@@ -2,7 +2,7 @@ import { Icon } from '@/components/ui/Icon';
 import { formatDistanceToNowStrict } from 'date-fns/formatDistanceToNowStrict';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Platform, Pressable, TextInput, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { EventCard } from '@/components/calendar/EventCard';
 import { TaskRow } from '@/components/tasks/TaskRow';
@@ -11,6 +11,7 @@ import { expandOccurrences } from '@/features/calendar/recurrence';
 import { useCalendar } from '@/features/calendar/store';
 import { eventOwner, openTasksFor } from '@/features/people/logic';
 import { useShopping } from '@/features/shopping/store';
+import { belongsTo } from '@/features/space/families';
 import { useSpace } from '@/features/space/store';
 import { useTasks } from '@/features/tasks/store';
 import type { Member } from '@/features/types';
@@ -20,6 +21,7 @@ import { fonts, radius, space, useTheme } from '@/theme';
 export default function SpaceScreen() {
   const { palette } = useTheme();
   const s = useSpace((st) => st.space);
+  const spaces = useSpace((st) => st.spaces);
   const { addAnnouncement, removeAnnouncement, togglePin, leaveSpace } = useSpace.getState();
   const events = useCalendar((st) => st.events);
   const tasks = useTasks((st) => st.tasks);
@@ -32,14 +34,15 @@ export default function SpaceScreen() {
   const sharedEvents = useMemo(
     () =>
       expandOccurrences(
-        events.filter((e) => e.visibility === 'shared'),
+        events.filter((e) => !!s && belongsTo(e, s.id, spaces)),
         today,
         toDateKey(addDays(new Date(), 6)),
       ).slice(0, 5),
-    [events, today],
+    [events, today, s, spaces],
   );
-  const sharedTasks = tasks.filter((t) => t.visibility === 'shared' && !t.completedAt).slice(0, 6);
-  const sharedLists = lists.filter((l) => l.visibility === 'shared');
+  // Only what's shared with the family being viewed.
+  const sharedTasks = tasks.filter((t) => !!s && belongsTo(t, s.id, spaces) && !t.completedAt).slice(0, 6);
+  const sharedLists = lists.filter((l) => !!s && belongsTo(l, s.id, spaces));
 
   if (!s) {
     return (
@@ -48,8 +51,8 @@ export default function SpaceScreen() {
           <EmptyState
             illustration="together"
             title="Organise life together"
-            body="Create a space for your household — a partner, family or housemates — to share calendars, chores and shopping lists."
-            action="Create Our Space"
+            body="Create a family for your household (a partner, children, housemates) to share calendars, chores and shopping lists. You can add more families later, like your parents' or a co-parenting group."
+            action="Create a family"
             onAction={() => router.push('/space-create')}
           />
         </Card>
@@ -79,7 +82,7 @@ export default function SpaceScreen() {
   };
 
   const confirmLeave = () => {
-    const msg = 'Your private items stay with you. Shared items stay with the space.';
+    const msg = 'Your private items stay with you. Items shared with this family stay with it.';
     if (Platform.OS === 'web') {
       if (window.confirm(`Leave ${s.name}? ${msg}`)) leaveSpace();
       return;
@@ -92,6 +95,8 @@ export default function SpaceScreen() {
 
   return (
     <Screen tabBar>
+      <FamilySwitcher />
+
       {/* Hero */}
       <View
         style={{
@@ -128,7 +133,7 @@ export default function SpaceScreen() {
         />
         <View>
           <Text variant="overline" tone="sunshine">
-            Our Space
+            {spaces.length > 1 ? 'Family' : 'Our Space'}
           </Text>
           <Text variant="title" accessibilityRole="header">
             {s.name}
@@ -483,6 +488,76 @@ function PeopleSection({ members }: { members: Member[] }) {
           </Text>
         </Pressable>
       </View>
+    </View>
+  );
+}
+
+/** Every family the user belongs to; tap one to view it, or add another. */
+function FamilySwitcher() {
+  const { palette } = useTheme();
+  const spaces = useSpace((st) => st.spaces);
+  const activeId = useSpace((st) => st.activeId);
+  const switchSpace = useSpace((st) => st.switchSpace);
+  return (
+    <View style={{ marginBottom: space.xl }}>
+      <SectionHeader title="Families" icon="home-outline" accent="coral" />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm, paddingRight: space.lg }}>
+        {spaces.map((f) => {
+          const active = f.id === activeId;
+          return (
+            <Pressable
+              key={f.id}
+              onPress={() => switchSpace(f.id)}
+              accessibilityRole="tab"
+              aria-selected={active}
+              accessibilityLabel={`${f.name}, ${f.members.length} ${f.members.length === 1 ? 'member' : 'members'}`}
+              style={({ pressed }) => ({
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: space.sm,
+                paddingLeft: 6,
+                paddingRight: space.lg,
+                height: 52,
+                borderRadius: radius.pill,
+                borderWidth: 1.5,
+                borderColor: active ? palette.accents.sunshine.base : palette.border,
+                backgroundColor: active ? palette.accents.sunshine.soft : palette.surface,
+                opacity: pressed ? 0.8 : 1,
+              })}>
+              <AvatarStack people={f.members.slice(0, 3)} size={30} />
+              <View>
+                <Text variant="bodyStrong" numberOfLines={1}>
+                  {f.name}
+                </Text>
+                <Text variant="caption" tone="secondary">
+                  {f.members.length} {f.members.length === 1 ? 'member' : 'members'}
+                </Text>
+              </View>
+            </Pressable>
+          );
+        })}
+        <Pressable
+          onPress={() => router.push('/space-create')}
+          accessibilityRole="button"
+          accessibilityLabel="Add a family"
+          style={({ pressed }) => ({
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 6,
+            paddingHorizontal: space.lg,
+            height: 52,
+            borderRadius: radius.pill,
+            borderWidth: 1.5,
+            borderStyle: 'dashed',
+            borderColor: palette.textTertiary,
+            opacity: pressed ? 0.7 : 1,
+          })}>
+          <Icon name="add" size={20} color={palette.textSecondary} />
+          <Text variant="callout" tone="secondary" style={{ fontFamily: fonts.bodyBold }}>
+            Add a family
+          </Text>
+        </Pressable>
+      </ScrollView>
     </View>
   );
 }

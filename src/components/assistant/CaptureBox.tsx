@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 
 import { useAssistant } from '@/features/assistant/store';
@@ -11,14 +11,6 @@ import { Text } from '../ui/Text';
 
 import { AssistantReply } from './AssistantReply';
 
-const EXAMPLES = [
-  'Rufaida needs to take the kids to the park on Saturday',
-  'Remind me about my appointment on Monday',
-  'Dentist for Sarah next Tuesday at 3',
-  'Buy milk, eggs and bread',
-  'What’s everyone doing this weekend?',
-];
-
 /**
  * The organiser: type anything in everyday words. The latest reply (with
  * review cards) appears right underneath, so ordinary requests never need
@@ -27,18 +19,11 @@ const EXAMPLES = [
 export function CaptureBox({ autoFocus, onSent }: { autoFocus?: boolean; onSent?: () => void }) {
   const { palette } = useTheme();
   const [text, setText] = useState('');
-  const [hint, setHint] = useState(0);
   const send = useAssistant((s) => s.send);
   const busy = useAssistant((s) => s.busy);
   const turns = useAssistant((s) => s.turns);
   const lastAssistant = [...turns].reverse().find((t) => t.role === 'assistant');
   const lastUser = [...turns].reverse().find((t) => t.role === 'user');
-
-  useEffect(() => {
-    if (text) return;
-    const id = setInterval(() => setHint((h) => (h + 1) % EXAMPLES.length), 4000);
-    return () => clearInterval(id);
-  }, [text]);
 
   const submit = () => {
     const value = text.trim();
@@ -66,7 +51,7 @@ export function CaptureBox({ autoFocus, onSent }: { autoFocus?: boolean; onSent?
           returnKeyType="send"
           blurOnSubmit
           multiline
-          placeholder={`“${EXAMPLES[hint]}”`}
+          placeholder="Add a task, plan or question…"
           placeholderTextColor={palette.textTertiary}
           accessibilityLabel="Tell Oursome anything"
           accessibilityHint="Type a task, event, reminder or question in your own words"

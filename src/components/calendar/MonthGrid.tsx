@@ -56,7 +56,7 @@ export function MonthGrid({ anchor, selected, today, onSelect, dots, compact }: 
                 key={key}
                 onPress={() => onSelect(key)}
                 accessibilityRole="button"
-                accessibilityState={{ selected: isSelected }}
+                aria-selected={isSelected}
                 accessibilityLabel={`${format(d, 'EEEE d MMMM')}${dayDots.length ? `, ${dayDots.length} events` : ''}`}
                 style={{ flex: 1, alignItems: 'center', paddingVertical: 2 }}>
                 <View
@@ -115,7 +115,7 @@ export function WeekStrip({ anchor, selected, today, onSelect, dots }: Omit<Prop
             key={key}
             onPress={() => onSelect(key)}
             accessibilityRole="button"
-            accessibilityState={{ selected: isSelected }}
+            aria-selected={isSelected}
             accessibilityLabel={format(d, 'EEEE d MMMM')}
             style={{
               flex: 1,

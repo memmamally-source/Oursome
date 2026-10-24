@@ -54,6 +54,8 @@ export type Task = {
    */
   assigneeName?: string;
   visibility: Visibility;
+  /** The family a shared task belongs to. Missing on items shared before families: the first family. */
+  spaceId?: string;
   order: number;
   createdAt: string;
   completedAt?: string;
@@ -82,6 +84,8 @@ export type CalendarEvent = {
   recurrence?: Recurrence | null;
   reminderMinutes?: number | null;
   visibility: Visibility;
+  /** The family a shared event belongs to (see Task.spaceId). */
+  spaceId?: string;
   /** Whose event this is, when it belongs to one household member ("Sarah's dentist"). */
   personId?: string;
   /** Important dates (birthdays, anniversaries) get special treatment on Home. */
@@ -117,6 +121,8 @@ export type ShoppingList = {
   color: AccentKey;
   icon: IconName;
   visibility: Visibility;
+  /** The family a shared list belongs to (see Task.spaceId). */
+  spaceId?: string;
   createdAt: string;
   isDemo?: boolean;
 };

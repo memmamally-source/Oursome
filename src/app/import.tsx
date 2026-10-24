@@ -25,7 +25,7 @@ export default function ImportScreen() {
   const [ambiguous, setAmbiguous] = useState<string[]>([]);
 
   const analyse = () => {
-    const { proposals, ambiguous: amb } = extractFromText(text, { now: new Date(), members: useSpace.getState().space?.members ?? [] });
+    const { proposals, ambiguous: amb } = extractFromText(text, { now: new Date(), members: useSpace.getState().people });
     setResults(proposals.map((p) => ({ proposal: p, status: 'pending' })));
     setAmbiguous(amb);
   };

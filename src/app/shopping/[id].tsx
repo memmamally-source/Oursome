@@ -242,7 +242,7 @@ function ItemRow({
   onRemove: () => void;
 }) {
   const { palette } = useTheme();
-  const adder = useSpace((s) => memberById(s.space, item.addedBy));
+  const adder = useSpace((s) => memberById(s.people, item.addedBy));
   return (
     <View
       style={{

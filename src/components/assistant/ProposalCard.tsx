@@ -6,7 +6,7 @@ import { DatePicker, TimePicker } from '@/components/forms/Fields';
 import { blockingIssue, type Assignee, type Proposal } from '@/features/assistant/proposals';
 import { describeProposal } from '@/features/assistant/resolve';
 import { useAssistant } from '@/features/assistant/store';
-import { NO_MEMBERS, useSpace } from '@/features/space/store';
+import { useSpace } from '@/features/space/store';
 import type { IconName } from '@/features/types';
 import { useLayout } from '@/hooks/useLayout';
 import { formatTime, relativeDayLabel } from '@/lib/dates';
@@ -52,7 +52,7 @@ function MetaChip({ icon, label, accent }: { icon: IconName; label: string; acce
 function PersonDecision({ proposal, a }: { proposal: Proposal; a: Assignee }) {
   const { palette } = useTheme();
   const decide = useAssistant((s) => s.decidePerson);
-  const members = useSpace((s) => s.space?.members ?? NO_MEMBERS);
+  const members = useSpace((s) => s.people);
   if (a.status === 'unknown') {
     return (
       <View style={{ gap: space.sm }}>

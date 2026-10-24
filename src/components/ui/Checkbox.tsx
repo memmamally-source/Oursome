@@ -30,7 +30,7 @@ export function Checkbox({
     <Pressable
       hitSlop={10}
       accessibilityRole="checkbox"
-      accessibilityState={{ checked }}
+      aria-checked={checked}
       accessibilityLabel={label}
       onPress={() => {
         // Update state first so the tick appears immediately; the pop is decoration.
