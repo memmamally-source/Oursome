@@ -12,6 +12,13 @@ Oursome launches as a website first, like Crossword Hub: one codebase that runs 
 - `.github/workflows/deploy-web.yml` publishes it to GitHub Pages whenever `main` changes. One-time setup: Settings → Pages → Source: **GitHub Actions**.
 - To install it on an iPhone, open the site in Safari, tap Share, then **Add to Home Screen**.
 
+## The organiser (AI)
+
+Type anything in everyday words: "Rufaida needs to take the kids to the park", "Dentist on Tuesday at 3pm", "What's overdue?". The organiser shows a card for each thing it understood, and nothing is saved until you tap Add.
+
+- **Basic mode** (default): runs on the device, and messages aren't sent anywhere.
+- **Smart mode:** the AI service in [`server/ai`](server/ai/README.md) (Claude via a Cloudflare Worker). It is built and tested but **not deployed**; switching it on needs the owner's approval, an Anthropic API key and a model choice. Costs and steps are in that README.
+
 ## Preview the native app on your iPhone
 
 1. Install **Expo Go** from the App Store.
@@ -37,6 +44,9 @@ You can also run `npm run web` for a quick look in the browser.
 | `npm run build:web` | Build the website into `dist/` |
 | `npm run check` | TypeScript, ESLint and unit tests |
 | `npm test` | Unit tests only |
+| `npm run check:server` | AI service typecheck and tests (fake model, no cost) |
+| `npm run eval:ai` | Organiser scenarios against a live AI service (`AI_EVAL_ENDPOINT=<url>`; costs a few cents) |
+| `npm run icons` | Regenerate the icon subset after using a new icon name |
 
 ## Project structure
 
@@ -48,6 +58,7 @@ src/
   features/       Domain logic and stores (tasks, calendar, shopping, space, assistant…)
   lib/            Dates, ids, storage, haptics
   theme/          Design tokens and theme provider
+server/ai/        AI service (Cloudflare Worker, not deployed)
 docs/             Brand concepts, legal drafts
 ```
 
