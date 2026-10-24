@@ -2,8 +2,9 @@ import { router } from 'expo-router';
 import { Pressable, View } from 'react-native';
 
 import { CaptureBox } from '@/components/assistant/CaptureBox';
+import { HomeHeader } from '@/components/home/HomeHeader';
 import { ComingUp, ListsRow, PeopleRow, SectionTitle, SuggestionLine, TodayCard } from '@/components/home/HomeSections';
-import { Avatar, Screen, Text } from '@/components/ui';
+import { Screen, Text } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { useCalendar } from '@/features/calendar/store';
 import { useDashboard } from '@/features/dashboard/useDashboard';
@@ -15,7 +16,6 @@ import { useSettings } from '@/features/settings/store';
 import { useTasks } from '@/features/tasks/store';
 import { useLayout } from '@/hooks/useLayout';
 import { useNow } from '@/hooks/useNow';
-import { format, greetingFor } from '@/lib/dates';
 import { fonts, radius, space, useTheme } from '@/theme';
 
 /**
@@ -32,8 +32,6 @@ export default function HomeScreen() {
   const calendars = useCalendar((s) => s.calendars);
   const hasDemo = tasks.some((t) => t.isDemo);
   const d = useDashboard(now);
-  const greeting = greetingFor(now);
-  const firstName = profile?.name.split(' ')[0];
   const people = d.space?.members ?? [];
   const toDo = todayTasks(tasks, d.today);
   const counts = plateCounts(people, tasks, d.todayOcc, calendars, d.today);
@@ -72,23 +70,17 @@ export default function HomeScreen() {
   };
 
   const header = (
-    <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: space.xl }}>
-      <View style={{ flex: 1, gap: 2 }}>
-        <Text variant="overline" tone="coral">
-          {format(now, 'EEEE d MMMM')}
-        </Text>
-        <Text variant="title" accessibilityRole="header">
-          {greeting.text}
-          {firstName ? `, ${firstName}` : ''} {greeting.emoji}
-        </Text>
-        <Text variant="callout" tone="secondary">
-          {summary(events.length, toDo.length)}
-        </Text>
-      </View>
-      <Pressable onPress={() => router.push('/settings')} accessibilityRole="button" accessibilityLabel="Profile and settings" hitSlop={8}>
-        <Avatar name={profile?.name ?? 'You'} accent={profile?.color ?? 'coral'} size={42} />
-      </Pressable>
-    </View>
+    <HomeHeader
+      now={now}
+      name={profile?.name}
+      color={profile?.color}
+      events={events.length}
+      toDo={toDo.length}
+      overdue={toDo.filter((t) => t.due! < d.today).length}
+      next={d.next}
+      people={people}
+      showLogo={!isWide}
+    />
   );
 
   const demoNote = hasDemo ? (
@@ -181,12 +173,4 @@ export default function HomeScreen() {
       </View>
     </Screen>
   );
-}
-
-function summary(events: number, tasks: number): string {
-  if (!events && !tasks) return 'A calm day — perfect for getting ahead.';
-  const parts = [];
-  if (events) parts.push(`${events} ${events === 1 ? 'thing' : 'things'} on`);
-  if (tasks) parts.push(`${tasks} to do`);
-  return `${parts.join(' · ')} today`;
 }
