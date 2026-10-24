@@ -24,7 +24,7 @@ const RELATIONS = ['partner', 'wife', 'husband', 'mum', 'dad', 'son', 'daughter'
 /** /person/new (optionally ?relation=wife&proposal=…) or /person/<id>. */
 export default function PersonScreen() {
   const params = useLocalSearchParams<{ id: string; relation?: string; proposal?: string; edit?: string; name?: string }>();
-  const person = useSpace((s) => s.space?.members.find((m) => m.id === params.id));
+  const person = useSpace((s) => s.people.find((m) => m.id === params.id));
   if (params.id === 'new' || (person && params.edit)) {
     return <PersonForm person={person} relation={params.relation} proposalId={params.proposal} initialName={params.name} />;
   }
@@ -138,7 +138,7 @@ function PersonForm({ person, relation, proposalId, initialName }: { person?: Me
   const key = name.trim().toLowerCase();
   const suggested = key ? tasks.filter((t) => !t.completedAt && !t.assigneeId && t.assigneeName?.trim().toLowerCase() === key) : [];
   const [claim, setClaim] = useState(true);
-  const taken = useSpace((s) => !!key && !!s.space?.members.some((m) => m.id !== person?.id && m.name.trim().toLowerCase() === key));
+  const taken = useSpace((s) => !!key && s.people.some((m) => m.id !== person?.id && m.name.trim().toLowerCase() === key));
 
   const save = () => {
     const clean = name.trim();
@@ -198,7 +198,7 @@ function PersonForm({ person, relation, proposalId, initialName }: { person?: Me
         <Pressable
           onPress={() => setInvite(!invite)}
           accessibilityRole="checkbox"
-          accessibilityState={{ checked: invite }}
+          aria-checked={invite}
           style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: palette.surface, borderRadius: radius.lg, padding: space.md, borderWidth: 1, borderColor: palette.border }}>
           <Icon name={invite ? 'checkbox' : 'square-outline'} size={22} color={palette.accents.sky.ink} />
           <View style={{ flex: 1 }}>
@@ -214,7 +214,7 @@ function PersonForm({ person, relation, proposalId, initialName }: { person?: Me
         <Pressable
           onPress={() => setClaim(!claim)}
           accessibilityRole="checkbox"
-          accessibilityState={{ checked: claim }}
+          aria-checked={claim}
           style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: palette.accents.sunshine.soft, borderRadius: radius.lg, padding: space.md }}>
           <Icon name={claim ? 'checkbox' : 'square-outline'} size={22} color={palette.accents.sunshine.ink} />
           <Text variant="callout" style={{ flex: 1 }}>

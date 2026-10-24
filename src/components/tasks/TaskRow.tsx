@@ -25,8 +25,8 @@ export function TaskRow({ task, onCompleted, showDate = true, card, reorder }: P
   const { palette } = useTheme();
   const toggle = useTasks((s) => s.toggleComplete);
   const category = useTasks((s) => s.categories.find((c) => c.id === task.categoryId));
-  const space_ = useSpace((s) => s.space);
-  const assignee = memberById(space_, task.assigneeId);
+  const people = useSpace((s) => s.people);
+  const assignee = memberById(people, task.assigneeId);
   const done = !!task.completedAt;
   const overdue = !done && !!task.due && task.due < todayKey();
   const accent = category?.color ?? 'lavender';

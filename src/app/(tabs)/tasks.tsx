@@ -9,7 +9,7 @@ import { parseCapture } from '@/features/assistant/parser';
 import { isTaskFor } from '@/features/people/logic';
 import { useSettings } from '@/features/settings/store';
 import { useShopping } from '@/features/shopping/store';
-import { NO_MEMBERS, useSpace } from '@/features/space/store';
+import { useSpace } from '@/features/space/store';
 import { groupOpenTasks, taskGroupLabels } from '@/features/tasks/logic';
 import { useTasks } from '@/features/tasks/store';
 import type { IconName, Task } from '@/features/types';
@@ -61,7 +61,7 @@ function TasksView() {
   const move = useTasks((s) => s.move);
   const sortMode = useSettings((s) => s.taskSortMode);
   const setSortMode = useSettings((s) => s.setTaskSortMode);
-  const members = useSpace((s) => s.space?.members ?? NO_MEMBERS);
+  const members = useSpace((s) => s.people);
   const [filter, setFilter] = useState<Filter>('all');
   const [draft, setDraft] = useState('');
   const [showDone, setShowDone] = useState(false);
@@ -159,7 +159,7 @@ function TasksView() {
                   key={m.id}
                   onPress={() => setFilter(filter === `person:${m.id}` ? 'all' : `person:${m.id}`)}
                   accessibilityRole="button"
-                  accessibilityState={{ selected: filter === `person:${m.id}` }}
+                  aria-selected={filter === `person:${m.id}`}
                   accessibilityLabel={m.isMe ? 'My tasks' : `${m.name}’s tasks`}
                   style={{
                     flexDirection: 'row',
@@ -282,7 +282,7 @@ function TasksView() {
           <Pressable
             onPress={() => setShowDone(!showDone)}
             accessibilityRole="button"
-            accessibilityState={{ expanded: showDone }}
+            aria-expanded={showDone}
             style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingVertical: space.sm }}>
             <Icon name="checkmark-done-circle" size={20} color={palette.accents.mint.ink} />
             <Text variant="subheading">Completed</Text>
@@ -438,7 +438,7 @@ function ListsView() {
                 key={a}
                 onPress={() => setColor(a)}
                 accessibilityRole="radio"
-                accessibilityState={{ selected: color === a }}
+                aria-selected={color === a}
                 accessibilityLabel={a}
                 style={{
                   width: 34,
@@ -457,7 +457,7 @@ function ListsView() {
                 key={i}
                 onPress={() => setIcon(i)}
                 accessibilityRole="radio"
-                accessibilityState={{ selected: icon === i }}
+                aria-selected={icon === i}
                 accessibilityLabel={i.replace('-outline', '')}
                 style={{
                   width: 40,

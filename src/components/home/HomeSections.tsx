@@ -178,7 +178,7 @@ export function PeopleRow({ people, counts }: { people: Member[]; counts: Record
         <View style={{ flex: 1 }}>
           <Text variant="bodyStrong">Add the people you plan with</Text>
           <Text variant="callout" tone="secondary">
-            A partner, family, housemates — then just say “Rufaida needs to…”.
+            A partner, children, housemates. Then you can give them tasks and see their plans.
           </Text>
         </View>
       </PressableScale>

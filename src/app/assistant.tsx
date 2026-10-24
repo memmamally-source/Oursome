@@ -12,15 +12,6 @@ import { useAssistant } from '@/features/assistant/store';
 import { haptic } from '@/lib/haptics';
 import { fonts, layout, radius, space, useTheme } from '@/theme';
 
-const EXAMPLES = [
-  'Rufaida needs to take the kids to the park',
-  'Dentist on Tuesday at 3pm',
-  'Buy eggs, bread and butter',
-  'What’s overdue?',
-  'What does my week look like?',
-  'Who is responsible for the bins?',
-];
-
 /** The full conversation with the organiser. Shares its state with the Home capture box. */
 export default function AssistantScreen() {
   const { palette } = useTheme();
@@ -114,25 +105,6 @@ export default function AssistantScreen() {
                 ? 'Your message and the names, dates and titles it needs are sent to our AI service (powered by Claude) to understand it. They aren’t used to train models, and nothing changes until you approve.'
                 : 'Basic mode works on this device: your messages aren’t sent anywhere.'}
             </Text>
-            <View style={{ gap: space.sm }}>
-              {EXAMPLES.map((e) => (
-                <Pressable
-                  key={e}
-                  onPress={() => submit(e)}
-                  accessibilityRole="button"
-                  style={({ pressed }) => ({
-                    backgroundColor: palette.surface,
-                    borderRadius: radius.lg,
-                    borderWidth: 1,
-                    borderColor: palette.border,
-                    paddingVertical: space.md,
-                    paddingHorizontal: space.lg,
-                    opacity: pressed ? 0.7 : 1,
-                  })}>
-                  <Text variant="callout">“{e}”</Text>
-                </Pressable>
-              ))}
-            </View>
           </View>
         ) : (
           turns.map((t) =>

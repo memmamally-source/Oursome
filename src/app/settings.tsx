@@ -7,7 +7,7 @@ import { Alert, Platform, Pressable, View } from 'react-native';
 import { LogoMark } from '@/components/brand/Logo';
 import { Avatar, Card, Divider, IconButton, Screen, Segmented, SettingRow, Text, TextField } from '@/components/ui';
 import { Brand } from '@/config/brand';
-import { clearDemoContent, hasDemoContent, loadDemoContent } from '@/features/demo/seed';
+import { clearDemoContent, hasDemoContent } from '@/features/demo/seed';
 import { deleteAllLocalData, exportData } from '@/features/settings/account';
 import { useSettings } from '@/features/settings/store';
 import { auth, useSession } from '@/features/session/store';
@@ -88,7 +88,7 @@ export default function SettingsScreen() {
                   useSpace.getState().syncMe({ name: profile?.name ?? 'You', color: a });
                 }}
                 accessibilityRole="radio"
-                accessibilityState={{ selected: profile?.color === a }}
+                aria-selected={profile?.color === a}
                 accessibilityLabel={a}
                 style={{
                   width: 36,
@@ -217,19 +217,21 @@ export default function SettingsScreen() {
         />
       </Section>
 
-      <Section title="Sample content">
-        <SettingRow
-          icon="color-palette-outline"
-          accent="sunshine"
-          label={demo ? 'Clear sample content' : 'Load sample content'}
-          detail={demo ? 'Removes all demonstration items. Your own items stay.' : 'Adds example events, tasks and lists to explore.'}
-          onPress={() => {
-            if (demo) clearDemoContent();
-            else loadDemoContent();
-            setDemo(!demo);
-          }}
-        />
-      </Section>
+      {/* Only for accounts that loaded sample content before it was retired. */}
+      {demo ? (
+        <Section title="Sample content">
+          <SettingRow
+            icon="color-palette-outline"
+            accent="sunshine"
+            label="Clear sample content"
+            detail="Removes the demonstration items. Your own items stay."
+            onPress={() => {
+              clearDemoContent();
+              setDemo(false);
+            }}
+          />
+        </Section>
+      ) : null}
 
       <Section title="Privacy & data">
         <SettingRow

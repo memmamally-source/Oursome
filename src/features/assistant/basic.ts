@@ -390,6 +390,6 @@ export function interpretBasic(input: string, ctx: AssistantContext): Interpreta
     }
     clarify = clarify ?? r.clarify;
   }
-  if (!actions.length) return none(clarify ?? 'I didn’t quite catch that. Try “Rufaida needs to take the kids to the park on Saturday”.');
+  if (!actions.length) return none(clarify ?? 'I didn’t quite catch that. Try saying what needs doing, who it’s for and when.');
   return { reply: '', actions, clarify: clarify ? { question: clarify, about: 'date' } : null };
 }

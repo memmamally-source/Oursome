@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import type { Category, Task } from '@/features/types';
+import { withFamily } from '@/features/space/store';
 import { createId } from '@/lib/id';
 import { persistStorage, STORE_VERSION } from '@/lib/storage';
 
@@ -36,17 +37,17 @@ export const useTasks = create<TasksState>()(
       tasks: [],
       categories: defaultCategories,
       addTask: (draft) => {
-        const task: Task = {
+        const task: Task = withFamily({
           ...draft,
           subtasks: draft.subtasks ?? [],
           id: createId('t_'),
           createdAt: new Date().toISOString(),
           order: nextOrder(get().tasks),
-        };
+        });
         set((s) => ({ tasks: [...s.tasks, task] }));
         return task;
       },
-      updateTask: (id, patch) => set((s) => ({ tasks: s.tasks.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
+      updateTask: (id, patch) => set((s) => ({ tasks: s.tasks.map((t) => (t.id === id ? withFamily({ ...t, ...patch }) : t)) })),
       removeTask: (id) => set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
       toggleComplete: (id) =>
         set((s) => {

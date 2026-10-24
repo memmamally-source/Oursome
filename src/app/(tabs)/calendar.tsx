@@ -11,7 +11,7 @@ import { Avatar, Card, Chip, EmptyState, IconButton, Segmented, Text, useTabBarC
 import { expandOccurrences } from '@/features/calendar/recurrence';
 import { useCalendar, visibleEvents } from '@/features/calendar/store';
 import { columnsFor, onlyPerson, rangeFor, stepFor, type CalendarView } from '@/features/calendar/views';
-import { NO_MEMBERS, useSpace } from '@/features/space/store';
+import { useSpace } from '@/features/space/store';
 import type { EventOccurrence, Member } from '@/features/types';
 import { useLayout } from '@/hooks/useLayout';
 import { useNow } from '@/hooks/useNow';
@@ -33,7 +33,7 @@ export default function CalendarScreen() {
   const events = useCalendar((s) => s.events);
   const calendars = useCalendar((s) => s.calendars);
   const toggleCalendar = useCalendar((s) => s.toggleCalendar);
-  const members = useSpace((s) => s.space?.members ?? NO_MEMBERS);
+  const members = useSpace((s) => s.people);
 
   // Jump to a date when navigated here with one (e.g. from a Home suggestion).
   const [seenParam, setSeenParam] = useState(params.date);
@@ -155,7 +155,7 @@ export default function CalendarScreen() {
           <Pressable
             onPress={() => setShowCalendars(!showCalendars)}
             accessibilityRole="button"
-            accessibilityState={{ expanded: showCalendars }}
+            aria-expanded={showCalendars}
             accessibilityLabel="Choose calendars"
             hitSlop={6}
             style={{
@@ -278,7 +278,7 @@ function PersonChip({ member, selected, onPress }: { member: Member; selected: b
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityState={{ selected }}
+      aria-selected={selected}
       accessibilityLabel={`Show ${member.isMe ? 'my' : `${member.name}’s`} events`}
       style={{
         flexDirection: 'row',

@@ -5,6 +5,7 @@ import { Alert, Platform, Pressable, TextInput, View } from 'react-native';
 
 import { ChipRow, DatePicker, Field, RepeatPicker, ReminderPicker, TimePicker } from '@/components/forms/Fields';
 import { Avatar, Button, Chip, ModalHeader, ModalScreen, Segmented, SettingRow, Text } from '@/components/ui';
+import { familyOf } from '@/features/space/families';
 import { ME_ID, useSpace } from '@/features/space/store';
 import { useTasks } from '@/features/tasks/store';
 import type { Priority, Subtask, Task } from '@/features/types';
@@ -46,11 +47,18 @@ export default function TaskEditor() {
   const [assigneeId, setAssigneeId] = useState(existing?.assigneeId ?? (params.assigneeId || undefined));
   // A name the organiser heard for someone not yet in the household.
   const [suggested, setSuggested] = useState(existing?.assigneeId ? undefined : existing?.assigneeName);
+  const spaces = useSpace((s) => s.spaces);
+  const people = useSpace((s) => s.people);
+  const [spaceId, setSpaceId] = useState(existing?.spaceId ?? useSpace.getState().activeId ?? undefined);
   const assign = (id: string) => {
     setAssigneeId(id === ME_ID ? undefined : id);
     setSuggested(undefined);
-    // Someone else's task has to be visible to them.
-    if (id !== ME_ID) setVisibility('shared');
+    // Someone else's task has to be visible to them, in the family they belong to.
+    if (id !== ME_ID) {
+      setVisibility('shared');
+      const family = familyOf(id, spaces);
+      if (family) setSpaceId(family.id);
+    }
   };
   const [subtasks, setSubtasks] = useState<Subtask[]>(existing?.subtasks ?? []);
   const [subDraft, setSubDraft] = useState('');
@@ -71,6 +79,7 @@ export default function TaskEditor() {
       visibility: space_ ? visibility : 'private',
       assigneeId: space_ && visibility === 'shared' && assigneeId !== ME_ID ? assigneeId : undefined,
       assigneeName: suggested,
+      spaceId: space_ && visibility === 'shared' ? spaceId : undefined,
       subtasks,
       completedAt: existing?.completedAt,
       isDemo: existing?.isDemo,
@@ -158,7 +167,7 @@ export default function TaskEditor() {
                   key={a}
                   onPress={() => setNewCat({ ...newCat, color: a })}
                   accessibilityRole="radio"
-                  accessibilityState={{ selected: newCat.color === a }}
+                  aria-selected={newCat.color === a}
                   accessibilityLabel={a}
                   style={{
                     width: 28,
@@ -243,12 +252,12 @@ export default function TaskEditor() {
       {space_ ? (
         <Field icon="person-outline" label="Who’s doing it?" accent="lavender">
           <ChipRow>
-            {space_.members.map((m) => (
+            {people.map((m) => (
               <Pressable
                 key={m.id}
                 onPress={() => assign(m.id)}
                 accessibilityRole="radio"
-                accessibilityState={{ selected: (assigneeId ?? ME_ID) === m.id }}
+                aria-selected={(assigneeId ?? ME_ID) === m.id}
                 accessibilityLabel={`Assign to ${m.isMe ? 'me' : m.name}`}
                 style={{
                   flexDirection: 'row',
@@ -300,15 +309,22 @@ export default function TaskEditor() {
             accent="sunshine"
             options={[
               { value: 'private', label: 'Private', icon: 'lock-closed-outline' },
-              { value: 'shared', label: space_.name, icon: 'people-outline' },
+              { value: 'shared', label: spaces.length > 1 ? 'Shared' : space_.name, icon: 'people-outline' },
             ]}
           />
+          {visibility === 'shared' && spaces.length > 1 ? (
+            <ChipRow>
+              {spaces.map((f) => (
+                <Chip key={f.id} small label={f.name} accent="sunshine" selected={spaceId === f.id} onPress={() => setSpaceId(f.id)} />
+              ))}
+            </ChipRow>
+          ) : null}
           <Text variant="caption" tone="tertiary">
             {visibility === 'private'
               ? assigneeId && assigneeId !== ME_ID
                 ? 'Private tasks can only be yours — choosing someone else shares it.'
                 : 'Only you can see this.'
-              : `Everyone in ${space_.name} can see this.`}
+              : `Everyone in ${spaces.find((f) => f.id === spaceId)?.name ?? space_.name} can see this.`}
           </Text>
         </Field>
       ) : null}
@@ -332,7 +348,7 @@ export default function TaskEditor() {
               <Pressable
                 onPress={() => setSubtasks(subtasks.map((x) => (x.id === st.id ? { ...x, done: !x.done } : x)))}
                 accessibilityRole="checkbox"
-                accessibilityState={{ checked: st.done }}
+                aria-checked={st.done}
                 accessibilityLabel={st.title}
                 hitSlop={8}>
                 <Icon

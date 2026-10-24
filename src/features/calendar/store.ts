@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import type { CalendarEvent, CalendarSource } from '@/features/types';
+import { withFamily } from '@/features/space/store';
 import { createId } from '@/lib/id';
 import { persistStorage, STORE_VERSION } from '@/lib/storage';
 
@@ -32,11 +33,11 @@ export const useCalendar = create<CalendarState>()(
       events: [],
       calendars: defaultCalendars,
       addEvent: (draft) => {
-        const event: CalendarEvent = { ...draft, id: createId('e_'), createdAt: new Date().toISOString() };
+        const event: CalendarEvent = withFamily({ ...draft, id: createId('e_'), createdAt: new Date().toISOString() });
         set((s) => ({ events: [...s.events, event] }));
         return event;
       },
-      updateEvent: (id, patch) => set((s) => ({ events: s.events.map((e) => (e.id === id ? { ...e, ...patch } : e)) })),
+      updateEvent: (id, patch) => set((s) => ({ events: s.events.map((e) => (e.id === id ? withFamily({ ...e, ...patch }) : e)) })),
       removeEvent: (id) => set((s) => ({ events: s.events.filter((e) => e.id !== id) })),
       toggleCalendar: (id) => set((s) => ({ calendars: s.calendars.map((c) => (c.id === id ? { ...c, visible: !c.visible } : c)) })),
       upsertCalendar: (calendar) =>

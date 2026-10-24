@@ -34,7 +34,7 @@ function TabItem({ name, focused, onPress, wide }: { name: string; focused: bool
     <Pressable
       onPress={onPress}
       accessibilityRole="tab"
-      accessibilityState={{ selected: focused }}
+      aria-selected={focused}
       accessibilityLabel={meta.label}
       style={({ pressed }) => [wide ? styles.sideItem : styles.item, wide && focused && { backgroundColor: tone.soft }, pressed && { opacity: 0.7 }]}>
       <View style={wide ? undefined : [styles.iconWrap, focused && { backgroundColor: tone.soft }]}>

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import type { ShoppingItem, ShoppingList } from '@/features/types';
+import { withFamily } from '@/features/space/store';
 import { createId } from '@/lib/id';
 import { persistStorage, STORE_VERSION } from '@/lib/storage';
 
@@ -33,11 +34,11 @@ export const useShopping = create<ShoppingState>()(
       items: [],
       favourites: [],
       addList: (draft) => {
-        const list: ShoppingList = { ...draft, id: createId('l_'), createdAt: new Date().toISOString() };
+        const list: ShoppingList = withFamily({ ...draft, id: createId('l_'), createdAt: new Date().toISOString() });
         set((s) => ({ lists: [...s.lists, list] }));
         return list;
       },
-      updateList: (id, patch) => set((s) => ({ lists: s.lists.map((l) => (l.id === id ? { ...l, ...patch } : l)) })),
+      updateList: (id, patch) => set((s) => ({ lists: s.lists.map((l) => (l.id === id ? withFamily({ ...l, ...patch }) : l)) })),
       removeList: (id) => set((s) => ({ lists: s.lists.filter((l) => l.id !== id), items: s.items.filter((i) => i.listId !== id) })),
       addItem: (listId, input, addedBy) => {
         const { name, quantity } = parseItemInput(input);

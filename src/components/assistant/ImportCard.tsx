@@ -43,8 +43,8 @@ export function ImportCard({
   const meta = kindMeta[proposal.kind];
   const tone = palette.accents[meta.accent];
   const [title, setTitle] = useState(proposal.title);
-  const space_ = useSpace((s) => s.space);
-  const assignee = memberById(space_, proposal.assigneeId);
+  const people = useSpace((s) => s.people);
+  const assignee = memberById(people, proposal.assigneeId);
   const when = describeWhen(proposal);
   const done = status !== 'pending';
 

@@ -1,10 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import type { Member, Space } from '@/features/types';
+import type { Member, Space, Visibility } from '@/features/types';
 import { createId } from '@/lib/id';
-import { persistStorage, STORE_VERSION } from '@/lib/storage';
+import { persistStorage } from '@/lib/storage';
 import { accentKeys, type AccentKey } from '@/theme/tokens';
+
+import { allPeople, migrateSpaces } from './families';
 
 /** Local id for the signed-in user until Firebase uids arrive in Stage 2. */
 export const ME_ID = 'me';
@@ -12,120 +14,126 @@ export const ME_ID = 'me';
 export const NO_MEMBERS: Member[] = [];
 
 type SpaceState = {
+  /** Every family the user belongs to. */
+  spaces: Space[];
+  activeId: string | null;
+  /** The family shown in Our Space (derived from spaces + activeId). */
   space: Space | null;
+  /** Everyone across all families, each once, the user first (derived). */
+  people: Member[];
   createSpace: (name: string, me: { name: string; color: AccentKey }) => Space;
+  switchSpace: (id: string) => void;
   renameSpace: (name: string) => void;
   addAnnouncement: (text: string) => void;
   removeAnnouncement: (id: string) => void;
   togglePin: (id: string) => void;
   setMemberColor: (memberId: string, color: AccentKey) => void;
   syncMe: (me: { name: string; color: AccentKey }) => void;
+  /** Adds a person to the active family (creating "Our Home" if there is none). */
   addPerson: (person: { name: string; relationship?: string; color?: AccentKey }) => Member;
   updatePerson: (id: string, patch: Partial<Pick<Member, 'name' | 'relationship' | 'aliases' | 'color' | 'invitePending'>>) => void;
   removePerson: (id: string) => void;
+  /** Leaves the active family; the next one becomes active. */
   leaveSpace: () => void;
+  /** null clears every family (account deletion); a space is added or replaced and made active. */
   replace: (space: Space | null) => void;
   clearDemo: () => void;
 };
 
+/** Recompute the derived fields whenever families change. */
+function derive(spaces: Space[], activeId: string | null) {
+  const active = spaces.find((s) => s.id === activeId) ?? spaces[0] ?? null;
+  return { spaces, activeId: active?.id ?? null, space: active, people: spaces.length ? allPeople(spaces) : NO_MEMBERS };
+}
+
+const newSpace = (name: string, me: { name: string; color: AccentKey }): Space => ({
+  id: createId('s_'),
+  name: name.trim() || 'Our Home',
+  members: [{ id: ME_ID, name: me.name, color: me.color, role: 'admin', isMe: true }],
+  announcements: [],
+  createdAt: new Date().toISOString(),
+});
+
 export const useSpace = create<SpaceState>()(
   persist(
-    (set, get) => ({
-      space: null,
-      createSpace: (name, me) => {
-        const space: Space = {
-          id: createId('s_'),
-          name: name.trim() || 'Our Space',
-          members: [{ id: ME_ID, name: me.name, color: me.color, role: 'admin', isMe: true }],
-          announcements: [],
-          createdAt: new Date().toISOString(),
-        };
-        set({ space });
-        return space;
-      },
-      renameSpace: (name) => set((s) => (s.space ? { space: { ...s.space, name } } : s)),
-      addAnnouncement: (text) =>
-        set((s) =>
-          s.space
-            ? {
-                space: {
-                  ...s.space,
-                  announcements: [
-                    { id: createId('a_'), text: text.trim(), authorId: ME_ID, createdAt: new Date().toISOString() },
-                    ...s.space.announcements,
-                  ],
-                },
-              }
-            : s,
-        ),
-      removeAnnouncement: (id) =>
-        set((s) => (s.space ? { space: { ...s.space, announcements: s.space.announcements.filter((a) => a.id !== id) } } : s)),
-      togglePin: (id) =>
-        set((s) =>
-          s.space
-            ? {
-                space: {
-                  ...s.space,
-                  announcements: s.space.announcements.map((a) => (a.id === id ? { ...a, pinned: !a.pinned } : a)),
-                },
-              }
-            : s,
-        ),
-      setMemberColor: (memberId, color) =>
-        set((s) =>
-          s.space ? { space: { ...s.space, members: s.space.members.map((m) => (m.id === memberId ? { ...m, color } : m)) } } : s,
-        ),
-      syncMe: (me) =>
-        set((s) => (s.space ? { space: { ...s.space, members: s.space.members.map((m) => (m.isMe ? { ...m, ...me } : m)) } } : s)),
-      addPerson: ({ name, relationship, color }) => {
-        const existing = get().space;
-        const used = new Set(existing?.members.map((m) => m.color));
-        const person: Member = {
-          id: createId('p_'),
-          name: name.trim(),
-          color: color ?? accentKeys.find((a) => !used.has(a)) ?? accentKeys[(existing?.members.length ?? 0) % accentKeys.length],
-          role: 'member',
-          kind: 'person',
-          relationship: relationship?.trim().toLowerCase() || undefined,
-        };
-        set((s) => {
-          const space = s.space ?? {
-            id: createId('s_'),
-            name: 'Our Home',
-            members: [{ id: ME_ID, name: 'You', color: 'coral' as AccentKey, role: 'admin' as const, isMe: true }],
-            announcements: [],
-            createdAt: new Date().toISOString(),
+    (set, get) => {
+      /** Apply a change to the active family only. */
+      const updateActive = (fn: (s: Space) => Space) =>
+        set((st) => (st.space ? derive(st.spaces.map((s) => (s.id === st.space!.id ? fn(s) : s)), st.activeId) : st));
+      /** Apply a change to a person wherever they appear. */
+      const updateMembers = (fn: (m: Member) => Member) =>
+        set((st) => derive(st.spaces.map((s) => ({ ...s, members: s.members.map(fn) })), st.activeId));
+
+      return {
+        ...derive([], null),
+        createSpace: (name, me) => {
+          const space = newSpace(name, me);
+          set((st) => derive([...st.spaces, space], space.id));
+          return space;
+        },
+        switchSpace: (id) => set((st) => derive(st.spaces, id)),
+        renameSpace: (name) => updateActive((s) => ({ ...s, name: name.trim() || s.name })),
+        addAnnouncement: (text) =>
+          updateActive((s) => ({
+            ...s,
+            announcements: [{ id: createId('a_'), text: text.trim(), authorId: ME_ID, createdAt: new Date().toISOString() }, ...s.announcements],
+          })),
+        removeAnnouncement: (id) => updateActive((s) => ({ ...s, announcements: s.announcements.filter((a) => a.id !== id) })),
+        togglePin: (id) => updateActive((s) => ({ ...s, announcements: s.announcements.map((a) => (a.id === id ? { ...a, pinned: !a.pinned } : a)) })),
+        setMemberColor: (memberId, color) => updateMembers((m) => (m.id === memberId ? { ...m, color } : m)),
+        syncMe: (me) => updateMembers((m) => (m.isMe ? { ...m, ...me } : m)),
+        addPerson: ({ name, relationship, color }) => {
+          if (!get().space) set((st) => derive([...st.spaces, newSpace('Our Home', { name: 'You', color: 'coral' })], st.activeId));
+          const used = new Set(get().people.map((m) => m.color));
+          const person: Member = {
+            id: createId('p_'),
+            name: name.trim(),
+            color: color ?? accentKeys.find((a) => !used.has(a)) ?? accentKeys[get().people.length % accentKeys.length],
+            role: 'member',
+            kind: 'person',
+            relationship: relationship?.trim().toLowerCase() || undefined,
           };
-          return { space: { ...space, members: [...space.members, person] } };
-        });
-        return person;
+          updateActive((s) => ({ ...s, members: [...s.members, person] }));
+          return person;
+        },
+        updatePerson: (id, patch) =>
+          updateMembers((m) =>
+            m.id === id
+              ? { ...m, ...patch, relationship: patch.relationship !== undefined ? patch.relationship.trim().toLowerCase() || undefined : m.relationship }
+              : m,
+          ),
+        removePerson: (id) =>
+          set((st) => derive(st.spaces.map((s) => ({ ...s, members: s.members.filter((m) => m.id !== id || m.isMe) })), st.activeId)),
+        leaveSpace: () => set((st) => derive(st.spaces.filter((s) => s.id !== st.activeId), null)),
+        replace: (space) =>
+          set((st) => (space ? derive([...st.spaces.filter((s) => s.id !== space.id), space], space.id) : derive([], null))),
+        clearDemo: () => set((st) => derive(st.spaces.filter((s) => !s.isDemo), st.activeId)),
+      };
+    },
+    {
+      name: 'oursome.space',
+      // v1 held a single `space`; v2 holds every family. migrateSpaces keeps all existing data.
+      version: 2,
+      storage: persistStorage,
+      partialize: (st) => ({ spaces: st.spaces, activeId: st.activeId }),
+      migrate: (persisted) => migrateSpaces(persisted) as unknown as SpaceState,
+      merge: (persisted, current) => {
+        const { spaces, activeId } = migrateSpaces(persisted);
+        return { ...current, ...derive(spaces, activeId) };
       },
-      updatePerson: (id, patch) =>
-        set((s) =>
-          s.space
-            ? {
-                space: {
-                  ...s.space,
-                  members: s.space.members.map((m) =>
-                    m.id === id
-                      ? { ...m, ...patch, relationship: patch.relationship !== undefined ? patch.relationship.trim().toLowerCase() || undefined : m.relationship }
-                      : m,
-                  ),
-                },
-              }
-            : s,
-        ),
-      removePerson: (id) =>
-        set((s) => (s.space ? { space: { ...s.space, members: s.space.members.filter((m) => m.id !== id || m.isMe) } } : s)),
-      leaveSpace: () => set({ space: null }),
-      replace: (space) => set({ space }),
-      clearDemo: () => set((s) => (s.space?.isDemo ? { space: null } : s)),
-    }),
-    { name: 'oursome.space', version: STORE_VERSION, storage: persistStorage },
+    },
   ),
 );
 
-export function memberById(space: Space | null, id?: string): Member | undefined {
-  if (!space || !id) return undefined;
-  return space.members.find((m) => m.id === id);
+/** A person by id, looked up across every family. */
+export function memberById(people: Member[], id?: string): Member | undefined {
+  if (!id) return undefined;
+  return people.find((m) => m.id === id);
+}
+
+/** Shared items remember their family: the active one unless they already have one. */
+export function withFamily<T extends { visibility: Visibility; spaceId?: string }>(item: T): T {
+  if (item.visibility !== 'shared' || item.spaceId) return item;
+  const id = useSpace.getState().activeId;
+  return id ? { ...item, spaceId: id } : item;
 }
