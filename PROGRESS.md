@@ -44,6 +44,11 @@ Merging to `main` deploys the website, so merge only with the owner's approval.
   - Our Space has a Families switcher and shows the chosen family's people, noticeboard and shared items. Today, Tasks and Calendar show everything.
   - The organiser and the task editor put work for someone into that person's family.
   - Selected, checked and expanded states now use `aria-*` props; `accessibilityState` emitted nothing on web.
+- **Tasks on the calendar, full task page (Oct 24):**
+  - Open dated tasks appear on the calendar as read-only entries (`features/calendar/tasks.ts`, pseudo-calendar `cal_tasks`, mint): timed tasks are 30-minute blocks, others go in the all-day row.
+  - Tapping an entry opens the task (`openOccurrence`). The "Tasks" chip in the calendar filters toggles them (`settings.tasksOnCalendar`). The people filter treats them as the assignee's, or the user's own when unassigned.
+  - Adding a task opens the full task page, pre-filled. This covers the Tasks quick-add box and the organiser's "Add task", which passes `proposal`; saving calls `useAssistant.complete`.
+  - "Who's doing it?" now shows even before any people exist.
 - **Zustand selectors:** never return a fresh `[]` or object; use `NO_MEMBERS` etc., or Zustand 5 re-renders in a loop.
 
 ## Stack (verified Oct 2026)

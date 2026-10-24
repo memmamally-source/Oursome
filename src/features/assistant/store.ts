@@ -41,6 +41,8 @@ type AssistantState = {
   dismiss: (id: string) => void;
   edit: (id: string, patch: Partial<Pick<Proposal, 'title' | 'date' | 'time' | 'endTime' | 'allDay'>>) => void;
   decidePerson: (id: string, decision: PersonDecision) => void;
+  /** Mark a proposal saved after the user finished it on the full task page. */
+  complete: (id: string, savedRef: NonNullable<Proposal['savedRef']>) => void;
   reset: () => void;
 };
 
@@ -134,6 +136,11 @@ export const useAssistant = create<AssistantState>()((set, get) => ({
             ? keepAsSuggestion(p)
             : unassign(p);
     set((s) => ({ conversation: replaceProposal(s.conversation, next) }));
+  },
+
+  complete: (id, savedRef) => {
+    const p = get().proposal(id);
+    if (p && p.status === 'pending') set((s) => ({ conversation: replaceProposal(s.conversation, { ...p, status: 'saved', savedRef }) }));
   },
 
   reset: () => set({ turns: [], conversation: emptyConversation, busy: false }),
