@@ -8,7 +8,10 @@
  * can highlight it. In Stage 4 the server-side AI returns the same
  * `ParseResult` shape, validated against a schema, so the UI is unchanged.
  */
-import { addDays, addMonths, getDaysInMonth, startOfWeek } from 'date-fns';
+import { addDays } from 'date-fns/addDays';
+import { addMonths } from 'date-fns/addMonths';
+import { getDaysInMonth } from 'date-fns/getDaysInMonth';
+import { startOfWeek } from 'date-fns/startOfWeek';
 
 import { guessCategory } from '@/features/shopping/logic';
 import type { Member } from '@/features/types';
@@ -152,6 +155,19 @@ const EVENT_WORDS = [
 
 const TASK_VERBS = [
   'pay',
+  'fetch',
+  'drop',
+  'pick',
+  'grab',
+  'walk',
+  'cook',
+  'drive',
+  'visit',
+  'phone',
+  'ring',
+  'remember',
+  'plan',
+  'collect',
   'buy',
   'call',
   'email',
@@ -214,7 +230,7 @@ const CATEGORY_WORDS: [string, string[]][] = [
   ],
   ['shopping', ['buy', 'pick up', 'order', 'groceries', 'shop']],
   ['home', ['clean', 'fix', 'plumber', 'bins', 'bin', 'laundry', 'garden', 'plants', 'vacuum', 'dishes', 'tidy', 'mow', 'car']],
-  ['family', ['school', 'kids', 'mum', 'mom', 'dad', 'grandma', 'grandpa', 'birthday', 'family', 'teacher', 'permission slip']],
+  ['family', ['school', 'kids', 'children', 'child', 'park', 'mum', 'mom', 'dad', 'grandma', 'grandpa', 'birthday', 'family', 'teacher', 'permission slip', 'swimming', 'playdate', 'nursery', 'daycare']],
   ['work', ['email', 'report', 'client', 'deadline', 'presentation', 'work', 'office']],
 ];
 
@@ -758,3 +774,56 @@ export function describeWhen(p: Proposal, now = new Date()): string | null {
   }
   return parts.join(' · ');
 }
+
+// ── Reusable pieces for the people-aware interpreter (./basic.ts) ────────
+
+export type When = {
+  /** Text with the date/time phrases removed. */
+  rest: string;
+  date?: DateKey;
+  time?: TimeKey;
+  endTime?: TimeKey;
+  /** Inferred values the user should double-check. */
+  assumptions: string[];
+  /** A numeric date that reads differently in US and UK order. */
+  ambiguous?: { question: string; options: { label: string; date: DateKey }[] };
+};
+
+/** Extract a date, time, range and duration from (lower-case) text. */
+export function extractWhen(text: string, now: Date): When {
+  const state = { text };
+  const d: Extracted = { assumptions: [] };
+  const clarify = extractDate(state, now, d);
+  const t: TimeExtract = { assumptions: [] };
+  extractTime(state, t);
+  const duration = extractDuration(state);
+  const time = t.time ?? d.partOfDay;
+  const assumptions = [...d.assumptions, ...t.assumptions];
+  if (!t.time && d.partOfDay) {
+    assumptions.push(`Time taken as ${d.partOfDay === '09:00' ? '9 AM' : d.partOfDay === '14:00' ? '2 PM' : '7 PM'}`);
+  }
+  let endTime = t.endTime;
+  if (!endTime && time && duration) {
+    const [h, m] = time.split(':').map(Number);
+    endTime = timeFromMinutes(Math.min(h * 60 + m + duration, 23 * 60 + 59));
+  }
+  const ambiguous =
+    clarify?.type === 'clarify'
+      ? { question: clarify.question, options: clarify.options.map((o) => ({ label: o.label, date: o.patch.date! })) }
+      : undefined;
+  return { rest: state.text.replace(/\s+/g, ' ').trim(), date: d.date, time, endTime, assumptions, ambiguous };
+}
+
+/** Whether a title reads like a calendar event ("dentist appointment", "swimming"). */
+export function looksLikeEvent(title: string): boolean {
+  const lower = title.toLowerCase();
+  return EVENT_WORDS.some((w) => has(lower, w)) || /\b(swimming|football|soccer|ballet|piano|gym|yoga)\b/.test(lower);
+}
+
+/** Whether a title starts with an everyday task verb ("pay", "buy", "collect"). */
+export function startsWithTaskVerb(title: string): boolean {
+  const lower = title.toLowerCase();
+  return TASK_VERBS.some((v) => lower.startsWith(v + ' ') || lower === v);
+}
+
+export { capitalise, cleanTitle, restoreCase, splitItems };

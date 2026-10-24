@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from './Icon';
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import {
@@ -13,13 +13,16 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { layout, space, useTheme } from '@/theme';
+import { useLayout } from '@/hooks/useLayout';
+import { fonts, layout, space, useTheme } from '@/theme';
 
 import { Text } from './Text';
 
-/** Bottom padding that clears the floating tab bar. */
+/** Bottom padding that clears the floating tab bar (none needed beside the desktop sidebar). */
 export function useTabBarClearance() {
   const insets = useSafeAreaInsets();
+  const { isWide } = useLayout();
+  if (isWide) return space.huge;
   return layout.tabBarHeight + layout.tabBarMargin + Math.max(insets.bottom, 12) + space.xxxl;
 }
 
@@ -33,9 +36,11 @@ type ScreenProps = {
   scroll?: boolean;
   contentStyle?: StyleProp<ViewStyle>;
   background?: string;
+  /** Allow a wider content column on desktop (two-column layouts). */
+  wide?: boolean;
 } & Pick<ScrollViewProps, 'refreshControl' | 'stickyHeaderIndices'>;
 
-export function Screen({ children, title, subtitle, right, tabBar, scroll = true, contentStyle, background, ...rest }: ScreenProps) {
+export function Screen({ children, title, subtitle, right, tabBar, scroll = true, contentStyle, background, wide, ...rest }: ScreenProps) {
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
   const clearance = useTabBarClearance();
@@ -60,7 +65,7 @@ export function Screen({ children, title, subtitle, right, tabBar, scroll = true
     paddingHorizontal: layout.screenPadding,
     paddingBottom: tabBar ? clearance : insets.bottom + space.xxxl,
     width: '100%',
-    maxWidth: layout.maxContentWidth,
+    maxWidth: wide ? layout.maxWideContentWidth : layout.maxContentWidth,
     alignSelf: 'center',
   };
 
@@ -124,7 +129,7 @@ export function ModalHeader({
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-        <Ionicons name="close" size={20} color={palette.text} />
+        <Icon name="close" size={20} color={palette.text} />
       </Pressable>
       <Text
         variant="subheading"
@@ -152,7 +157,7 @@ export function ModalHeader({
           <Text
             variant="callout"
             color={actionDisabled ? palette.textTertiary : palette.onAccent}
-            style={{ fontFamily: 'NunitoSans_700Bold' }}>
+            style={{ fontFamily: fonts.bodyBold }}>
             {action}
           </Text>
         </Pressable>

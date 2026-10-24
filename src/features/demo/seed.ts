@@ -250,7 +250,7 @@ export function buildDemo(myName: string, now = new Date()) {
     isDemo: true,
     members: [
       { id: ME_ID, name: myName, color: 'coral', role: 'admin', isMe: true },
-      { id: PARTNER_ID, name: 'Jordan', color: 'sky', role: 'member' },
+      { id: PARTNER_ID, name: 'Jordan', color: 'sky', role: 'member', kind: 'person', relationship: 'partner' },
     ],
     announcements: [
       {

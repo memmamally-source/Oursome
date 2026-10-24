@@ -1,15 +1,15 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { TaskRow } from '@/components/tasks/TaskRow';
-import { Button, Card, Celebration, Chip, EmptyState, IconButton, PressableScale, Screen, Segmented, Text } from '@/components/ui';
+import { Avatar, Button, Card, Celebration, Chip, EmptyState, IconButton, PressableScale, Screen, Segmented, Text } from '@/components/ui';
 import { parseCapture } from '@/features/assistant/parser';
+import { isTaskFor } from '@/features/people/logic';
 import { useSettings } from '@/features/settings/store';
 import { useShopping } from '@/features/shopping/store';
-import { ME_ID, useSpace } from '@/features/space/store';
+import { NO_MEMBERS, useSpace } from '@/features/space/store';
 import { groupOpenTasks, taskGroupLabels } from '@/features/tasks/logic';
 import { useTasks } from '@/features/tasks/store';
 import type { IconName, Task } from '@/features/types';
@@ -17,7 +17,7 @@ import { haptic } from '@/lib/haptics';
 import { format, todayKey } from '@/lib/dates';
 import { accentKeys, elevation, fonts, layout, radius, space, useTheme, type AccentKey } from '@/theme';
 
-type Filter = 'all' | 'today' | 'mine' | 'shared' | `cat:${string}`;
+type Filter = 'all' | 'today' | 'shared' | `cat:${string}` | `person:${string}`;
 
 export default function TasksScreen() {
   const params = useLocalSearchParams<{ view?: string }>();
@@ -61,7 +61,7 @@ function TasksView() {
   const move = useTasks((s) => s.move);
   const sortMode = useSettings((s) => s.taskSortMode);
   const setSortMode = useSettings((s) => s.setTaskSortMode);
-  const members = useSpace((s) => s.space?.members ?? []);
+  const members = useSpace((s) => s.space?.members ?? NO_MEMBERS);
   const [filter, setFilter] = useState<Filter>('all');
   const [draft, setDraft] = useState('');
   const [showDone, setShowDone] = useState(false);
@@ -72,12 +72,15 @@ function TasksView() {
     () =>
       tasks.filter((t) => {
         if (filter === 'today') return !!t.due && t.due <= today;
-        if (filter === 'mine') return !t.assigneeId || t.assigneeId === ME_ID;
+        if (filter.startsWith('person:')) {
+          const m = members.find((x) => x.id === filter.slice(7));
+          return !!m && isTaskFor(t, m);
+        }
         if (filter === 'shared') return t.visibility === 'shared';
         if (filter.startsWith('cat:')) return t.categoryId === filter.slice(4);
         return true;
       }),
-    [tasks, filter, today],
+    [tasks, filter, today, members],
   );
   const groups = groupOpenTasks(filtered, today, sortMode);
   const completed = filtered.filter((t) => t.completedAt).sort((a, b) => b.completedAt!.localeCompare(a.completedAt!));
@@ -127,7 +130,7 @@ function TasksView() {
           },
           elevation(palette, 1),
         ]}>
-        <Ionicons name="add-circle-outline" size={22} color={palette.accents.mint.ink} />
+        <Icon name="add-circle-outline" size={22} color={palette.accents.mint.ink} />
         <TextInput
           value={draft}
           onChangeText={setDraft}
@@ -150,9 +153,33 @@ function TasksView() {
           style={{ flex: 1 }}>
           <Chip label="All" small selected={filter === 'all'} accent="mint" onPress={() => setFilter('all')} />
           <Chip label="Today" small selected={filter === 'today'} accent="coral" onPress={() => setFilter('today')} />
-          {members.length > 1 ? (
-            <Chip label="Mine" small selected={filter === 'mine'} accent="lavender" onPress={() => setFilter('mine')} />
-          ) : null}
+          {members.length > 1
+            ? members.map((m) => (
+                <Pressable
+                  key={m.id}
+                  onPress={() => setFilter(filter === `person:${m.id}` ? 'all' : `person:${m.id}`)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: filter === `person:${m.id}` }}
+                  accessibilityLabel={m.isMe ? 'My tasks' : `${m.name}’s tasks`}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 5,
+                    height: 30,
+                    paddingLeft: 3,
+                    paddingRight: 10,
+                    borderRadius: radius.pill,
+                    borderWidth: 1.5,
+                    borderColor: filter === `person:${m.id}` ? palette.accents[m.color].base : palette.border,
+                    backgroundColor: filter === `person:${m.id}` ? palette.accents[m.color].soft : palette.surface,
+                  }}>
+                  <Avatar name={m.name} accent={m.color} size={22} />
+                  <Text variant="caption" style={{ fontFamily: fonts.bodyBold }}>
+                    {m.isMe ? 'Mine' : m.name.split(' ')[0]}
+                  </Text>
+                </Pressable>
+              ))
+            : null}
           <Chip
             label="Shared"
             small
@@ -197,7 +224,7 @@ function TasksView() {
           </Card>
         ) : (
           groups.map((g) => (
-            <Animated.View key={g.key} entering={FadeIn} style={{ marginBottom: space.lg }}>
+            <View key={g.key} style={{ marginBottom: space.lg }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, marginBottom: space.xs }}>
                 <Text variant="subheading" tone={g.key === 'overdue' ? 'danger' : 'primary'}>
                   {taskGroupLabels[g.key]}
@@ -244,7 +271,7 @@ function TasksView() {
                   </View>
                 ))}
               </Card>
-            </Animated.View>
+            </View>
           ))
         )}
         <Celebration burstKey={burst} />
@@ -257,17 +284,12 @@ function TasksView() {
             accessibilityRole="button"
             accessibilityState={{ expanded: showDone }}
             style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingVertical: space.sm }}>
-            <Ionicons name="checkmark-done-circle" size={20} color={palette.accents.mint.ink} />
+            <Icon name="checkmark-done-circle" size={20} color={palette.accents.mint.ink} />
             <Text variant="subheading">Completed</Text>
             <Text variant="callout" tone="secondary">
               {completed.length}
             </Text>
-            <Ionicons
-              name={showDone ? 'chevron-up' : 'chevron-down'}
-              size={18}
-              color={palette.textSecondary}
-              style={{ marginLeft: 'auto' }}
-            />
+            <Icon name={showDone ? 'chevron-up' : 'chevron-down'} size={18} color={palette.textSecondary} style={{ marginLeft: 'auto' }} />
           </Pressable>
           {showDone ? (
             <Card padded={false} style={{ paddingHorizontal: space.md, marginTop: space.sm }}>
@@ -359,9 +381,9 @@ function ListsView() {
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}>
-                  <Ionicons name={l.icon} size={20} color={palette.onAccent} />
+                  <Icon name={l.icon} size={20} color={palette.onAccent} />
                 </View>
-                <Ionicons
+                <Icon
                   name={l.visibility === 'shared' ? 'people' : 'lock-closed'}
                   size={15}
                   color={tone.ink}
@@ -445,7 +467,7 @@ function ListsView() {
                   justifyContent: 'center',
                   backgroundColor: icon === i ? palette.accents[color].soft : palette.surfaceSunken,
                 }}>
-                <Ionicons name={i} size={20} color={icon === i ? palette.accents[color].ink : palette.textSecondary} />
+                <Icon name={i} size={20} color={icon === i ? palette.accents[color].ink : palette.textSecondary} />
               </Pressable>
             ))}
           </View>

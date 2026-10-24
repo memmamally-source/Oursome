@@ -1,0 +1,23 @@
+# Oursome AI service — Cloudflare Worker configuration.
+# NOT DEPLOYED. Deploying needs the owner's approval (see README.md).
+# The API key is never stored here: set it with `npx wrangler secret put ANTHROPIC_API_KEY`.
+name = "oursome-ai"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# The owner picks the model (see README for costs). claude-haiku-5-5 is the low-cost option.
+AI_MODEL = "claude-opus-5-5"
+AI_EFFORT = "low"
+ALLOWED_ORIGINS = "https://memmamally-source.github.io,http://localhost:8081"
+PER_DEVICE_PER_MINUTE = "10"
+PER_DEVICE_PER_DAY = "200"
+# Hard ceiling on model calls per UTC day for everyone together — the cost cap.
+GLOBAL_PER_DAY = "2000"
+
+# Optional: shared rate-limit counters across instances (free tier includes KV).
+# Create with `npx wrangler kv namespace create RATE_KV` and paste the id here.
+# [[kv_namespaces]]
+# binding = "RATE_KV"
+# id = "<id>"

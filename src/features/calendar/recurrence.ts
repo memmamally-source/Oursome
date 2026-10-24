@@ -1,4 +1,8 @@
-import { addDays, addMonths, addYears, differenceInCalendarDays, getDaysInMonth } from 'date-fns';
+import { addDays } from 'date-fns/addDays';
+import { addMonths } from 'date-fns/addMonths';
+import { addYears } from 'date-fns/addYears';
+import { differenceInCalendarDays } from 'date-fns/differenceInCalendarDays';
+import { getDaysInMonth } from 'date-fns/getDaysInMonth';
 
 import type { CalendarEvent, EventOccurrence, Recurrence } from '@/features/types';
 import { combine, dateKeyOf, fromDateKey, fromLocalDateTime, timeKeyOf, toDateKey, toLocalDateTime, type DateKey } from '@/lib/dates';

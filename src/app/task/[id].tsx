@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Platform, Pressable, TextInput, View } from 'react-native';
@@ -44,6 +44,14 @@ export default function TaskEditor() {
   const [isReminder, setIsReminder] = useState(existing?.isReminder ?? !!params.reminder);
   const [visibility, setVisibility] = useState(existing?.visibility ?? (params.shared || params.assigneeId ? 'shared' : 'private'));
   const [assigneeId, setAssigneeId] = useState(existing?.assigneeId ?? (params.assigneeId || undefined));
+  // A name the organiser heard for someone not yet in the household.
+  const [suggested, setSuggested] = useState(existing?.assigneeId ? undefined : existing?.assigneeName);
+  const assign = (id: string) => {
+    setAssigneeId(id === ME_ID ? undefined : id);
+    setSuggested(undefined);
+    // Someone else's task has to be visible to them.
+    if (id !== ME_ID) setVisibility('shared');
+  };
   const [subtasks, setSubtasks] = useState<Subtask[]>(existing?.subtasks ?? []);
   const [subDraft, setSubDraft] = useState('');
   const [newCat, setNewCat] = useState<{ name: string; color: AccentKey } | null>(null);
@@ -61,7 +69,8 @@ export default function TaskEditor() {
       reminderMinutes: due ? reminderMinutes : null,
       isReminder,
       visibility: space_ ? visibility : 'private',
-      assigneeId: space_ && visibility === 'shared' ? assigneeId : undefined,
+      assigneeId: space_ && visibility === 'shared' && assigneeId !== ME_ID ? assigneeId : undefined,
+      assigneeName: suggested,
       subtasks,
       completedAt: existing?.completedAt,
       isDemo: existing?.isDemo,
@@ -232,6 +241,58 @@ export default function TaskEditor() {
       </View>
 
       {space_ ? (
+        <Field icon="person-outline" label="Who’s doing it?" accent="lavender">
+          <ChipRow>
+            {space_.members.map((m) => (
+              <Pressable
+                key={m.id}
+                onPress={() => assign(m.id)}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: (assigneeId ?? ME_ID) === m.id }}
+                accessibilityLabel={`Assign to ${m.isMe ? 'me' : m.name}`}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 6,
+                  paddingLeft: 4,
+                  paddingRight: 12,
+                  height: 32,
+                  borderRadius: radius.pill,
+                  borderWidth: 1.5,
+                  borderColor: (assigneeId ?? ME_ID) === m.id && !suggested ? palette.accents[m.color].base : palette.border,
+                  backgroundColor: (assigneeId ?? ME_ID) === m.id && !suggested ? palette.accents[m.color].soft : palette.surface,
+                }}>
+                <Avatar name={m.name} accent={m.color} size={24} />
+                <Text variant="callout">{m.id === ME_ID ? 'Me' : m.name}</Text>
+              </Pressable>
+            ))}
+            <Chip
+              label="Someone new"
+              small
+              icon="person-add-outline"
+              accent="sunshine"
+              onPress={() => router.push({ pathname: '/person/[id]', params: { id: 'new' } })}
+            />
+          </ChipRow>
+          {suggested ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, backgroundColor: palette.accents.sunshine.soft, borderRadius: radius.md, padding: space.md }}>
+              <Text variant="callout" style={{ flex: 1 }}>
+                Noted for “{suggested}”, who isn’t in your household yet.
+              </Text>
+              <Pressable
+                onPress={() => router.push({ pathname: '/person/[id]', params: { id: 'new', name: suggested } })}
+                accessibilityRole="button"
+                hitSlop={8}>
+                <Text variant="callout" tone="sunshine" style={{ fontFamily: fonts.bodyBold }}>
+                  Add {suggested}
+                </Text>
+              </Pressable>
+            </View>
+          ) : null}
+        </Field>
+      ) : null}
+
+      {space_ ? (
         <Field icon="people-outline" label="Sharing" accent="sunshine">
           <Segmented
             value={visibility}
@@ -242,38 +303,13 @@ export default function TaskEditor() {
               { value: 'shared', label: space_.name, icon: 'people-outline' },
             ]}
           />
-          {visibility === 'shared' ? (
-            <ChipRow>
-              <Chip label="Anyone" small accent="sunshine" selected={!assigneeId} onPress={() => setAssigneeId(undefined)} />
-              {space_.members.map((m) => (
-                <Pressable
-                  key={m.id}
-                  onPress={() => setAssigneeId(m.id)}
-                  accessibilityRole="radio"
-                  accessibilityState={{ selected: assigneeId === m.id }}
-                  accessibilityLabel={`Assign to ${m.isMe ? 'me' : m.name}`}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 6,
-                    paddingLeft: 4,
-                    paddingRight: 12,
-                    height: 30,
-                    borderRadius: radius.pill,
-                    borderWidth: 1.5,
-                    borderColor: assigneeId === m.id ? palette.accents[m.color].base : palette.border,
-                    backgroundColor: assigneeId === m.id ? palette.accents[m.color].soft : palette.surface,
-                  }}>
-                  <Avatar name={m.name} accent={m.color} size={22} />
-                  <Text variant="callout">{m.id === ME_ID ? 'Me' : m.name}</Text>
-                </Pressable>
-              ))}
-            </ChipRow>
-          ) : (
-            <Text variant="caption" tone="tertiary">
-              Only you can see this.
-            </Text>
-          )}
+          <Text variant="caption" tone="tertiary">
+            {visibility === 'private'
+              ? assigneeId && assigneeId !== ME_ID
+                ? 'Private tasks can only be yours — choosing someone else shares it.'
+                : 'Only you can see this.'
+              : `Everyone in ${space_.name} can see this.`}
+          </Text>
         </Field>
       ) : null}
 
@@ -299,7 +335,7 @@ export default function TaskEditor() {
                 accessibilityState={{ checked: st.done }}
                 accessibilityLabel={st.title}
                 hitSlop={8}>
-                <Ionicons
+                <Icon
                   name={st.done ? 'checkmark-circle' : 'ellipse-outline'}
                   size={22}
                   color={st.done ? palette.accents.mint.base : palette.textTertiary}
@@ -316,7 +352,7 @@ export default function TaskEditor() {
                 hitSlop={8}
                 accessibilityRole="button"
                 accessibilityLabel={`Remove ${st.title}`}>
-                <Ionicons name="close" size={18} color={palette.textTertiary} />
+                <Icon name="close" size={18} color={palette.textTertiary} />
               </Pressable>
             </View>
           ))}
@@ -329,7 +365,7 @@ export default function TaskEditor() {
               borderTopWidth: subtasks.length ? 1 : 0,
               borderTopColor: palette.border,
             }}>
-            <Ionicons name="add" size={22} color={palette.accents.mint.ink} />
+            <Icon name="add" size={22} color={palette.accents.mint.ink} />
             <TextInput
               value={subDraft}
               onChangeText={setSubDraft}

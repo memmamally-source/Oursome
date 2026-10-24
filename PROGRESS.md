@@ -11,7 +11,8 @@
 | Stage | Status |
 | --- | --- |
 | 1. Beautiful foundation | ✅ Done (local-only, see below) |
-| 1b. Website first (PWA on GitHub Pages) | ✅ Built; goes live once Pages is enabled (see below) |
+| 1b. Website first (PWA on GitHub Pages) | ✅ Live at memmamally-source.github.io/Oursome |
+| Overhaul (branch `overhaul-performance-ui-ai`) | ✅ Phases A–E done; PR open, awaiting owner approval to merge (merging deploys). AI service built, not deployed. |
 | 2. Core functionality (Firebase auth, Firestore, notifications) | ⏭ Next |
 | 3. Household sharing | — |
 | 4. AI assistant (server) | — |
@@ -19,6 +20,23 @@
 | 6. Premium subscriptions (RevenueCat, sandbox) | — |
 | 7. Polish & testing | — |
 | 8. Store release | — |
+
+## Overhaul: performance, UI/UX and AI (branch `overhaul-performance-ui-ai`, not merged)
+
+Merging to `main` deploys the website, so merge only with the owner's approval.
+
+- **A. Performance:** icons are an SVG subset (`npm run icons` after using a new icon name). Reanimated and gesture-handler are gone. Two self-hosted variable fonts on web. The service worker caches CORE at install and WARM when the browser is idle. Measured on slow 4G: returning-user Home 7.8 s → 3.9 s, transfer 1.66 → 0.55 MB, Lighthouse 55 → 65.
+- **B. Home and navigation:** logo bar plus greeting card, organiser capture box, My day, My people, lists, coming up. Tabs are Today / Calendar / Tasks / Our Space with a central "+" ("Add or ask"); a sidebar on screens ≥900px. The organiser is a full chat at `/assistant`. `/person/[id]` shows a person page and an add/edit form.
+- **C. Calendar, tasks, household:** Day / 3 days (Week when wide) / Month / List, with people filters and calendars behind one button. View maths is in `features/calendar/views.ts`. The task editor has "Who's doing it?" (choosing someone else shares the task) and shows suggested names. Tasks can be filtered by person. Our Space has a People list linking each person to their tasks and calendar.
+- **People model:** `Member.kind` is `person` (no account) or `account`, with optional `relationship` and `aliases` set only by the user. `Task.assigneeName` holds an unresolved suggested name. Unassigned tasks belong to the user (`features/people/logic.ts`).
+- **Assistant:** Interpretation (names only) → `resolve.ts` (directory, relationships, pronouns, refs validation) → Proposals → user approval → `execute.ts`, the only write path. Questions are answered from data in `query.ts`. `basic.ts` is the labelled offline "Basic mode". `remote.ts` calls `EXPO_PUBLIC_AI_ENDPOINT` (not set yet). Scenario tests are in `features/assistant/__tests__/scenarios.test.ts`.
+- **D. AI service (`server/ai`, built and tested, NOT deployed):** a Cloudflare Worker using `@anthropic-ai/sdk` structured outputs (`betaZodOutputFormat`, schema in `src/schema.ts`), with a cached system prompt, `fallbacks: "default"` on Opus/Sonnet 5.5, rate limits (per device, plus a global daily cap), a CORS allow-list, and token/cost logs that never include the message. The model is the `AI_MODEL` var (default `claude-opus-5-5`; `claude-haiku-5-5` is the cheap option), and the owner still has to choose. Costs and the approval-gated turn-on steps are in `server/ai/README.md`. The web build reads the repo variable `EXPO_PUBLIC_AI_ENDPOINT` (unset = Basic mode). `npm run check:server` runs in CI. `AI_EVAL_ENDPOINT=<url> npm run eval:ai` runs every scenario against the live service and fails if any message fell back to Basic mode.
+- **E. Testing and measurement (production build, local Pages-like server with gzip, slow 4G 1.6 Mbps / 150 ms, 4× CPU):**
+  - Lighthouse mobile: three runs scored 52 / 64 / 68 (this sandbox is noisy). The median, 64, compares with 55 at baseline and 65 after Phase A: LCP 4.7 s, TBT 810 ms, 504 KB.
+  - Returning user: Home visible in 4.2 s (baseline 7.8 s, Phase A 3.9 s), 572 KB transferred. Tab switches 0.2–0.9 s; ticking a task 0.27–0.30 s (baseline 0.66 s).
+  - A Playwright E2E script (scratchpad, not in the repo) ran 29 checks: onboarding, organiser flows (unknown person, approve, follow-up, multiple actions, dismiss, data question), people across Tasks / Our Space / the person page, calendar views and person filter, task assignment, deep links, persistence, PWA manifest, service worker, offline, the privacy and support pages, and desktop layout. All pass, with no console errors apart from the expected deep-link 404s that GitHub Pages serves by design.
+  - Not done: real-device (iPhone) testing, and any live AI evaluation (no key; not deployed).
+- **Zustand selectors:** never return a fresh `[]` or object; use `NO_MEMBERS` etc., or Zustand 5 re-renders in a loop.
 
 ## Stack (verified Oct 2026)
 

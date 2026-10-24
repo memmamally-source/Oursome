@@ -1,10 +1,10 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { TextInput, View } from 'react-native';
 
-import { ProposalCard, type ProposalStatus } from '@/components/assistant/ProposalCard';
+import { ImportCard, type ProposalStatus } from '@/components/assistant/ImportCard';
 import { Illustration } from '@/components/illustrations/Illustration';
 import { Button, ModalHeader, ModalScreen, Segmented, Text } from '@/components/ui';
 import { applyProposal } from '@/features/assistant/apply';
@@ -114,7 +114,7 @@ export default function ImportScreen() {
               borderRadius: radius.lg,
               padding: space.lg,
             }}>
-            <Ionicons name="time-outline" size={18} color={palette.accents.lavender.ink} style={{ marginTop: 2 }} />
+            <Icon name="time-outline" size={18} color={palette.accents.lavender.ink} style={{ marginTop: 2 }} />
             <Text variant="callout" tone="lavender" style={{ flex: 1 }}>
               Reading screenshots, photos and PDFs uses our secure AI service, coming in a later update. Before it’s switched on, we’ll
               explain exactly how images are processed, and they won’t be kept after reading.
@@ -147,7 +147,7 @@ export default function ImportScreen() {
             />
           ) : null}
           {results.map((r, i) => (
-            <ProposalCard
+            <ImportCard
               key={r.proposal.id + i}
               index={i}
               proposal={r.proposal}

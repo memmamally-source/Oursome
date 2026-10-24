@@ -5,7 +5,7 @@
  * evening-before reminder. Images and PDFs need the server-side AI (Stage 5),
  * which will return the same Proposal shape.
  */
-import { addDays } from 'date-fns';
+import { addDays } from 'date-fns/addDays';
 
 import { fromDateKey, toDateKey } from '@/lib/dates';
 

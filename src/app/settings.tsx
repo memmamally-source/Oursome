@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
@@ -9,7 +9,7 @@ import { Avatar, Card, Divider, IconButton, Screen, Segmented, SettingRow, Text,
 import { Brand } from '@/config/brand';
 import { clearDemoContent, hasDemoContent, loadDemoContent } from '@/features/demo/seed';
 import { deleteAllLocalData, exportData } from '@/features/settings/account';
-import { dashboardSectionKeys, dashboardSectionLabels, useSettings } from '@/features/settings/store';
+import { useSettings } from '@/features/settings/store';
 import { auth, useSession } from '@/features/session/store';
 import { useSpace } from '@/features/space/store';
 import { formatTime } from '@/lib/dates';
@@ -103,7 +103,7 @@ export default function SettingsScreen() {
           </View>
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Ionicons name="globe-outline" size={15} color={palette.textSecondary} />
+          <Icon name="globe-outline" size={15} color={palette.textSecondary} />
           <Text variant="caption" tone="secondary">
             Time zone: {profile?.timeZone.replace(/_/g, ' ')} (from this device)
           </Text>
@@ -125,7 +125,7 @@ export default function SettingsScreen() {
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-          <Ionicons name="diamond" size={22} color={palette.onAccent} />
+          <Icon name="diamond" size={22} color={palette.onAccent} />
         </View>
         <View style={{ flex: 1 }}>
           <Text variant="subheading">{Brand.name} Premium</Text>
@@ -133,7 +133,7 @@ export default function SettingsScreen() {
             Free plan · See what’s coming
           </Text>
         </View>
-        <Ionicons name="chevron-forward" size={18} color={palette.accents.lavender.ink} />
+        <Icon name="chevron-forward" size={18} color={palette.accents.lavender.ink} />
       </Card>
 
       <View style={{ marginBottom: space.xxl }}>
@@ -150,15 +150,6 @@ export default function SettingsScreen() {
           ]}
         />
       </View>
-
-      <Section title="Home screen">
-        {dashboardSectionKeys.map((k, i) => (
-          <View key={k}>
-            {i ? <Divider /> : null}
-            <SettingRow label={dashboardSectionLabels[k]} value={settings.dashboard[k]} onValueChange={() => settings.toggleSection(k)} />
-          </View>
-        ))}
-      </Section>
 
       <Section title="Notifications">
         <View style={{ backgroundColor: palette.accents.sunshine.soft, borderRadius: radius.md, padding: space.md, marginTop: space.md }}>

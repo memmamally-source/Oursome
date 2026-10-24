@@ -1,47 +1,42 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { useState, type ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 
-import {
-  ImportantDates,
-  QuickCapture,
-  ShoppingStrip,
-  SpacePreview,
-  StatTile,
-  SuggestionCard,
-  Timeline,
-} from '@/components/home/HomeSections';
-import { TaskRow } from '@/components/tasks/TaskRow';
-import { Avatar, Card, Celebration, EmptyState, Screen, SectionHeader, Text } from '@/components/ui';
+import { CaptureBox } from '@/components/assistant/CaptureBox';
+import { HomeHeader } from '@/components/home/HomeHeader';
+import { ComingUp, ListsRow, PeopleRow, SectionTitle, SuggestionLine, TodayCard } from '@/components/home/HomeSections';
+import { Screen, Text } from '@/components/ui';
+import { Icon } from '@/components/ui/Icon';
+import { useCalendar } from '@/features/calendar/store';
 import { useDashboard } from '@/features/dashboard/useDashboard';
 import type { Suggestion } from '@/features/dashboard/suggestions';
 import { clearDemoContent } from '@/features/demo/seed';
+import { plateCounts, todayTasks } from '@/features/people/logic';
 import { useSession } from '@/features/session/store';
-import { dashboardSectionKeys, useSettings, type DashboardSection } from '@/features/settings/store';
+import { useSettings } from '@/features/settings/store';
 import { useTasks } from '@/features/tasks/store';
-import type { Task } from '@/features/types';
+import { useLayout } from '@/hooks/useLayout';
 import { useNow } from '@/hooks/useNow';
-import { format, greetingFor } from '@/lib/dates';
-import { radius, space, useTheme } from '@/theme';
+import { fonts, radius, space, useTheme } from '@/theme';
 
+/**
+ * Home is three things: my day, my organiser and my people. Everything
+ * else (lists, dates coming up) sits quietly underneath.
+ */
 export default function HomeScreen() {
   const now = useNow();
   const { palette } = useTheme();
+  const { isWide } = useLayout();
   const profile = useSession((s) => s.profile);
-  const sections = useSettings((s) => s.dashboard);
   const dismiss = useSettings((s) => s.dismissSuggestion);
-  const hasDemo = useTasks((s) => s.tasks.some((t) => t.isDemo));
+  const tasks = useTasks((s) => s.tasks);
+  const calendars = useCalendar((s) => s.calendars);
+  const hasDemo = tasks.some((t) => t.isDemo);
   const d = useDashboard(now);
-  const [burst, setBurst] = useState(0);
-  const greeting = greetingFor(now);
-  const firstName = profile?.name.split(' ')[0];
-
-  const onCompleted = (task: Task) => {
-    const remaining = d.priorities.filter((t) => t.id !== task.id).length;
-    if (task.priority === 'high' || remaining === 0) setBurst(Date.now());
-  };
+  const people = d.space?.members ?? [];
+  const toDo = todayTasks(tasks, d.today);
+  const counts = plateCounts(people, tasks, d.todayOcc, calendars, d.today);
+  const events = [...d.allDay, ...d.timed];
+  const memberForCalendar = (id: string) => calendars.find((c) => c.id === id)?.memberId;
 
   const runSuggestion = (s: Suggestion) => {
     const a = s.action;
@@ -54,228 +49,128 @@ export default function HomeScreen() {
         router.navigate('/tasks');
         break;
       case 'plan-tomorrow':
-        router.navigate({ pathname: '/assistant', params: { prompt: 'Organise my tasks for tomorrow', t: Date.now().toString() } });
+        router.push({ pathname: '/assistant', params: { prompt: 'What’s on tomorrow?', t: Date.now().toString() } });
         break;
       case 'move-overdue-to-today':
         a.taskIds.forEach((id) => useTasks.getState().updateTask(id, { due: d.today }));
         break;
       case 'create-task':
-        useTasks
-          .getState()
-          .addTask({
-            title: a.title,
-            due: a.due,
-            categoryId: 'family',
-            priority: 'medium',
-            visibility: 'private',
-            isReminder: true,
-            dueTime: '09:00',
-            reminderMinutes: 0,
-          });
+        useTasks.getState().addTask({
+          title: a.title,
+          due: a.due,
+          categoryId: 'family',
+          priority: 'medium',
+          visibility: 'private',
+          isReminder: true,
+          dueTime: '09:00',
+          reminderMinutes: 0,
+        });
         break;
     }
   };
 
-  const summary = buildSummary(d.timed.length + d.allDay.length, d.dueToday.length);
-  const section = (key: DashboardSection, node: ReactNode) =>
-    sections[key] ? (
-      <Animated.View
-        key={key}
-        entering={FadeInDown.delay(60 + dashboardSectionKeys.indexOf(key) * 60)
-          .springify()
-          .damping(18)}
-        style={{ marginBottom: space.xxl }}>
-        {node}
-      </Animated.View>
-    ) : null;
+  const header = (
+    <HomeHeader
+      now={now}
+      name={profile?.name}
+      color={profile?.color}
+      events={events.length}
+      toDo={toDo.length}
+      overdue={toDo.filter((t) => t.due! < d.today).length}
+      next={d.next}
+      people={people}
+      showLogo={!isWide}
+    />
+  );
+
+  const demoNote = hasDemo ? (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: space.sm,
+        backgroundColor: palette.surfaceSunken,
+        borderRadius: radius.pill,
+        paddingVertical: 8,
+        paddingHorizontal: space.md,
+      }}>
+      <Icon name="color-palette-outline" size={16} color={palette.textSecondary} />
+      <Text variant="caption" tone="secondary" style={{ flex: 1 }}>
+        You’re viewing sample content.
+      </Text>
+      <Pressable onPress={clearDemoContent} hitSlop={8} accessibilityRole="button" accessibilityLabel="Clear sample content">
+        <Text variant="caption" tone="coral" style={{ fontFamily: fonts.bodyBold }}>
+          Clear it
+        </Text>
+      </Pressable>
+    </View>
+  ) : null;
+
+  const day = (
+    <View>
+      <SectionTitle title="My day" action="Calendar" onAction={() => router.navigate('/calendar')} />
+      <TodayCard events={events} tasks={toDo} nowTime={d.nowTime} people={people} memberForCalendar={memberForCalendar} />
+    </View>
+  );
+
+  const suggestion = d.suggestion ? (
+    <SuggestionLine suggestion={d.suggestion} onAction={() => runSuggestion(d.suggestion!)} onDismiss={() => dismiss(d.suggestion!.id)} />
+  ) : null;
+
+  const peopleSection = (
+    <View>
+      <SectionTitle title="My people" action={people.length > 1 ? 'Our Space' : undefined} onAction={() => router.navigate('/space')} />
+      <PeopleRow people={people} counts={counts} />
+    </View>
+  );
+
+  const lists = d.listSummaries.length ? (
+    <View>
+      <SectionTitle title="Lists" />
+      <ListsRow lists={d.listSummaries} />
+    </View>
+  ) : null;
+
+  const coming = d.upcomingImportant.length ? (
+    <View>
+      <SectionTitle title="Coming up" />
+      <ComingUp dates={d.upcomingImportant} />
+    </View>
+  ) : null;
+
+  if (isWide) {
+    return (
+      <Screen tabBar wide>
+        {header}
+        <View style={{ flexDirection: 'row', gap: space.xxl, alignItems: 'flex-start' }}>
+          <View style={{ flex: 3, gap: space.xxl }}>
+            <CaptureBox />
+            {suggestion}
+            {day}
+          </View>
+          <View style={{ flex: 2, gap: space.xxl }}>
+            {demoNote}
+            {peopleSection}
+            {lists}
+            {coming}
+          </View>
+        </View>
+      </Screen>
+    );
+  }
 
   return (
     <Screen tabBar>
-      {/* Greeting */}
-      <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: space.xl }}>
-        <View style={{ flex: 1, gap: 4 }}>
-          <Text variant="overline" tone="coral">
-            {format(now, 'EEEE d MMMM')}
-          </Text>
-          <Text variant="display" accessibilityRole="header">
-            {greeting.text}
-            {firstName ? `, ${firstName}` : ''}! {greeting.emoji}
-          </Text>
-          <Text variant="body" tone="secondary">
-            {summary}
-          </Text>
-        </View>
-        <Pressable
-          onPress={() => router.push('/settings')}
-          accessibilityRole="button"
-          accessibilityLabel="Profile and settings"
-          hitSlop={8}>
-          <Avatar name={profile?.name ?? 'You'} accent={profile?.color ?? 'coral'} size={44} />
-        </Pressable>
+      {header}
+      <View style={{ gap: space.xxl }}>
+        <CaptureBox />
+        {demoNote}
+        {suggestion}
+        {day}
+        {peopleSection}
+        {lists}
+        {coming}
       </View>
-
-      {hasDemo ? (
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: space.sm,
-            backgroundColor: palette.surfaceSunken,
-            borderRadius: radius.pill,
-            paddingVertical: 8,
-            paddingHorizontal: space.md,
-            marginBottom: space.xl,
-          }}>
-          <Ionicons name="color-palette-outline" size={16} color={palette.textSecondary} />
-          <Text variant="caption" tone="secondary" style={{ flex: 1 }}>
-            You’re viewing sample content.
-          </Text>
-          <Pressable onPress={clearDemoContent} hitSlop={8} accessibilityRole="button" accessibilityLabel="Clear sample content">
-            <Text variant="caption" tone="coral" style={{ fontFamily: 'NunitoSans_700Bold' }}>
-              Clear it
-            </Text>
-          </Pressable>
-        </View>
-      ) : null}
-
-      {section(
-        'overview',
-        <View style={{ flexDirection: 'row', gap: space.sm }}>
-          <StatTile
-            icon="calendar"
-            accent="sky"
-            value={d.todayOcc.length}
-            label={d.todayOcc.length === 1 ? 'Event' : 'Events'}
-            onPress={() => router.navigate('/calendar')}
-          />
-          <StatTile
-            icon="checkmark-done"
-            accent="coral"
-            value={d.dueToday.length}
-            label={d.dueToday.length === 1 ? 'Task' : 'Tasks'}
-            onPress={() => router.navigate('/tasks')}
-          />
-          <StatTile
-            icon="notifications"
-            accent="sunshine"
-            value={d.reminders.length}
-            label={d.reminders.length === 1 ? 'Reminder' : 'Reminders'}
-            onPress={() => router.navigate('/tasks')}
-          />
-          <StatTile icon="people" accent="lavender" value={d.sharedToday} label="Shared" onPress={() => router.navigate('/space')} />
-        </View>,
-      )}
-
-      {section('capture', <QuickCapture />)}
-
-      {d.suggestion
-        ? section(
-            'suggestion',
-            <SuggestionCard
-              suggestion={d.suggestion}
-              onAction={() => runSuggestion(d.suggestion!)}
-              onDismiss={() => dismiss(d.suggestion!.id)}
-            />,
-          )
-        : null}
-
-      {section(
-        'schedule',
-        <>
-          <SectionHeader title="Today’s schedule" action="Calendar" onAction={() => router.navigate('/calendar')} />
-          {d.todayOcc.length ? (
-            <Timeline timed={d.timed} allDay={d.allDay} nowTime={d.nowTime} />
-          ) : (
-            <Card>
-              <EmptyState
-                compact
-                illustration="sun"
-                title="A clear day ahead"
-                body="Nothing on the calendar today. Add an appointment, or enjoy the space."
-                action="Add appointment"
-                onAction={() => router.push({ pathname: '/event/[id]', params: { id: 'new' } })}
-              />
-            </Card>
-          )}
-        </>,
-      )}
-
-      {section(
-        'priorities',
-        <>
-          <SectionHeader title="My priorities" action="All tasks" onAction={() => router.navigate('/tasks')} />
-          <View>
-            {d.priorities.length ? (
-              <View style={{ gap: space.sm }}>
-                {d.priorities.map((t) => (
-                  <TaskRow key={t.id} task={t} card onCompleted={onCompleted} />
-                ))}
-              </View>
-            ) : (
-              <Card tint="mint" style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-                <Ionicons name="happy-outline" size={28} color={palette.accents.mint.ink} />
-                <View style={{ flex: 1 }}>
-                  <Text variant="subheading">{d.completedToday.length ? 'All caught up!' : 'Nothing urgent today'}</Text>
-                  <Text variant="callout" tone="secondary">
-                    {d.completedToday.length
-                      ? `You finished ${d.completedToday.length} ${d.completedToday.length === 1 ? 'task' : 'tasks'} today. Lovely work.`
-                      : 'Add a task when something comes up.'}
-                  </Text>
-                </View>
-              </Card>
-            )}
-            <Celebration burstKey={burst} />
-          </View>
-        </>,
-      )}
-
-      {section(
-        'space',
-        <>
-          <SectionHeader title="Our Space" />
-          <SpacePreview space={d.space} sharedTasks={d.sharedOpen.length} sharedEvents={d.sharedEventsToday.length} />
-        </>,
-      )}
-
-      {d.listSummaries.length
-        ? section(
-            'shopping',
-            <>
-              <SectionHeader title="Shopping lists" />
-              <ShoppingStrip lists={d.listSummaries} />
-            </>,
-          )
-        : null}
-
-      {d.upcomingImportant.length
-        ? section(
-            'dates',
-            <>
-              <SectionHeader title="Important dates" icon="star" accent="sunshine" />
-              <Card>
-                <ImportantDates dates={d.upcomingImportant} />
-              </Card>
-            </>,
-          )
-        : null}
-
-      <Pressable
-        onPress={() => router.push('/settings')}
-        accessibilityRole="button"
-        style={{ alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 6, padding: space.sm }}>
-        <Ionicons name="options-outline" size={16} color={palette.textTertiary} />
-        <Text variant="caption" tone="tertiary">
-          Customise your Home
-        </Text>
-      </Pressable>
     </Screen>
   );
-}
-
-function buildSummary(events: number, tasks: number): string {
-  if (!events && !tasks) return 'A calm day — perfect for getting ahead.';
-  const parts = [];
-  if (events) parts.push(`${events} ${events === 1 ? 'thing' : 'things'} on the calendar`);
-  if (tasks) parts.push(`${tasks} ${tasks === 1 ? 'task' : 'tasks'} to tick off`);
-  return `${parts.join(' and ')}. You’ve got this.`;
 }

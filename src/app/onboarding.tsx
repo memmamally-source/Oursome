@@ -1,7 +1,6 @@
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { FlatList, Pressable, useWindowDimensions, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Wordmark } from '@/components/brand/Logo';
@@ -116,10 +115,10 @@ export default function Onboarding() {
 
       <View style={{ paddingHorizontal: space.xl, gap: space.md, width: '100%', maxWidth: 520, alignSelf: 'center' }}>
         {isLast ? (
-          <Animated.View entering={FadeIn} style={{ gap: space.md }}>
+          <View style={{ gap: space.md }}>
             <Button label="Get started" size="lg" fullWidth onPress={() => finish('/sign-up')} />
             <Button label="I already have an account" variant="ghost" fullWidth onPress={() => finish('/sign-in')} />
-          </Animated.View>
+          </View>
         ) : (
           <Button
             label="Next"

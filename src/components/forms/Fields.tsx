@@ -1,5 +1,6 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { addMonths, nextSaturday } from 'date-fns';
+import { Icon } from '@/components/ui/Icon';
+import { addMonths } from 'date-fns/addMonths';
+import { nextSaturday } from 'date-fns/nextSaturday';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ScrollView, View } from 'react-native';
 import type { ScrollViewInstance } from 'react-native';
@@ -40,7 +41,7 @@ export function Field({
   return (
     <View style={{ gap: space.sm }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-        <Ionicons name={icon} size={16} color={palette.accents[accent].ink} />
+        <Icon name={icon} size={16} color={palette.accents[accent].ink} />
         <Text variant="callout" tone="secondary" style={{ flex: 1 }}>
           {label}
         </Text>

@@ -1,4 +1,4 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { View } from 'react-native';
 
 import { Card, ModalHeader, ModalScreen, Text } from '@/components/ui';
@@ -35,7 +35,7 @@ export default function PremiumScreen() {
             opacity: 0.35,
           }}
         />
-        <Ionicons name="diamond" size={28} color={palette.accents.lavender.ink} />
+        <Icon name="diamond" size={28} color={palette.accents.lavender.ink} />
         <Text variant="title">More time for the good stuff</Text>
         <Text variant="body" tone="secondary">
           Premium is shared across your whole household. Coming soon — we’ll let you know when it’s ready.
@@ -57,7 +57,7 @@ export default function PremiumScreen() {
           ) : null}
           {plan.features.map((f) => (
             <View key={f} style={{ flexDirection: 'row', gap: space.sm, alignItems: 'flex-start' }}>
-              <Ionicons
+              <Icon
                 name="checkmark-circle"
                 size={18}
                 color={plan.id === 'premium' ? palette.accents.coral.ink : palette.accents.mint.ink}

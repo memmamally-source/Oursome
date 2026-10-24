@@ -1,8 +1,7 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Icon } from '@/components/ui/Icon';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
-import Animated, { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated';
 
 import { Button, Card, Checkbox, EmptyState, IconButton, Screen, Text } from '@/components/ui';
 import { groupItems, shoppingCategoryMeta } from '@/features/shopping/logic';
@@ -86,7 +85,7 @@ export default function ShoppingListScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
           <View
             style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: tone.base, alignItems: 'center', justifyContent: 'center' }}>
-            <Ionicons name={list.icon} size={24} color={palette.onAccent} />
+            <Icon name={list.icon} size={24} color={palette.onAccent} />
           </View>
           <View style={{ flex: 1 }}>
             <Text variant="title" numberOfLines={1} accessibilityRole="header">
@@ -114,7 +113,7 @@ export default function ShoppingListScreen() {
           },
           elevation(palette, 1),
         ]}>
-        <Ionicons name="add" size={22} color={tone.ink} />
+        <Icon name="add" size={22} color={tone.ink} />
         <TextInput
           value={draft}
           onChangeText={setDraft}
@@ -150,7 +149,7 @@ export default function ShoppingListScreen() {
                 borderRadius: radius.pill,
                 backgroundColor: palette.accents.sunshine.soft,
               }}>
-              <Ionicons name="star" size={12} color={palette.accents.sunshine.ink} />
+              <Icon name="star" size={12} color={palette.accents.sunshine.ink} />
               <Text variant="callout" tone="sunshine">
                 {f}
               </Text>
@@ -172,9 +171,9 @@ export default function ShoppingListScreen() {
         groupItems(open).map((g) => {
           const meta = shoppingCategoryMeta[g.category];
           return (
-            <Animated.View key={g.category} layout={LinearTransition} style={{ marginBottom: space.lg }}>
+            <View key={g.category} style={{ marginBottom: space.lg }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: space.xs }}>
-                <Ionicons name={meta.icon} size={15} color={palette.accents[meta.color].ink} />
+                <Icon name={meta.icon} size={15} color={palette.accents[meta.color].ink} />
                 <Text variant="overline" color={palette.accents[meta.color].ink}>
                   {meta.label}
                 </Text>
@@ -192,7 +191,7 @@ export default function ShoppingListScreen() {
                   />
                 ))}
               </Card>
-            </Animated.View>
+            </View>
           );
         })
       )}
@@ -245,9 +244,7 @@ function ItemRow({
   const { palette } = useTheme();
   const adder = useSpace((s) => memberById(s.space, item.addedBy));
   return (
-    <Animated.View
-      entering={FadeIn}
-      exiting={FadeOut}
+    <View
       style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -284,15 +281,15 @@ function ItemRow({
         hitSlop={8}
         accessibilityRole="button"
         accessibilityLabel={favourite ? `Remove ${item.name} from favourites` : `Add ${item.name} to favourites`}>
-        <Ionicons
+        <Icon
           name={favourite ? 'star' : 'star-outline'}
           size={18}
           color={favourite ? palette.accents.sunshine.base : palette.textTertiary}
         />
       </Pressable>
       <Pressable onPress={onRemove} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Delete ${item.name}`}>
-        <Ionicons name="close" size={18} color={palette.textTertiary} />
+        <Icon name="close" size={18} color={palette.textTertiary} />
       </Pressable>
-    </Animated.View>
+    </View>
   );
 }
