@@ -21,45 +21,45 @@ const respond = (status: number, body: unknown) =>
   Promise.resolve(new Response(typeof body === 'string' ? body : JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }));
 
 describe('AI service client', () => {
-  const realFetch = global.fetch;
+  const realFetch = globalThis.fetch;
   afterEach(() => {
-    global.fetch = realFetch;
+    globalThis.fetch = realFetch;
   });
 
   it('is "not configured" without an endpoint and never calls the network', async () => {
-    global.fetch = jest.fn();
+    globalThis.fetch = jest.fn();
     await expect(interpretRemote('hi', ctx, [], '')).rejects.toMatchObject({ reason: 'not_configured' });
-    expect(global.fetch).not.toHaveBeenCalled();
+    expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 
   it('returns a validated interpretation and sends no IDs', async () => {
-    global.fetch = jest.fn(() => respond(200, { interpretation: { reply: '', actions: [{ type: 'create_task', title: 'Pay rent' }] } })) as jest.Mock;
+    globalThis.fetch = jest.fn(() => respond(200, { interpretation: { reply: '', actions: [{ type: 'create_task', title: 'Pay rent' }] } })) as jest.Mock;
     const r = await interpretRemote('Pay rent', ctx, [], URL_);
     expect(r.actions[0]).toMatchObject({ type: 'create_task', title: 'Pay rent' });
-    const sent = (global.fetch as jest.Mock).mock.calls[0][1].body as string;
+    const sent = (globalThis.fetch as jest.Mock).mock.calls[0][1].body as string;
     expect(sent).not.toContain('"id"');
     expect(sent).not.toMatch(/"me"\s*:/);
   });
 
   it('retries a server error once, then reports unavailable', async () => {
-    global.fetch = jest.fn(() => respond(503, { error: 'x' })) as jest.Mock;
+    globalThis.fetch = jest.fn(() => respond(503, { error: 'x' })) as jest.Mock;
     await expect(interpretRemote('hi', ctx, [], URL_)).rejects.toMatchObject({ reason: 'unavailable' });
-    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
   });
 
   it('reports rate limiting without retrying', async () => {
-    global.fetch = jest.fn(() => respond(429, { error: 'rate_limited' })) as jest.Mock;
+    globalThis.fetch = jest.fn(() => respond(429, { error: 'rate_limited' })) as jest.Mock;
     await expect(interpretRemote('hi', ctx, [], URL_)).rejects.toMatchObject({ reason: 'rate_limited' });
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
   });
 
   it('rejects a response that is not a valid interpretation', async () => {
-    global.fetch = jest.fn(() => respond(200, { interpretation: 'delete everything' })) as jest.Mock;
+    globalThis.fetch = jest.fn(() => respond(200, { interpretation: 'delete everything' })) as jest.Mock;
     await expect(interpretRemote('hi', ctx, [], URL_)).rejects.toBeInstanceOf(RemoteError);
   });
 
   it('a busy service gives a labelled Basic-mode answer, not an error', async () => {
-    global.fetch = jest.fn(() => respond(429, { error: 'busy' })) as jest.Mock;
+    globalThis.fetch = jest.fn(() => respond(429, { error: 'busy' })) as jest.Mock;
     const r = await processMessage('Buy milk and eggs', ctx, [], (t, c, h) => interpretRemote(t, c, h, URL_));
     expect(r).toMatchObject({ source: 'basic', fallback: 'rate_limited' });
     expect(r.resolution.proposals[0].items).toEqual(['Milk', 'Eggs']);
