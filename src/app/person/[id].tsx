@@ -23,10 +23,10 @@ const RELATIONS = ['partner', 'wife', 'husband', 'mum', 'dad', 'son', 'daughter'
 
 /** /person/new (optionally ?relation=wife&proposal=…) or /person/<id>. */
 export default function PersonScreen() {
-  const params = useLocalSearchParams<{ id: string; relation?: string; proposal?: string; edit?: string }>();
+  const params = useLocalSearchParams<{ id: string; relation?: string; proposal?: string; edit?: string; name?: string }>();
   const person = useSpace((s) => s.space?.members.find((m) => m.id === params.id));
   if (params.id === 'new' || (person && params.edit)) {
-    return <PersonForm person={person} relation={params.relation} proposalId={params.proposal} />;
+    return <PersonForm person={person} relation={params.relation} proposalId={params.proposal} initialName={params.name} />;
   }
   if (!person) {
     return (
@@ -108,6 +108,16 @@ function PersonView({ person }: { person: Member }) {
       </View>
 
       <Button
+        label={person.isMe ? 'Open my calendar' : `Open ${person.name.split(' ')[0]}’s calendar`}
+        icon="calendar-clear-outline"
+        variant="secondary"
+        accent="sky"
+        onPress={() => {
+          router.back();
+          router.navigate({ pathname: '/calendar', params: { person: person.id } });
+        }}
+      />
+      <Button
         label={person.isMe ? 'Ask the organiser' : `Plan something for ${person.name.split(' ')[0]}`}
         icon="sparkles"
         variant="secondary"
@@ -118,9 +128,9 @@ function PersonView({ person }: { person: Member }) {
   );
 }
 
-function PersonForm({ person, relation, proposalId }: { person?: Member; relation?: string; proposalId?: string }) {
+function PersonForm({ person, relation, proposalId, initialName }: { person?: Member; relation?: string; proposalId?: string; initialName?: string }) {
   const { palette } = useTheme();
-  const [name, setName] = useState(person?.name ?? '');
+  const [name, setName] = useState(person?.name ?? initialName ?? '');
   const [rel, setRel] = useState(person?.relationship ?? relation ?? '');
   const [aliases, setAliases] = useState((person?.aliases ?? []).join(', '));
   const [invite, setInvite] = useState(person?.invitePending ?? false);

@@ -8,6 +8,8 @@ import { accentKeys, type AccentKey } from '@/theme/tokens';
 
 /** Local id for the signed-in user until Firebase uids arrive in Stage 2. */
 export const ME_ID = 'me';
+/** Stable empty list for selectors, so components don't re-render in a loop with no space. */
+export const NO_MEMBERS: Member[] = [];
 
 type SpaceState = {
   space: Space | null;

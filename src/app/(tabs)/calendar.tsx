@@ -11,7 +11,7 @@ import { Avatar, Card, Chip, EmptyState, IconButton, Segmented, Text, useTabBarC
 import { expandOccurrences } from '@/features/calendar/recurrence';
 import { useCalendar, visibleEvents } from '@/features/calendar/store';
 import { columnsFor, onlyPerson, rangeFor, stepFor, type CalendarView } from '@/features/calendar/views';
-import { useSpace } from '@/features/space/store';
+import { NO_MEMBERS, useSpace } from '@/features/space/store';
 import type { EventOccurrence, Member } from '@/features/types';
 import { useLayout } from '@/hooks/useLayout';
 import { useNow } from '@/hooks/useNow';
@@ -43,6 +43,13 @@ export default function CalendarScreen() {
       setSelected(params.date);
       setView('day');
     }
+  }
+
+  // …or to one person's calendar (from Our Space or a person's page).
+  const [seenPerson, setSeenPerson] = useState(params.person);
+  if (params.person !== seenPerson) {
+    setSeenPerson(params.person);
+    setPerson(params.person ?? null);
   }
 
   const range = rangeFor(view, selected, isWide);
@@ -256,8 +263,6 @@ export default function CalendarScreen() {
     </View>
   );
 }
-
-const NO_MEMBERS: Member[] = [];
 
 function rangeTitle(a: DateKey, b: DateKey): string {
   const x = fromDateKey(a);

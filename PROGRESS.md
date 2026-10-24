@@ -11,7 +11,8 @@
 | Stage | Status |
 | --- | --- |
 | 1. Beautiful foundation | ✅ Done (local-only, see below) |
-| 1b. Website first (PWA on GitHub Pages) | ✅ Built; goes live once Pages is enabled (see below) |
+| 1b. Website first (PWA on GitHub Pages) | ✅ Live at memmamally-source.github.io/Oursome |
+| Overhaul (branch `overhaul-performance-ui-ai`) | 🔄 Phases A–C done; D (AI server) and E (E2E, PR) next — see below |
 | 2. Core functionality (Firebase auth, Firestore, notifications) | ⏭ Next |
 | 3. Household sharing | — |
 | 4. AI assistant (server) | — |
@@ -19,6 +20,17 @@
 | 6. Premium subscriptions (RevenueCat, sandbox) | — |
 | 7. Polish & testing | — |
 | 8. Store release | — |
+
+## Overhaul: performance, UI/UX and AI (branch `overhaul-performance-ui-ai`, not merged)
+
+Merging to `main` deploys the website, so merge only with the owner's approval.
+
+- **A. Performance:** icons are an SVG subset (`npm run icons` after using a new icon name). Reanimated and gesture-handler are gone. Two self-hosted variable fonts on web. The service worker caches CORE at install and WARM when the browser is idle. Measured on slow 4G: returning-user Home 7.8 s → 3.9 s, transfer 1.66 → 0.55 MB, Lighthouse 55 → 65.
+- **B. Home and navigation:** logo bar plus greeting card, organiser capture box, My day, My people, lists, coming up. Tabs are Today / Calendar / Tasks / Our Space with a central "+" ("Add or ask"); a sidebar on screens ≥900px. The organiser is a full chat at `/assistant`. `/person/[id]` shows a person page and an add/edit form.
+- **C. Calendar, tasks, household:** Day / 3 days (Week when wide) / Month / List, with people filters and calendars behind one button. View maths is in `features/calendar/views.ts`. The task editor has "Who's doing it?" (choosing someone else shares the task) and shows suggested names. Tasks can be filtered by person. Our Space has a People list linking each person to their tasks and calendar.
+- **People model:** `Member.kind` is `person` (no account) or `account`, with optional `relationship` and `aliases` set only by the user. `Task.assigneeName` holds an unresolved suggested name. Unassigned tasks belong to the user (`features/people/logic.ts`).
+- **Assistant:** Interpretation (names only) → `resolve.ts` (directory, relationships, pronouns, refs validation) → Proposals → user approval → `execute.ts`, the only write path. Questions are answered from data in `query.ts`. `basic.ts` is the labelled offline "Basic mode". `remote.ts` calls `EXPO_PUBLIC_AI_ENDPOINT` (not set yet). Scenario tests are in `features/assistant/__tests__/scenarios.test.ts`.
+- **Zustand selectors:** never return a fresh `[]` or object; use `NO_MEMBERS` etc., or Zustand 5 re-renders in a loop.
 
 ## Stack (verified Oct 2026)
 

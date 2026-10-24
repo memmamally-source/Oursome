@@ -6,13 +6,15 @@ import { Alert, Platform, Pressable, TextInput, View } from 'react-native';
 
 import { EventCard } from '@/components/calendar/EventCard';
 import { TaskRow } from '@/components/tasks/TaskRow';
-import { Avatar, AvatarStack, Button, Card, EmptyState, IconBubble, Screen, SectionHeader, Text } from '@/components/ui';
+import { Avatar, AvatarStack, Button, Card, EmptyState, IconBubble, IconButton, Screen, SectionHeader, Text } from '@/components/ui';
 import { expandOccurrences } from '@/features/calendar/recurrence';
 import { useCalendar } from '@/features/calendar/store';
+import { eventOwner, openTasksFor } from '@/features/people/logic';
 import { useShopping } from '@/features/shopping/store';
 import { useSpace } from '@/features/space/store';
 import { useTasks } from '@/features/tasks/store';
-import { addDays, toDateKey } from '@/lib/dates';
+import type { Member } from '@/features/types';
+import { addDays, relativeDayLabel, toDateKey } from '@/lib/dates';
 import { fonts, radius, space, useTheme } from '@/theme';
 
 export default function SpaceScreen() {
@@ -51,6 +53,14 @@ export default function SpaceScreen() {
             onAction={() => router.push('/space-create')}
           />
         </Card>
+        <Button
+          label="Or just add the people you plan with"
+          variant="ghost"
+          accent="sunshine"
+          icon="person-add-outline"
+          onPress={() => router.push({ pathname: '/person/[id]', params: { id: 'new' } })}
+          style={{ marginBottom: space.xl }}
+        />
         <PrivacyNote />
       </Screen>
     );
@@ -166,6 +176,8 @@ export default function SpaceScreen() {
           </Text>
         ) : null}
       </View>
+
+      <PeopleSection members={s.members} />
 
       {/* Announcements */}
       <SectionHeader title="Noticeboard" icon="megaphone-outline" accent="sunshine" />
@@ -361,6 +373,115 @@ function PrivacyNote() {
         <Text variant="callout" tone="lavender">
           Only items you mark as Shared appear in Our Space. Your private events, tasks and lists are never shown to other members.
         </Text>
+      </View>
+    </View>
+  );
+}
+
+/** Everyone in the household, each linked to their tasks and calendar. */
+function PeopleSection({ members }: { members: Member[] }) {
+  const { palette } = useTheme();
+  const tasks = useTasks((st) => st.tasks);
+  const events = useCalendar((st) => st.events);
+  const calendars = useCalendar((st) => st.calendars);
+  const now = new Date();
+  const today = toDateKey(now);
+  const upcoming = expandOccurrences(events, today, toDateKey(addDays(now, 14)));
+
+  return (
+    <View style={{ marginBottom: space.xxl }}>
+      <SectionHeader title="People" icon="people-outline" accent="lavender" />
+      <View style={{ backgroundColor: palette.surface, borderRadius: radius.xl, borderWidth: 1, borderColor: palette.border }}>
+        {members.map((m, i) => {
+          const open = openTasksFor(m, tasks);
+          const overdue = open.filter((t) => t.due && t.due < today).length;
+          const next = upcoming.find((o) => eventOwner(o.event, calendars) === m.id);
+          const summary = [
+            open.length ? `${open.length} open ${open.length === 1 ? 'task' : 'tasks'}` : 'No open tasks',
+            overdue ? `${overdue} overdue` : null,
+            next ? `next: ${next.event.title}, ${relativeDayLabel(next.date)}` : null,
+          ]
+            .filter(Boolean)
+            .join(' · ');
+          return (
+            <View
+              key={m.id}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: space.md,
+                paddingHorizontal: space.lg,
+                paddingVertical: space.md,
+                borderTopWidth: i ? 1 : 0,
+                borderTopColor: palette.border,
+              }}>
+              <Pressable
+                onPress={() => router.push({ pathname: '/person/[id]', params: { id: m.id } })}
+                accessibilityRole="button"
+                accessibilityLabel={`${m.isMe ? 'You' : m.name}. ${summary}`}
+                style={({ pressed }) => ({
+                  flex: 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: space.md,
+                  opacity: pressed ? 0.7 : 1,
+                })}>
+                <Avatar name={m.name} accent={m.color} size={44} />
+                <View style={{ flex: 1, gap: 1 }}>
+                  <Text variant="bodyStrong" numberOfLines={1}>
+                    {m.isMe ? `${m.name} (you)` : m.name}
+                    {m.relationship ? (
+                      <Text variant="callout" tone="secondary">
+                        {'  '}
+                        {m.relationship}
+                      </Text>
+                    ) : null}
+                  </Text>
+                  <Text variant="caption" tone={overdue ? 'danger' : 'secondary'} numberOfLines={2}>
+                    {summary}
+                  </Text>
+                </View>
+              </Pressable>
+              <IconButton
+                icon="calendar-clear-outline"
+                label={`${m.isMe ? 'My' : `${m.name}’s`} calendar`}
+                size={36}
+                variant="soft"
+                accent="sky"
+                onPress={() => router.navigate({ pathname: '/calendar', params: { person: m.id } })}
+              />
+            </View>
+          );
+        })}
+        <Pressable
+          onPress={() => router.push({ pathname: '/person/[id]', params: { id: 'new' } })}
+          accessibilityRole="button"
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: space.md,
+            paddingHorizontal: space.lg,
+            paddingVertical: space.md,
+            borderTopWidth: 1,
+            borderTopColor: palette.border,
+          }}>
+          <View
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 22,
+              borderWidth: 1.5,
+              borderStyle: 'dashed',
+              borderColor: palette.textTertiary,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <Icon name="add" size={22} color={palette.textSecondary} />
+          </View>
+          <Text variant="body" tone="secondary">
+            Add a person
+          </Text>
+        </Pressable>
       </View>
     </View>
   );
