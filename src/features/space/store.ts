@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 import type { Member, Space } from '@/features/types';
 import { createId } from '@/lib/id';
 import { persistStorage, STORE_VERSION } from '@/lib/storage';
-import type { AccentKey } from '@/theme/tokens';
+import { accentKeys, type AccentKey } from '@/theme/tokens';
 
 /** Local id for the signed-in user until Firebase uids arrive in Stage 2. */
 export const ME_ID = 'me';
@@ -18,6 +18,9 @@ type SpaceState = {
   togglePin: (id: string) => void;
   setMemberColor: (memberId: string, color: AccentKey) => void;
   syncMe: (me: { name: string; color: AccentKey }) => void;
+  addPerson: (person: { name: string; relationship?: string; color?: AccentKey }) => Member;
+  updatePerson: (id: string, patch: Partial<Pick<Member, 'name' | 'relationship' | 'aliases' | 'color' | 'invitePending'>>) => void;
+  removePerson: (id: string) => void;
   leaveSpace: () => void;
   replace: (space: Space | null) => void;
   clearDemo: () => void;
@@ -25,7 +28,7 @@ type SpaceState = {
 
 export const useSpace = create<SpaceState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       space: null,
       createSpace: (name, me) => {
         const space: Space = {
@@ -72,6 +75,46 @@ export const useSpace = create<SpaceState>()(
         ),
       syncMe: (me) =>
         set((s) => (s.space ? { space: { ...s.space, members: s.space.members.map((m) => (m.isMe ? { ...m, ...me } : m)) } } : s)),
+      addPerson: ({ name, relationship, color }) => {
+        const existing = get().space;
+        const used = new Set(existing?.members.map((m) => m.color));
+        const person: Member = {
+          id: createId('p_'),
+          name: name.trim(),
+          color: color ?? accentKeys.find((a) => !used.has(a)) ?? accentKeys[(existing?.members.length ?? 0) % accentKeys.length],
+          role: 'member',
+          kind: 'person',
+          relationship: relationship?.trim().toLowerCase() || undefined,
+        };
+        set((s) => {
+          const space = s.space ?? {
+            id: createId('s_'),
+            name: 'Our Home',
+            members: [{ id: ME_ID, name: 'You', color: 'coral' as AccentKey, role: 'admin' as const, isMe: true }],
+            announcements: [],
+            createdAt: new Date().toISOString(),
+          };
+          return { space: { ...space, members: [...space.members, person] } };
+        });
+        return person;
+      },
+      updatePerson: (id, patch) =>
+        set((s) =>
+          s.space
+            ? {
+                space: {
+                  ...s.space,
+                  members: s.space.members.map((m) =>
+                    m.id === id
+                      ? { ...m, ...patch, relationship: patch.relationship !== undefined ? patch.relationship.trim().toLowerCase() || undefined : m.relationship }
+                      : m,
+                  ),
+                },
+              }
+            : s,
+        ),
+      removePerson: (id) =>
+        set((s) => (s.space ? { space: { ...s.space, members: s.space.members.filter((m) => m.id !== id || m.isMe) } } : s)),
       leaveSpace: () => set({ space: null }),
       replace: (space) => set({ space }),
       clearDemo: () => set((s) => (s.space?.isDemo ? { space: null } : s)),

@@ -94,7 +94,17 @@ export function TaskRow({ task, onCompleted, showDate = true, card, reorder }: P
             ) : null}
           </View>
         </View>
-        {assignee ? <Avatar name={assignee.name} accent={assignee.color} size={26} /> : null}
+        {assignee ? (
+          <Avatar name={assignee.name} accent={assignee.color} size={26} />
+        ) : task.assigneeName ? (
+          <View
+            accessibilityLabel={`Suggested for ${task.assigneeName}`}
+            style={{ borderWidth: 1, borderStyle: 'dashed', borderColor: palette.textTertiary, borderRadius: 13, paddingHorizontal: 8, height: 26, justifyContent: 'center' }}>
+            <Text variant="caption" tone="secondary" numberOfLines={1}>
+              {task.assigneeName}
+            </Text>
+          </View>
+        ) : null}
         {reorder ? (
           <View style={{ gap: 2 }}>
             <Pressable

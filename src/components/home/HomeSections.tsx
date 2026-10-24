@@ -1,358 +1,309 @@
-import { Icon } from '@/components/ui/Icon';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 
+import { useCalendarAccent } from '@/components/calendar/EventCard';
+import { TaskRow } from '@/components/tasks/TaskRow';
 import type { Suggestion } from '@/features/dashboard/suggestions';
-import type { EventOccurrence, IconName, ShoppingList, Space } from '@/features/types';
-import { haptic } from '@/lib/haptics';
-import { format, formatTime, fromDateKey, relativeDayLabel, timeKeyOf } from '@/lib/dates';
-import { elevation, fonts, radius, space, useTheme, type AccentKey } from '@/theme';
+import type { EventOccurrence, Member, ShoppingList, Task } from '@/features/types';
+import { formatTime, relativeDayLabel, timeKeyOf } from '@/lib/dates';
+import { fonts, radius, space, useTheme } from '@/theme';
 
-import { EventCard } from '../calendar/EventCard';
-import { AvatarStack, Button, Card, IconButton, PressableScale, Text } from '../ui';
+import { Avatar } from '../ui/primitives';
+import { Icon } from '../ui/Icon';
+import { PressableScale } from '../ui/PressableScale';
+import { Text } from '../ui/Text';
 
-export function StatTile({
-  icon,
-  accent,
-  value,
-  label,
-  onPress,
-}: {
-  icon: IconName;
-  accent: AccentKey;
-  value: number;
-  label: string;
-  onPress?: () => void;
-}) {
-  const { palette } = useTheme();
-  const tone = palette.accents[accent];
+export function SectionTitle({ title, detail, action, onAction }: { title: string; detail?: string; action?: string; onAction?: () => void }) {
   return (
-    <PressableScale
-      onPress={onPress}
-      accessibilityLabel={`${value} ${label}`}
-      style={{
-        flex: 1,
-        backgroundColor: tone.soft,
-        borderRadius: radius.lg,
-        paddingVertical: space.md,
-        paddingHorizontal: space.sm,
-        alignItems: 'center',
-        gap: 4,
-      }}>
-      <View style={{ width: 30, height: 30, borderRadius: 10, backgroundColor: tone.base, alignItems: 'center', justifyContent: 'center' }}>
-        <Icon name={icon} size={16} color={palette.onAccent} />
+    <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: space.md, gap: space.md }}>
+      <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: space.sm, flexShrink: 1 }}>
+        <Text variant="heading" accessibilityRole="header">
+          {title}
+        </Text>
+        {detail ? (
+          <Text variant="callout" tone="tertiary" numberOfLines={1}>
+            {detail}
+          </Text>
+        ) : null}
       </View>
-      <Text variant="number" color={tone.ink} style={{ fontSize: 26, lineHeight: 30 }}>
-        {value}
-      </Text>
-      <Text
-        variant="caption"
-        color={tone.ink}
-        numberOfLines={1}
-        maxFontSizeMultiplier={1.3}
-        style={{ fontFamily: fonts.bodyBold, fontSize: 12 }}>
-        {label}
-      </Text>
-    </PressableScale>
-  );
-}
-
-export function QuickCapture() {
-  const { palette } = useTheme();
-  const [text, setText] = useState('');
-  const submit = () => {
-    const value = text.trim();
-    if (!value) return;
-    haptic.tap();
-    setText('');
-    router.navigate({ pathname: '/assistant', params: { prompt: value, t: Date.now().toString() } });
-  };
-  return (
-    <View
-      style={[
-        {
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: space.sm,
-          backgroundColor: palette.surface,
-          borderRadius: radius.xl,
-          paddingLeft: space.lg,
-          paddingRight: space.sm,
-          minHeight: 60,
-          borderWidth: 1.5,
-          borderColor: palette.accents.lavender.soft,
-        },
-        elevation(palette, 1),
-      ]}>
-      <Icon name="sparkles" size={20} color={palette.accents.lavender.base} />
-      <TextInput
-        value={text}
-        onChangeText={setText}
-        onSubmitEditing={submit}
-        returnKeyType="send"
-        placeholder="“School meeting Friday at 4”"
-        placeholderTextColor={palette.textTertiary}
-        accessibilityLabel="Quick capture"
-        accessibilityHint="Type a task, reminder or appointment in your own words"
-        style={{ flex: 1, fontFamily: fonts.body, fontSize: 16, color: palette.text, paddingVertical: space.md }}
-      />
-      <IconButton icon="arrow-up" label="Capture" variant="solid" accent="lavender" size={40} onPress={submit} />
+      {action ? (
+        <Pressable onPress={onAction} hitSlop={10} accessibilityRole="button">
+          <Text variant="callout" tone="coral" style={{ fontFamily: fonts.bodyBold }}>
+            {action}
+          </Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
 
-export function SuggestionCard({
-  suggestion,
-  onAction,
-  onDismiss,
+function AgendaRow({ o, nowTime, person }: { o: EventOccurrence; nowTime: string; person?: Member }) {
+  const { palette } = useTheme();
+  const accent = useCalendarAccent(o.event.calendarId);
+  const start = timeKeyOf(o.start);
+  const end = timeKeyOf(o.end);
+  const past = !o.event.allDay && end <= nowTime;
+  const now = !o.event.allDay && start <= nowTime && end > nowTime;
+  const [hm, ampm] = o.event.allDay ? ['All', 'day'] : formatTime(start).split(' ');
+  return (
+    <Pressable
+      onPress={() => router.push({ pathname: '/event/[id]', params: { id: o.event.id } })}
+      accessibilityRole="button"
+      accessibilityLabel={`${o.event.title}, ${o.event.allDay ? 'all day' : formatTime(start)}`}
+      style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.md, opacity: past ? 0.5 : pressed ? 0.7 : 1 })}>
+      <View style={{ width: 46, alignItems: 'flex-end' }}>
+        <Text variant="bodyStrong" style={{ lineHeight: 20 }}>
+          {hm}
+        </Text>
+        <Text variant="caption" tone="tertiary" style={{ fontSize: 11, lineHeight: 13 }}>
+          {ampm}
+        </Text>
+      </View>
+      <View style={{ width: 4, alignSelf: 'stretch', borderRadius: 2, backgroundColor: palette.accents[accent].base }} />
+      <View style={{ flex: 1, gap: 1 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
+          <Text variant="bodyStrong" numberOfLines={1} style={{ flexShrink: 1 }}>
+            {o.event.title}
+          </Text>
+          {now ? (
+            <View style={{ backgroundColor: palette.accents.coral.base, borderRadius: radius.pill, paddingHorizontal: 7, paddingVertical: 1 }}>
+              <Text variant="caption" color={palette.onAccent} style={{ fontFamily: fonts.bodyBold, fontSize: 11 }}>
+                Now
+              </Text>
+            </View>
+          ) : null}
+        </View>
+        {o.event.location || !o.event.allDay ? (
+          <Text variant="caption" tone="secondary" numberOfLines={1}>
+            {[!o.event.allDay ? `until ${formatTime(end)}` : null, o.event.location].filter(Boolean).join(' · ')}
+          </Text>
+        ) : null}
+      </View>
+      {person ? <Avatar name={person.name} accent={person.color} size={26} /> : null}
+    </Pressable>
+  );
+}
+
+/** Today in one list: what's on, then what's to do. */
+export function TodayCard({
+  events,
+  tasks,
+  nowTime,
+  people,
+  memberForCalendar,
 }: {
-  suggestion: Suggestion;
-  onAction: () => void;
-  onDismiss: () => void;
+  events: EventOccurrence[];
+  tasks: Task[];
+  nowTime: string;
+  people: Member[];
+  memberForCalendar: (calendarId: string) => string | undefined;
 }) {
+  const { palette } = useTheme();
+  const shown = tasks.slice(0, 6);
+  const personOf = (o: EventOccurrence) => {
+    const id = o.event.personId ?? memberForCalendar(o.event.calendarId);
+    return people.find((p) => p.id === id && !p.isMe);
+  };
+  return (
+    <View style={{ backgroundColor: palette.surface, borderRadius: radius.xl, borderWidth: 1, borderColor: palette.border, paddingHorizontal: space.lg, paddingVertical: space.sm }}>
+      {events.length === 0 && tasks.length === 0 ? (
+        <View style={{ paddingVertical: space.xl, alignItems: 'center', gap: space.xs }}>
+          <Icon name="sunny-outline" size={28} color={palette.accents.sunshine.base} />
+          <Text variant="bodyStrong">Nothing planned today</Text>
+          <Text variant="callout" tone="secondary" align="center">
+            Enjoy the space — or tell your organiser what’s coming up.
+          </Text>
+        </View>
+      ) : null}
+      {events.map((o, i) => (
+        <View key={o.key} style={i ? { borderTopWidth: 1, borderTopColor: palette.border } : undefined}>
+          <AgendaRow o={o} nowTime={nowTime} person={personOf(o)} />
+        </View>
+      ))}
+      {shown.length ? (
+        <View style={events.length ? { borderTopWidth: 1, borderTopColor: palette.border, paddingTop: space.sm } : undefined}>
+          <Text variant="overline" tone="tertiary" style={{ marginTop: space.xs }}>
+            To do
+          </Text>
+          {shown.map((t) => (
+            <TaskRow key={t.id} task={t} />
+          ))}
+          {tasks.length > shown.length ? (
+            <Pressable onPress={() => router.navigate('/tasks')} accessibilityRole="button" style={{ paddingVertical: space.sm }}>
+              <Text variant="callout" tone="coral" style={{ fontFamily: fonts.bodyBold }}>
+                {tasks.length - shown.length} more to do →
+              </Text>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+/** A slim, dismissible nudge — never more than one at a time. */
+export function SuggestionLine({ suggestion, onAction, onDismiss }: { suggestion: Suggestion; onAction: () => void; onDismiss: () => void }) {
   const { palette } = useTheme();
   const tone = palette.accents[suggestion.accent];
   return (
-    <Card tint={suggestion.accent} style={{ gap: space.md }}>
-      <View style={{ flexDirection: 'row', gap: space.md, alignItems: 'flex-start' }}>
+    <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.md, backgroundColor: tone.soft, borderRadius: radius.lg, padding: space.md }}>
+      <Icon name={suggestion.icon} size={20} color={tone.ink} />
+      <View style={{ flex: 1, gap: space.xs }}>
+        <Text variant="callout">{suggestion.text}</Text>
+        <Pressable onPress={onAction} accessibilityRole="button" hitSlop={8} style={{ alignSelf: 'flex-start' }}>
+          <Text variant="callout" color={tone.ink} style={{ fontFamily: fonts.bodyBold }}>
+            {suggestion.actionLabel} →
+          </Text>
+        </Pressable>
+      </View>
+      <Pressable onPress={onDismiss} accessibilityRole="button" accessibilityLabel="Dismiss" hitSlop={10}>
+        <Icon name="close" size={16} color={palette.textSecondary} />
+      </Pressable>
+    </View>
+  );
+}
+
+/** The people you plan with, each with what's on their plate today. */
+export function PeopleRow({ people, counts }: { people: Member[]; counts: Record<string, number> }) {
+  const { palette } = useTheme();
+  if (people.length <= 1) {
+    return (
+      <PressableScale
+        onPress={() => router.push({ pathname: '/person/[id]', params: { id: 'new' } })}
+        accessibilityLabel="Add a person"
+        style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: palette.accents.sunshine.soft, borderRadius: radius.xl, padding: space.lg }}>
+        <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: palette.accents.sunshine.base, alignItems: 'center', justifyContent: 'center' }}>
+          <Icon name="person-add" size={22} color={palette.onAccent} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text variant="bodyStrong">Add the people you plan with</Text>
+          <Text variant="callout" tone="secondary">
+            A partner, family, housemates — then just say “Rufaida needs to…”.
+          </Text>
+        </View>
+      </PressableScale>
+    );
+  }
+  return (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.lg, paddingRight: space.lg, paddingTop: 4 }}>
+      {people.map((p) => (
+        <Pressable
+          key={p.id}
+          onPress={() => router.push({ pathname: '/person/[id]', params: { id: p.id } })}
+          accessibilityRole="button"
+          accessibilityLabel={`${p.isMe ? 'You' : p.name}, ${counts[p.id] ?? 0} things today`}
+          style={({ pressed }) => ({ alignItems: 'center', gap: 6, width: 68, opacity: pressed ? 0.7 : 1 })}>
+          <View>
+            <Avatar name={p.name} accent={p.color} size={56} />
+            {counts[p.id] ? (
+              <View
+                style={{
+                  position: 'absolute',
+                  right: -2,
+                  top: -2,
+                  minWidth: 22,
+                  height: 22,
+                  borderRadius: 11,
+                  paddingHorizontal: 5,
+                  backgroundColor: palette.text,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderWidth: 2,
+                  borderColor: palette.background,
+                }}>
+                <Text variant="caption" color={palette.background} style={{ fontFamily: fonts.bodyBold, fontSize: 11, lineHeight: 14 }}>
+                  {counts[p.id]}
+                </Text>
+              </View>
+            ) : null}
+          </View>
+          <Text variant="caption" numberOfLines={1} style={{ fontFamily: fonts.bodyMedium }}>
+            {p.isMe ? 'You' : p.name.split(' ')[0]}
+          </Text>
+        </Pressable>
+      ))}
+      <Pressable
+        onPress={() => router.push({ pathname: '/person/[id]', params: { id: 'new' } })}
+        accessibilityRole="button"
+        accessibilityLabel="Add a person"
+        style={({ pressed }) => ({ alignItems: 'center', gap: 6, width: 68, opacity: pressed ? 0.7 : 1 })}>
         <View
           style={{
-            width: 36,
-            height: 36,
-            borderRadius: 12,
-            backgroundColor: palette.surface,
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            borderWidth: 1.5,
+            borderStyle: 'dashed',
+            borderColor: palette.textTertiary,
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-          <Icon name={suggestion.icon} size={19} color={tone.ink} />
+          <Icon name="add" size={24} color={palette.textSecondary} />
         </View>
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text variant="overline" color={tone.ink}>
-            Smart suggestion
-          </Text>
-          <Text variant="body">{suggestion.text}</Text>
-        </View>
-        <Pressable onPress={onDismiss} hitSlop={12} accessibilityRole="button" accessibilityLabel="Dismiss suggestion">
-          <Icon name="close" size={18} color={palette.textSecondary} />
-        </Pressable>
-      </View>
-      <Button
-        label={suggestion.actionLabel}
-        size="sm"
-        variant="primary"
-        accent={suggestion.accent}
-        onPress={onAction}
-        style={{ marginLeft: 48 }}
-      />
-    </Card>
-  );
-}
-
-/** Vertical timeline of today's timed events with a "now" marker. */
-export function Timeline({ timed, allDay, nowTime }: { timed: EventOccurrence[]; allDay: EventOccurrence[]; nowTime: string }) {
-  const { palette } = useTheme();
-  const nowIndex = timed.findIndex((o) => timeKeyOf(o.start) > nowTime);
-  return (
-    <View style={{ gap: space.sm }}>
-      {allDay.length ? (
-        <View style={{ gap: space.sm, marginBottom: space.xs, paddingLeft: 66 }}>
-          {allDay.map((o) => (
-            <EventCard key={o.key} occurrence={o} compact />
-          ))}
-        </View>
-      ) : null}
-      {timed.map((o, i) => (
-        <View key={o.key}>
-          {i === nowIndex ? <NowMarker label={formatTime(nowTime)} /> : null}
-          <View style={{ flexDirection: 'row', gap: space.md }}>
-            <View style={{ width: 54, paddingTop: space.lg }}>
-              <Text variant="caption" tone="secondary" style={{ fontFamily: fonts.bodyBold }}>
-                {formatTime(timeKeyOf(o.start))}
-              </Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <EventCard occurrence={o} now={nowTime} />
-            </View>
-          </View>
-        </View>
-      ))}
-      {nowIndex === -1 && timed.length && timeKeyOf(timed[timed.length - 1].end) <= nowTime ? (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingLeft: 66, paddingTop: space.xs }}>
-          <Icon name="checkmark-done" size={16} color={palette.accents.mint.ink} />
-          <Text variant="callout" tone="mint">
-            That’s everything on the calendar for today.
-          </Text>
-        </View>
-      ) : null}
-    </View>
-  );
-}
-
-function NowMarker({ label }: { label: string }) {
-  const { palette } = useTheme();
-  return (
-    <View
-      style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, marginVertical: space.xs }}
-      accessibilityLabel={`Now, ${label}`}>
-      <View style={{ width: 54 }}>
-        <Text variant="caption" tone="coral" style={{ fontFamily: fonts.bodyBold }}>
-          Now
-        </Text>
-      </View>
-      <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: palette.accents.coral.base }} />
-      <View style={{ flex: 1, height: 2, borderRadius: 1, backgroundColor: palette.accents.coral.base, opacity: 0.6 }} />
-    </View>
-  );
-}
-
-export function SpacePreview({ space: s, sharedTasks, sharedEvents }: { space: Space | null; sharedTasks: number; sharedEvents: number }) {
-  const { palette } = useTheme();
-  if (!s) {
-    return (
-      <Card
-        tint="sunshine"
-        onPress={() => router.push('/space-create')}
-        accessibilityLabel="Create an Our Space"
-        style={{ flexDirection: 'row', alignItems: 'center', gap: space.lg }}>
-        <View style={{ flex: 1, gap: 4 }}>
-          <Text variant="subheading">Better together</Text>
-          <Text variant="callout" tone="secondary">
-            Create an Our Space to share calendars, tasks and lists with the people you live with.
-          </Text>
-        </View>
-        <Icon name="arrow-forward-circle" size={32} color={palette.accents.sunshine.ink} />
-      </Card>
-    );
-  }
-  const pinned = s.announcements.find((a) => a.pinned) ?? s.announcements[0];
-  const author = s.members.find((m) => m.id === pinned?.authorId);
-  return (
-    <Card onPress={() => router.navigate('/space')} accessibilityLabel={`${s.name}, ${sharedTasks} shared tasks`} style={{ gap: space.md }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-        <AvatarStack people={s.members} size={34} />
-        <View style={{ flex: 1 }}>
-          <Text variant="subheading" numberOfLines={1}>
-            {s.name}
-          </Text>
-          <Text variant="caption" tone="secondary">
-            {sharedEvents} shared {sharedEvents === 1 ? 'event' : 'events'} today · {sharedTasks} open shared{' '}
-            {sharedTasks === 1 ? 'task' : 'tasks'}
-          </Text>
-        </View>
-        <Icon name="chevron-forward" size={18} color={palette.textTertiary} />
-      </View>
-      {pinned ? (
-        <View
-          style={{
-            backgroundColor: palette.accents.sunshine.soft,
-            borderRadius: radius.md,
-            padding: space.md,
-            flexDirection: 'row',
-            gap: space.sm,
-          }}>
-          <Icon name="megaphone-outline" size={16} color={palette.accents.sunshine.ink} style={{ marginTop: 2 }} />
-          <Text variant="callout" style={{ flex: 1 }} numberOfLines={2}>
-            {author ? (
-              <Text variant="callout" style={{ fontFamily: fonts.bodyBold }}>
-                {author.isMe ? 'You' : author.name}:{' '}
-              </Text>
-            ) : null}
-            {pinned.text}
-          </Text>
-        </View>
-      ) : null}
-    </Card>
-  );
-}
-
-export function ShoppingStrip({ lists }: { lists: { list: ShoppingList; remaining: number; preview: string[] }[] }) {
-  const { palette } = useTheme();
-  return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ gap: space.md, paddingRight: space.lg }}
-      style={{ marginHorizontal: -4, paddingHorizontal: 4 }}>
-      {lists.map(({ list, remaining, preview }) => {
-        const tone = palette.accents[list.color];
-        return (
-          <PressableScale
-            key={list.id}
-            onPress={() => router.push({ pathname: '/shopping/[id]', params: { id: list.id } })}
-            accessibilityLabel={`${list.name}, ${remaining} items`}
-            style={{ width: 190, backgroundColor: tone.soft, borderRadius: radius.lg, padding: space.lg, gap: space.sm }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Icon name={list.icon} size={22} color={tone.ink} />
-              {list.visibility === 'shared' ? <Icon name="people" size={15} color={tone.ink} accessibilityLabel="Shared" /> : null}
-            </View>
-            <Text variant="subheading" numberOfLines={1}>
-              {list.name}
-            </Text>
-            <Text variant="caption" color={tone.ink} numberOfLines={2}>
-              {remaining ? `${remaining} to get · ${preview.join(', ')}` : 'All done — nice work'}
-            </Text>
-          </PressableScale>
-        );
-      })}
-      <PressableScale
-        onPress={() => router.navigate({ pathname: '/tasks', params: { view: 'lists' } })}
-        accessibilityLabel="All lists"
-        style={{
-          width: 110,
-          borderRadius: radius.lg,
-          borderWidth: 1.5,
-          borderStyle: 'dashed',
-          borderColor: palette.border,
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 6,
-        }}>
-        <Icon name="add" size={22} color={palette.textSecondary} />
         <Text variant="caption" tone="secondary">
-          New list
+          Add
         </Text>
-      </PressableScale>
+      </Pressable>
     </ScrollView>
   );
 }
 
-export function ImportantDates({ dates }: { dates: EventOccurrence[] }) {
+export function ListsRow({ lists }: { lists: { list: ShoppingList; remaining: number }[] }) {
   const { palette } = useTheme();
   return (
-    <View style={{ gap: space.sm }}>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm, paddingRight: space.lg }}>
+      {lists.map(({ list, remaining }) => {
+        const tone = palette.accents[list.color];
+        return (
+          <Pressable
+            key={list.id}
+            onPress={() => router.push({ pathname: '/shopping/[id]', params: { id: list.id } })}
+            accessibilityRole="button"
+            accessibilityLabel={`${list.name}, ${remaining} to get`}
+            style={({ pressed }) => ({
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: space.sm,
+              backgroundColor: palette.surface,
+              borderWidth: 1,
+              borderColor: palette.border,
+              borderRadius: radius.pill,
+              paddingLeft: 6,
+              paddingRight: space.lg,
+              height: 48,
+              opacity: pressed ? 0.7 : 1,
+            })}>
+            <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: tone.soft, alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name={list.icon} size={18} color={tone.ink} />
+            </View>
+            <Text variant="bodyStrong">{list.name}</Text>
+            <Text variant="callout" tone="secondary">
+              {remaining}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </ScrollView>
+  );
+}
+
+export function ComingUp({ dates }: { dates: EventOccurrence[] }) {
+  const { palette } = useTheme();
+  return (
+    <View style={{ gap: space.md }}>
       {dates.slice(0, 3).map((o) => (
         <Pressable
           key={o.key}
           onPress={() => router.push({ pathname: '/event/[id]', params: { id: o.event.id } })}
           accessibilityRole="button"
-          accessibilityLabel={`${o.event.title}, ${relativeDayLabel(o.date)}`}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.xs }}>
-          <View
-            style={{
-              width: 46,
-              height: 46,
-              borderRadius: 14,
-              backgroundColor: palette.accents.sunshine.soft,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <Text variant="caption" tone="sunshine" style={{ fontFamily: fonts.bodyBold, fontSize: 10, lineHeight: 12 }}>
-              {format(fromDateKey(o.date), 'MMM').toUpperCase()}
-            </Text>
-            <Text variant="subheading" tone="sunshine" style={{ lineHeight: 20 }}>
-              {Number(o.date.slice(8, 10))}
-            </Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text variant="bodyStrong" numberOfLines={1}>
-              {o.event.title}
-            </Text>
-            <Text variant="caption" tone="secondary">
-              {relativeDayLabel(o.date)}
-            </Text>
-          </View>
-          <Icon name={/birthday/i.test(o.event.title) ? 'gift-outline' : 'heart-outline'} size={20} color={palette.accents.sunshine.ink} />
+          style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+          <Icon name={/birthday/i.test(o.event.title) ? 'gift-outline' : 'star-outline'} size={18} color={palette.accents.sunshine.ink} />
+          <Text variant="body" style={{ flex: 1 }} numberOfLines={1}>
+            {o.event.title}
+          </Text>
+          <Text variant="callout" tone="secondary">
+            {relativeDayLabel(o.date)}
+          </Text>
         </Pressable>
       ))}
     </View>

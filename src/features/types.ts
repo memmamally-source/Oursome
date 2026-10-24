@@ -47,6 +47,12 @@ export type Task = {
   recurrence?: Recurrence | null;
   subtasks: Subtask[];
   assigneeId?: string;
+  /**
+   * A name the assistant heard for someone not (yet) in the household
+   * directory. Shown as a suggested assignee; never mapped to an ID until
+   * the user confirms who it is.
+   */
+  assigneeName?: string;
   visibility: Visibility;
   order: number;
   createdAt: string;
@@ -76,6 +82,8 @@ export type CalendarEvent = {
   recurrence?: Recurrence | null;
   reminderMinutes?: number | null;
   visibility: Visibility;
+  /** Whose event this is, when it belongs to one household member ("Sarah's dentist"). */
+  personId?: string;
   /** Important dates (birthdays, anniversaries) get special treatment on Home. */
   isImportantDate?: boolean;
   createdAt: string;
@@ -128,12 +136,27 @@ export type ShoppingItem = {
 
 export type MemberRole = 'admin' | 'member';
 
+/**
+ * Someone in the household. `account` members sign in themselves (from
+ * Stage 3); `person` members are named people the household plans for
+ * without an account (a partner who hasn't joined yet, a grandparent, a
+ * nanny). Relationship labels ("wife", "Dad") are only ever set explicitly
+ * by the user — the assistant never assumes them.
+ */
 export type Member = {
   id: string;
   name: string;
   color: AccentKey;
   role: MemberRole;
   isMe?: boolean;
+  /** Missing on records saved before people were introduced: treat as 'account'. */
+  kind?: 'account' | 'person';
+  /** How the signed-in user refers to this person, e.g. "wife", "dad". */
+  relationship?: string;
+  /** Other names the user calls them ("Ru", "Mum"). */
+  aliases?: string[];
+  /** An invitation has been prepared (sending arrives with cloud accounts). */
+  invitePending?: boolean;
 };
 
 export type Announcement = {

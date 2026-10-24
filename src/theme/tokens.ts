@@ -195,4 +195,5 @@ export const layout = {
   tabBarMargin: 12,
   screenPadding: 20,
   maxContentWidth: 640,
+  maxWideContentWidth: 1080,
 } as const;

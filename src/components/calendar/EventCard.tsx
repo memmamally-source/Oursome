@@ -5,7 +5,7 @@ import { View } from 'react-native';
 import { useCalendar } from '@/features/calendar/store';
 import type { EventOccurrence } from '@/features/types';
 import { formatTime, timeKeyOf } from '@/lib/dates';
-import { radius, space, useTheme, type AccentKey } from '@/theme';
+import { fonts, radius, space, useTheme, type AccentKey } from '@/theme';
 
 import { PressableScale } from '../ui/PressableScale';
 import { Text } from '../ui/Text';
@@ -42,12 +42,12 @@ export function EventCard({ occurrence, compact, now }: { occurrence: EventOccur
       <View style={{ width: 5, borderRadius: 3, backgroundColor: tone.base }} />
       <View style={{ flex: 1, gap: 2 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <Text variant="caption" color={tone.ink} style={{ fontFamily: 'NunitoSans_700Bold' }}>
+          <Text variant="caption" color={tone.ink} style={{ fontFamily: fonts.bodyBold }}>
             {event.allDay ? 'All day' : `${formatTime(start)} – ${formatTime(end)}`}
           </Text>
           {isNow ? (
             <View style={{ backgroundColor: tone.base, borderRadius: radius.pill, paddingHorizontal: 6, paddingVertical: 1 }}>
-              <Text variant="caption" color={palette.onAccent} style={{ fontFamily: 'NunitoSans_700Bold', fontSize: 11 }}>
+              <Text variant="caption" color={palette.onAccent} style={{ fontFamily: fonts.bodyBold, fontSize: 11 }}>
                 NOW
               </Text>
             </View>

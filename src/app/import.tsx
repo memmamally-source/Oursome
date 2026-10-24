@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useState } from 'react';
 import { TextInput, View } from 'react-native';
 
-import { ProposalCard, type ProposalStatus } from '@/components/assistant/ProposalCard';
+import { ImportCard, type ProposalStatus } from '@/components/assistant/ImportCard';
 import { Illustration } from '@/components/illustrations/Illustration';
 import { Button, ModalHeader, ModalScreen, Segmented, Text } from '@/components/ui';
 import { applyProposal } from '@/features/assistant/apply';
@@ -147,7 +147,7 @@ export default function ImportScreen() {
             />
           ) : null}
           {results.map((r, i) => (
-            <ProposalCard
+            <ImportCard
               key={r.proposal.id + i}
               index={i}
               proposal={r.proposal}

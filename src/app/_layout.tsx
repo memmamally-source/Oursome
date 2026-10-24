@@ -88,6 +88,8 @@ function AppNavigator() {
           <Stack.Screen name="task/[id]" options={{ presentation: 'modal' }} />
           <Stack.Screen name="event/[id]" options={{ presentation: 'modal' }} />
           <Stack.Screen name="quick-add" options={sheet} />
+          <Stack.Screen name="assistant" />
+          <Stack.Screen name="person/[id]" options={{ presentation: 'modal' }} />
           <Stack.Screen name="shopping/[id]" />
           <Stack.Screen name="settings" />
           <Stack.Screen name="import" options={{ presentation: 'modal' }} />

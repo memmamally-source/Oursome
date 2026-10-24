@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
 import { TabBar } from '@/components/navigation/TabBar';
+import { useLayout } from '@/hooks/useLayout';
 
 /**
  * Web loads each screen's code on demand. Once the first screen is up and the
@@ -14,7 +15,7 @@ function usePrefetchTabs() {
     const load = () => {
       import('./calendar');
       import('./tasks');
-      import('./assistant');
+      import('../assistant');
       import('./space');
     };
     const w = globalThis as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
@@ -25,12 +26,12 @@ function usePrefetchTabs() {
 
 export default function TabsLayout() {
   usePrefetchTabs();
+  const { isWide } = useLayout();
   return (
-    <Tabs tabBar={(props) => <TabBar {...props} />} screenOptions={{ headerShown: false }}>
+    <Tabs tabBar={(props) => <TabBar {...props} />} screenOptions={{ headerShown: false, tabBarPosition: isWide ? 'left' : 'bottom' }}>
       <Tabs.Screen name="index" />
       <Tabs.Screen name="calendar" />
       <Tabs.Screen name="tasks" />
-      <Tabs.Screen name="assistant" />
       <Tabs.Screen name="space" />
     </Tabs>
   );

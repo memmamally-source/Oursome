@@ -1,10 +1,10 @@
 import { Icon } from '@/components/ui/Icon';
 import { router, type Href } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { IconButton, Text } from '@/components/ui';
+import { CaptureBox } from '@/components/assistant/CaptureBox';
+import { Text } from '@/components/ui';
 import { useShopping } from '@/features/shopping/store';
 import { useSpace } from '@/features/space/store';
 import type { IconName } from '@/features/types';
@@ -16,7 +16,6 @@ type Action = { label: string; hint: string; icon: IconName; accent: AccentKey; 
 export default function QuickAdd() {
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
-  const [text, setText] = useState('');
   const hasSpace = useSpace((s) => !!s.space);
 
   const go = (href: Href) => {
@@ -64,13 +63,6 @@ export default function QuickAdd() {
       : { label: 'Our Space', hint: 'Share with people', icon: 'people', accent: 'coral', href: () => '/space-create' },
   ];
 
-  const capture = () => {
-    const value = text.trim();
-    if (!value) return;
-    router.back();
-    setTimeout(() => router.navigate({ pathname: '/assistant', params: { prompt: value, t: Date.now().toString() } }), 250);
-  };
-
   return (
     <ScrollView
       keyboardShouldPersistTaps="handled"
@@ -85,34 +77,12 @@ export default function QuickAdd() {
         alignSelf: 'center',
       }}>
       <Text variant="title" accessibilityRole="header">
-        Add something
+        Add or ask
       </Text>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: space.sm,
-          backgroundColor: palette.surface,
-          borderRadius: radius.xl,
-          paddingLeft: space.lg,
-          paddingRight: 6,
-          minHeight: 58,
-          borderWidth: 1.5,
-          borderColor: palette.accents.lavender.soft,
-        }}>
-        <Icon name="sparkles" size={20} color={palette.accents.lavender.base} />
-        <TextInput
-          value={text}
-          onChangeText={setText}
-          onSubmitEditing={capture}
-          returnKeyType="send"
-          placeholder="Just type it — “Pay rent by the 1st”"
-          placeholderTextColor={palette.textTertiary}
-          accessibilityLabel="Quick capture"
-          style={{ flex: 1, fontFamily: fonts.body, fontSize: 16, color: palette.text, paddingVertical: space.md }}
-        />
-        <IconButton icon="arrow-up" label="Capture" variant="solid" accent="lavender" size={44} onPress={capture} />
-      </View>
+      <CaptureBox autoFocus />
+      <Text variant="overline" tone="tertiary">
+        Or add it yourself
+      </Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md }}>
         {actions.map((a) => {
           const tone = palette.accents[a.accent];

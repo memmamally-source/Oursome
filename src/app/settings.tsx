@@ -9,7 +9,7 @@ import { Avatar, Card, Divider, IconButton, Screen, Segmented, SettingRow, Text,
 import { Brand } from '@/config/brand';
 import { clearDemoContent, hasDemoContent, loadDemoContent } from '@/features/demo/seed';
 import { deleteAllLocalData, exportData } from '@/features/settings/account';
-import { dashboardSectionKeys, dashboardSectionLabels, useSettings } from '@/features/settings/store';
+import { useSettings } from '@/features/settings/store';
 import { auth, useSession } from '@/features/session/store';
 import { useSpace } from '@/features/space/store';
 import { formatTime } from '@/lib/dates';
@@ -150,15 +150,6 @@ export default function SettingsScreen() {
           ]}
         />
       </View>
-
-      <Section title="Home screen">
-        {dashboardSectionKeys.map((k, i) => (
-          <View key={k}>
-            {i ? <Divider /> : null}
-            <SettingRow label={dashboardSectionLabels[k]} value={settings.dashboard[k]} onValueChange={() => settings.toggleSection(k)} />
-          </View>
-        ))}
-      </Section>
 
       <Section title="Notifications">
         <View style={{ backgroundColor: palette.accents.sunshine.soft, borderRadius: radius.md, padding: space.md, marginTop: space.md }}>
