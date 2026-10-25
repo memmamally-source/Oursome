@@ -67,7 +67,7 @@ function AgendaRow({ o, nowTime, person }: { o: EventOccurrence; nowTime: string
           </Text>
           {now ? (
             <View style={{ backgroundColor: palette.accents.coral.base, borderRadius: radius.pill, paddingHorizontal: 7, paddingVertical: 1 }}>
-              <Text variant="caption" color={palette.onAccent} style={{ fontFamily: fonts.bodyBold, fontSize: 11 }}>
+              <Text variant="caption" color={palette.accents.coral.on} style={{ fontFamily: fonts.bodyBold, fontSize: 11 }}>
                 Now
               </Text>
             </View>
@@ -173,7 +173,7 @@ export function PeopleRow({ people, counts }: { people: Member[]; counts: Record
         accessibilityLabel="Add a person"
         style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: palette.accents.sunshine.soft, borderRadius: radius.xl, padding: space.lg }}>
         <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: palette.accents.sunshine.base, alignItems: 'center', justifyContent: 'center' }}>
-          <Icon name="person-add" size={22} color={palette.onAccent} />
+          <Icon name="person-add" size={22} color={palette.accents.sunshine.on} />
         </View>
         <View style={{ flex: 1 }}>
           <Text variant="bodyStrong">Add the people you plan with</Text>

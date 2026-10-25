@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "oursome",
     "userInterfaceStyle": "automatic",
-    "backgroundColor": "#FFF9F2",
+    "backgroundColor": "#F4EEE5",
     "ios": {
       "bundleIdentifier": "app.oursome.ios",
       "supportsTablet": false,
@@ -18,7 +18,7 @@
     "android": {
       "package": "app.oursome.android",
       "adaptiveIcon": {
-        "backgroundColor": "#FFF9F2",
+        "backgroundColor": "#F4EEE5",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -31,8 +31,8 @@
       "name": "Oursome — Life’s better together",
       "shortName": "Oursome",
       "lang": "en",
-      "themeColor": "#FFF9F2",
-      "backgroundColor": "#FFF9F2",
+      "themeColor": "#F4EEE5",
+      "backgroundColor": "#F4EEE5",
       "description": "A warm, colourful organiser for you and the people you live with: calendar, tasks, reminders, shopping lists and a shared Our Space."
     },
     "plugins": [
@@ -40,11 +40,11 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#FFF9F2",
+          "backgroundColor": "#F4EEE5",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 120,
           "dark": {
-            "backgroundColor": "#17181F",
+            "backgroundColor": "#1E1A17",
             "image": "./assets/images/splash-icon.png"
           }
         }

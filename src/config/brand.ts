@@ -15,14 +15,19 @@ export const Brand = {
   principle: 'Spend less time organising life and more time living it.',
   supportEmail: 'hello@example.com', // TODO: replace once a domain is secured
   colors: {
-    coral: '#FF7468',
-    sunshine: '#FFC857',
-    sky: '#76C8F5',
-    lavender: '#B7A2ED',
-    mint: '#79D6B0',
-    cream: '#FFF9F2',
-    charcoal: '#242632',
-    white: '#FFFFFF',
+    /** Warm linen: the main background. */
+    linen: '#F4EEE5',
+    /** Soft ivory: raised surfaces, cards, sheets. */
+    ivory: '#FFF9F0',
+    /** Brand terracotta (logo, decoration). Interactive fills use the AA-safe #A9533F. */
+    terracotta: '#B95F49',
+    sage: '#879D86',
+    honey: '#E5B96D',
+    /** Supporting tones for calendars and the organiser. */
+    slate: '#8FA5B2',
+    heather: '#A08DA4',
+    /** Warm espresso: main text. */
+    espresso: '#332B27',
   },
 } as const;
 

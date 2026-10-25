@@ -125,7 +125,7 @@ export default function SettingsScreen() {
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-          <Icon name="diamond" size={22} color={palette.onAccent} />
+          <Icon name="diamond" size={22} color={palette.accents.lavender.on} />
         </View>
         <View style={{ flex: 1 }}>
           <Text variant="subheading">{Brand.name} Premium</Text>

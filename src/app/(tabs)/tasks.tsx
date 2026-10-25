@@ -386,7 +386,7 @@ function ListsView() {
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}>
-                  <Icon name={l.icon} size={20} color={palette.onAccent} />
+                  <Icon name={l.icon} size={20} color={tone.on} />
                 </View>
                 <Icon
                   name={l.visibility === 'shared' ? 'people' : 'lock-closed'}

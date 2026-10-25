@@ -4,9 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>%WEB_TITLE%</title>
-    <meta name="description" content="A warm, colourful organiser for you and the people you live with: calendar, tasks, reminders, shopping lists and a shared Our Space." />
-    <meta name="theme-color" content="#FFF9F2" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#17181F" media="(prefers-color-scheme: dark)" />
+    <meta name="description" content="A warm shared home for couples, families and housemates: calendar, tasks, reminders, shopping lists and a journal of your moments." />
+    <meta name="theme-color" content="#F4EEE5" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1E1A17" media="(prefers-color-scheme: dark)" />
     <meta name="color-scheme" content="light dark" />
 
     <!-- Installable web app (PWA). __BASE__ is filled in by scripts/build-web.js. -->
@@ -20,17 +20,16 @@
     <!-- Link previews -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Oursome — Life’s better together" />
-    <meta property="og:description" content="Your calendar, tasks, reminders and shopping lists in one warm, colourful place, shared with the people you live with." />
+    <meta property="og:description" content="Your shared home: calendar, tasks, lists and memories, with the people you live with." />
     <meta property="og:image" content="__SITE_URL__/og-image.png" />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <!-- Brand fonts: two small variable files, never blocking the first paint. -->
+    <!-- Brand fonts: Fraunces (headings) and Nunito Sans (text), two small variable files that never block the first paint. -->
     <link rel="preload" href="__BASE__/fonts/nunito-sans.woff2" as="font" type="font/woff2" crossorigin fetchpriority="low" />
-    <link rel="preload" href="__BASE__/fonts/nunito.woff2" as="font" type="font/woff2" crossorigin fetchpriority="low" />
+    <link rel="preload" href="__BASE__/fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin fetchpriority="low" />
     <style id="fonts">
       /* One variable font per family; each named weight is pinned so existing font names keep working. */
-      @font-face { font-family: 'Nunito_700Bold'; src: url('__BASE__/fonts/nunito.woff2') format('woff2'); font-weight: 700; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
-      @font-face { font-family: 'Nunito_800ExtraBold'; src: url('__BASE__/fonts/nunito.woff2') format('woff2'); font-weight: 800; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+      @font-face { font-family: 'Fraunces_600SemiBold'; src: url('__BASE__/fonts/fraunces.woff2') format('woff2'); font-weight: 600; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
       @font-face { font-family: 'NunitoSans_400Regular'; src: url('__BASE__/fonts/nunito-sans.woff2') format('woff2'); font-weight: 400; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
       @font-face { font-family: 'NunitoSans_600SemiBold'; src: url('__BASE__/fonts/nunito-sans.woff2') format('woff2'); font-weight: 600; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
       @font-face { font-family: 'NunitoSans_700Bold'; src: url('__BASE__/fonts/nunito-sans.woff2') format('woff2'); font-weight: 700; font-display: swap; unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
@@ -40,7 +39,7 @@
       body {
         height: 100%;
         margin: 0;
-        background: #fff9f2;
+        background: #f4eee5;
       }
       body {
         overflow: hidden;
@@ -51,6 +50,25 @@
         height: 100%;
         flex: 1;
       }
+      /* Paper: a whisper of grain on screen backgrounds (elements with data-paper). */
+      html,
+      [data-paper='true'] {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.26 0 0 0 0 0.2 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        background-size: 160px 160px;
+      }
+      /* Calm, visible keyboard focus everywhere. */
+      :focus-visible {
+        outline: 2px solid #a9533f;
+        outline-offset: 2px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
       /* Shown until the app's JavaScript renders, then replaced. */
       #boot {
         margin: auto;
@@ -58,8 +76,8 @@
         flex-direction: column;
         align-items: center;
         gap: 18px;
-        font: 800 34px/1 'Nunito', ui-rounded, system-ui, sans-serif;
-        color: #242632;
+        font: 600 36px/1 'Fraunces_600SemiBold', Georgia, serif;
+        color: #332b27;
         letter-spacing: -1px;
       }
       #boot svg {
@@ -71,15 +89,15 @@
         text-align: center;
         font: 400 16px/1.4 'NunitoSans_400Regular', system-ui, sans-serif;
         letter-spacing: 0;
-        color: #5c5f6e;
+        color: #6e625a;
       }
       #boot-slow button {
         margin-top: 12px;
         border: 0;
         border-radius: 999px;
         padding: 10px 22px;
-        background: #ff7468;
-        color: #242632;
+        background: #a9533f;
+        color: #fff9f0;
         font: 700 16px 'NunitoSans_700Bold', system-ui, sans-serif;
       }
       @keyframes boot-spin {
@@ -90,13 +108,13 @@
       @media (prefers-color-scheme: dark) {
         html,
         body {
-          background: #17181f;
+          background: #1e1a17;
         }
         #boot {
-          color: #f5efe7;
+          color: #f4eee5;
         }
         #boot-slow {
-          color: #b9bccb;
+          color: #bdafa3;
         }
       }
       @media (prefers-reduced-motion: reduce) {
@@ -112,13 +130,13 @@
     <div id="root">
       <div id="boot" role="status" aria-label="Loading Oursome">
         <svg width="72" height="72" viewBox="0 0 100 100" aria-hidden="true">
-          <path d="M 20.33 38.01 A 32 32 0 0 1 38.01 20.33" stroke="#FF7468" stroke-width="17" stroke-linecap="round" fill="none" />
-          <path d="M 61.99 20.33 A 32 32 0 0 1 79.67 38.01" stroke="#FFC857" stroke-width="17" stroke-linecap="round" fill="none" />
-          <path d="M 79.67 61.99 A 32 32 0 0 1 61.99 79.67" stroke="#79D6B0" stroke-width="17" stroke-linecap="round" fill="none" />
-          <path d="M 38.01 79.67 A 32 32 0 0 1 20.33 61.99" stroke="#76C8F5" stroke-width="17" stroke-linecap="round" fill="none" />
-          <circle cx="50" cy="50" r="7" fill="#B7A2ED" />
+          <path d="M 20.33 38.01 A 32 32 0 0 1 38.01 20.33" stroke="#E5B96D" stroke-width="17" stroke-linecap="round" fill="none" />
+          <path d="M 61.99 20.33 A 32 32 0 0 1 79.67 38.01" stroke="#879D86" stroke-width="17" stroke-linecap="round" fill="none" />
+          <path d="M 79.67 61.99 A 32 32 0 0 1 61.99 79.67" stroke="#8FA5B2" stroke-width="17" stroke-linecap="round" fill="none" />
+          <path d="M 38.01 79.67 A 32 32 0 0 1 20.33 61.99" stroke="#A08DA4" stroke-width="17" stroke-linecap="round" fill="none" />
+          <circle cx="50" cy="50" r="11" fill="#B95F49" />
         </svg>
-        <div>oursome<span style="color: #ff7468">.</span></div>
+        <div>oursome<span style="color: #b95f49">.</span></div>
         <div id="boot-slow">
           Taking longer than usual — your connection may be slow.<br />
           <button type="button" onclick="location.reload()">Try again</button>

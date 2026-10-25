@@ -14,7 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useLayout } from '@/hooks/useLayout';
-import { fonts, layout, space, useTheme } from '@/theme';
+import { fonts, layout, paperProps, space, useTheme } from '@/theme';
 
 import { Text } from './Text';
 
@@ -71,6 +71,7 @@ export function Screen({ children, title, subtitle, right, tabBar, scroll = true
 
   return (
     <KeyboardAvoidingView
+      {...paperProps}
       style={{ flex: 1, backgroundColor: background ?? palette.background }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       {scroll ? (
@@ -156,7 +157,7 @@ export function ModalHeader({
           }}>
           <Text
             variant="callout"
-            color={actionDisabled ? palette.textTertiary : palette.onAccent}
+            color={actionDisabled ? palette.textTertiary : palette.accents.coral.on}
             style={{ fontFamily: fonts.bodyBold }}>
             {action}
           </Text>
@@ -173,7 +174,7 @@ export function ModalScreen({ children, header }: { children: ReactNode; header:
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: palette.background }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView {...paperProps} style={{ flex: 1, backgroundColor: palette.background }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View
         style={{
           paddingHorizontal: layout.screenPadding,

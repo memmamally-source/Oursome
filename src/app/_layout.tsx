@@ -22,14 +22,14 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
     if (Platform.OS === 'web') (globalThis as { __oursomeRecoverChunk?: (m: string) => void }).__oursomeRecoverChunk?.(error.message);
   }, [error]);
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: '#FFF9F2', gap: 12 }}>
-      <Text style={{ fontSize: 22, fontWeight: '800', color: '#242632' }}>Something went wrong</Text>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: '#F4EEE5', gap: 12 }}>
+      <Text style={{ fontSize: 22, fontWeight: '800', color: '#332B27' }}>Something went wrong</Text>
       <Text style={{ fontSize: 16, color: '#6B6D7B', textAlign: 'center' }}>Your information is safe. Let’s try that again.</Text>
       <Pressable
         onPress={retry}
         accessibilityRole="button"
-        style={{ marginTop: 8, backgroundColor: '#FF7468', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 999 }}>
-        <Text style={{ fontSize: 16, fontWeight: '700', color: '#242632' }}>Try again</Text>
+        style={{ marginTop: 8, backgroundColor: '#A9533F', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 999 }}>
+        <Text style={{ fontSize: 16, fontWeight: '700', color: '#FFF9F0' }}>Try again</Text>
       </Pressable>
     </View>
   );

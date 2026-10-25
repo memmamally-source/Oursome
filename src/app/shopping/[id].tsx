@@ -85,7 +85,7 @@ export default function ShoppingListScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
           <View
             style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: tone.base, alignItems: 'center', justifyContent: 'center' }}>
-            <Icon name={list.icon} size={24} color={palette.onAccent} />
+            <Icon name={list.icon} size={24} color={tone.on} />
           </View>
           <View style={{ flex: 1 }}>
             <Text variant="title" numberOfLines={1} accessibilityRole="header">

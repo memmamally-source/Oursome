@@ -76,8 +76,8 @@ export function TabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
           accessibilityRole="button"
           accessibilityLabel="Add or ask"
           style={({ pressed }) => [styles.sideCompose, { backgroundColor: palette.accents.coral.base, opacity: pressed ? 0.85 : 1 }]}>
-          <Icon name="sparkles" size={18} color={palette.onAccent} />
-          <Text style={{ fontFamily: fonts.bodyBold, fontSize: 16, color: palette.onAccent }}>Add or ask</Text>
+          <Icon name="sparkles" size={18} color={palette.accents.coral.on} />
+          <Text style={{ fontFamily: fonts.bodyBold, fontSize: 16, color: palette.accents.coral.on }}>Add or ask</Text>
         </Pressable>
         <View style={{ gap: 4, marginTop: space.xl }}>
           {routes.map((route) => (
@@ -108,7 +108,7 @@ export function TabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
               { backgroundColor: palette.accents.coral.base, transform: [{ scale: pressed ? 0.94 : 1 }] },
               elevation(palette, 2),
             ]}>
-            <Icon name="add" size={30} color={palette.onAccent} />
+            <Icon name="add" size={30} color={palette.accents.coral.on} />
           </Pressable>
         </View>
         {routes.slice(mid).map(item)}

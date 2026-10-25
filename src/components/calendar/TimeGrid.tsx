@@ -95,7 +95,7 @@ export function TimeGrid({ days, occurrences, today, nowTime, height, onSelectDa
                         justifyContent: 'center',
                         backgroundColor: isToday ? palette.accents.coral.base : 'transparent',
                       }}>
-                      <Text variant="bodyStrong" color={isToday ? palette.onAccent : palette.text}>
+                      <Text variant="bodyStrong" color={isToday ? palette.accents.coral.on : palette.text}>
                         {format(d, 'd')}
                       </Text>
                     </View>

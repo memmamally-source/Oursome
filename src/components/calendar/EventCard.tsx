@@ -55,7 +55,7 @@ export function EventCard({ occurrence, compact, now }: { occurrence: EventOccur
           </Text>
           {isNow ? (
             <View style={{ backgroundColor: tone.base, borderRadius: radius.pill, paddingHorizontal: 6, paddingVertical: 1 }}>
-              <Text variant="caption" color={palette.onAccent} style={{ fontFamily: fonts.bodyBold, fontSize: 11 }}>
+              <Text variant="caption" color={tone.on} style={{ fontFamily: fonts.bodyBold, fontSize: 11 }}>
                 NOW
               </Text>
             </View>

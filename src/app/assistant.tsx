@@ -10,7 +10,7 @@ import { Icon } from '@/components/ui/Icon';
 import { AI_ENDPOINT } from '@/features/assistant/remote';
 import { useAssistant } from '@/features/assistant/store';
 import { haptic } from '@/lib/haptics';
-import { fonts, layout, radius, space, useTheme } from '@/theme';
+import { fonts, layout, paperProps, radius, space, useTheme } from '@/theme';
 
 /** The full conversation with the organiser. Shares its state with the Home capture box. */
 export default function AssistantScreen() {
@@ -42,7 +42,7 @@ export default function AssistantScreen() {
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: palette.background }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+    <KeyboardAvoidingView {...paperProps} style={{ flex: 1, backgroundColor: palette.background }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View
         style={{
           flexDirection: 'row',
@@ -180,7 +180,7 @@ export default function AssistantScreen() {
               justifyContent: 'center',
               backgroundColor: draft.trim() ? palette.accents.coral.base : palette.surfaceSunken,
             }}>
-            <Icon name="arrow-up" size={22} color={draft.trim() ? palette.onAccent : palette.textTertiary} />
+            <Icon name="arrow-up" size={22} color={draft.trim() ? palette.accents.coral.on : palette.textTertiary} />
           </Pressable>
         </View>
       </View>

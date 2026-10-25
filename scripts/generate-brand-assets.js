@@ -8,7 +8,8 @@ const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright');
 
-const C = { coral: '#FF7468', sunshine: '#FFC857', sky: '#76C8F5', lavender: '#B7A2ED', mint: '#79D6B0', cream: '#FFF9F2', charcoal: '#242632' };
+// Warm palette: terracotta orb at the centre, honey/sage/slate/heather around it, on linen.
+const C = { coral: '#B95F49', sunshine: '#E5B96D', sky: '#8FA5B2', lavender: '#A08DA4', mint: '#879D86', cream: '#F4EEE5', charcoal: '#332B27' };
 const root = path.join(__dirname, '..');
 const out = (p) => path.join(root, p);
 
@@ -20,10 +21,10 @@ function arc(cx, cy, r, a1, a2) {
 
 /** Concept 1 — "Gathering": four rounded pieces circling a shared centre. */
 function gathering({ scale = 1, mono, dot = true } = {}) {
-  const segs = [[C.coral, -158], [C.sunshine, -68], [C.mint, 22], [C.sky, 112]];
+  const segs = [[C.sunshine, -158], [C.mint, -68], [C.sky, 22], [C.lavender, 112]];
   const r = 32 * scale, w = 17 * scale;
   return segs.map(([c, s]) => `<path d="${arc(50, 50, r, s, s + 46)}" stroke="${mono || c}" stroke-width="${w}" stroke-linecap="round" fill="none"/>`).join('') +
-    (dot ? `<circle cx="50" cy="50" r="${7 * scale}" fill="${mono || C.lavender}"/>` : '');
+    (dot ? `<circle cx="50" cy="50" r="${11 * scale}" fill="${mono || C.coral}"/>` : '');
 }
 
 /** Concept 2 — "Petals": overlapping circles that read as an o. */
@@ -74,17 +75,20 @@ const svg = (body, { bg = C.cream, size = 1024, viewBox = '0 0 100 100' } = {}) 
   await render(padded('-10 -10 120 120').replace('width="512" height="512"', 'width="180" height="180"'), 'public/icons/apple-touch-icon.png', 180);
 
   // Social preview image (1200×630).
-  const og = `<div id="og" style="width:1200px;height:630px;background:${C.cream};position:relative;overflow:hidden;font-family:system-ui">
-    <div style="position:absolute;right:-120px;top:-140px;width:520px;height:520px;border-radius:50%;background:#FFF3D6"></div>
-    <div style="position:absolute;right:160px;bottom:-200px;width:380px;height:380px;border-radius:50%;background:#FFE8E4"></div>
+  const fraunces = fs.readFileSync(out('public/fonts/fraunces.woff2')).toString('base64');
+  const og = `<style>@font-face{font-family:Fraunces;src:url(data:font/woff2;base64,${fraunces}) format('woff2');font-weight:100 900}</style>
+  <div id="og" style="width:1200px;height:630px;background:${C.cream};position:relative;overflow:hidden;font-family:system-ui">
+    <div style="position:absolute;right:-120px;top:-140px;width:520px;height:520px;border-radius:50%;background:#F7E9CC"></div>
+    <div style="position:absolute;right:160px;bottom:-200px;width:380px;height:380px;border-radius:50%;background:#F3DDD3"></div>
     <div style="position:absolute;right:110px;top:150px">${svg(gathering(), { size: 330, bg: null })}</div>
     <div style="position:absolute;left:90px;top:170px;width:620px">
-      <div style="font:800 96px/1 system-ui;letter-spacing:-3px;color:${C.charcoal}">oursome<span style="color:${C.coral}">.</span></div>
-      <div style="font:700 44px/1.2 system-ui;color:${C.charcoal};margin-top:28px">Life’s better together.</div>
-      <div style="font:400 28px/1.4 system-ui;color:#6B6D7B;margin-top:18px">Calendar, tasks, reminders and shopping lists, shared with the people you live with.</div>
+      <div style="font:600 100px/1 Fraunces,Georgia,serif;letter-spacing:-3px;color:${C.charcoal}">oursome<span style="color:${C.coral}">.</span></div>
+      <div style="font:500 44px/1.2 Fraunces,Georgia,serif;color:${C.charcoal};margin-top:28px">Life’s better together.</div>
+      <div style="font:400 28px/1.4 system-ui;color:#6E625A;margin-top:18px">Your shared home: calendar, tasks, lists and memories, with the people you live with.</div>
     </div></div>`;
   await page.setViewportSize({ width: 1200, height: 630 });
   await page.setContent(`<html><body style="margin:0">${og}</body></html>`);
+  await page.evaluate(() => document.fonts.ready);
   await page.locator('#og').screenshot({ path: out('public/og-image.png') });
 
   // Concept sheet for review.

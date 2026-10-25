@@ -1,5 +1,5 @@
 import { Icon } from './Icon';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -33,7 +33,7 @@ export function IconBubble({
   shape?: 'circle' | 'square';
   solid?: boolean;
 }) {
-  const { palette, accent: a } = useTheme();
+  const { accent: a } = useTheme();
   const tone = a(accent);
   return (
     <View
@@ -45,7 +45,7 @@ export function IconBubble({
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-      <Icon name={name} size={size * 0.5} color={solid ? palette.onAccent : tone.ink} />
+      <Icon name={name} size={size * 0.5} color={solid ? tone.on : tone.ink} />
     </View>
   );
 }
@@ -63,11 +63,12 @@ type CardProps = {
 export function Card({ children, tint, style, padded = true, onPress, accessibilityLabel, elevated = true }: CardProps) {
   const { palette } = useTheme();
   const base: ViewStyle = {
+    // Stationery: ivory paper with a fine warm edge and a soft resting shadow.
     backgroundColor: tint ? palette.accents[tint].soft : palette.surface,
     borderRadius: radius.xl,
     padding: padded ? space.lg : 0,
     ...(elevated && !tint ? elevation(palette, 1) : null),
-    ...(palette.scheme === 'dark' && !tint ? { borderWidth: StyleSheet.hairlineWidth, borderColor: palette.border } : null),
+    ...(!tint ? { borderWidth: 1, borderColor: palette.border } : null),
   };
   if (onPress) {
     return (
@@ -120,7 +121,7 @@ export function Button({
             : 'transparent';
   const fg =
     variant === 'primary'
-      ? palette.onAccent
+      ? tone.on
       : variant === 'soft'
         ? tone.ink
         : variant === 'danger'
@@ -195,7 +196,7 @@ export function IconButton({
         : variant === 'surface'
           ? palette.surface
           : 'transparent';
-  const fg = variant === 'solid' ? palette.onAccent : (tone?.ink ?? palette.text);
+  const fg = variant === 'solid' ? (tone?.on ?? palette.background) : (tone?.ink ?? palette.text);
   return (
     <PressableScale
       onPress={() => {
@@ -246,14 +247,15 @@ export function Chip({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
-        paddingHorizontal: small ? 10 : 14,
-        height: small ? 30 : 36,
+        paddingHorizontal: small ? 12 : 14,
+        height: small ? 32 : 38,
         borderRadius: radius.pill,
         backgroundColor: selected ? tone.soft : palette.surface,
-        borderWidth: 1.5,
+        borderWidth: 1,
         borderColor: selected ? tone.base : palette.border,
         opacity: pressed ? 0.8 : 1,
-      })}>
+      })}
+      hitSlop={small ? 6 : 3}>
       {dot ? <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: palette.accents[dot].base }} /> : null}
       {icon ? <Icon name={icon} size={15} color={selected ? tone.ink : palette.textSecondary} /> : null}
       <Text variant="callout" color={selected ? tone.ink : palette.text} numberOfLines={1}>
@@ -307,7 +309,7 @@ export function Avatar({ name, accent, size = 32, ring }: { name: string; accent
         borderWidth: ring ? 2.5 : 0,
         borderColor: palette.surface,
       }}>
-      <Text variant="callout" color={palette.onAccent} style={{ fontFamily: fonts.display, fontSize: size * 0.4, lineHeight: size * 0.5 }}>
+      <Text variant="callout" color={palette.accents[accent].on} style={{ fontFamily: fonts.display, fontSize: size * 0.4, lineHeight: size * 0.5 }}>
         {initials}
       </Text>
     </View>
@@ -367,6 +369,7 @@ export function TextField({
   ...rest
 }: TextInputProps & { label?: string; error?: string | null; icon?: IconName }) {
   const { palette } = useTheme();
+  const [focused, setFocused] = useState(false);
   return (
     <View style={{ gap: 6 }}>
       {label ? (
@@ -382,7 +385,7 @@ export function TextField({
           backgroundColor: palette.surface,
           borderRadius: radius.md,
           borderWidth: 1.5,
-          borderColor: error ? palette.danger : palette.border,
+          borderColor: error ? palette.danger : focused ? palette.accents.coral.base : palette.border,
           paddingHorizontal: space.md,
         }}>
         {icon ? <Icon name={icon} size={18} color={palette.textTertiary} /> : null}
@@ -390,6 +393,14 @@ export function TextField({
           placeholderTextColor={palette.textTertiary}
           accessibilityLabel={label ?? rest.placeholder}
           {...rest}
+          onFocus={(e) => {
+            setFocused(true);
+            rest.onFocus?.(e);
+          }}
+          onBlur={(e) => {
+            setFocused(false);
+            rest.onBlur?.(e);
+          }}
           style={[
             {
               flex: 1,
@@ -451,6 +462,8 @@ export function Segmented<T extends string>({
                 flexDirection: 'row',
                 gap: 6,
                 backgroundColor: active ? palette.surface : 'transparent',
+                borderWidth: 1,
+                borderColor: active ? palette.border : 'transparent',
               },
               active && elevation(palette, 1),
             ]}>
@@ -507,7 +520,7 @@ export function SettingRow({
           }}
           accessibilityLabel={label}
           trackColor={{ true: palette.accents.coral.base, false: palette.border }}
-          thumbColor="#FFFFFF"
+          thumbColor={palette.surface}
           ios_backgroundColor={palette.border}
         />
       ) : onPress ? (
