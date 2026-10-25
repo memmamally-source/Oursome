@@ -57,7 +57,7 @@ const svg = (body, { bg = C.cream, size = 1024, viewBox = '0 0 100 100' } = {}) 
   };
 
   // Chosen app icon (iOS: square, opaque — iOS applies the corner mask).
-  await render(svg(gathering({ scale: 1 }), { size: 1024 }).replace('viewBox="0 0 100 100"', 'viewBox="-4 -4 108 108"').replace('<rect width="100"', '<rect x="-4" y="-4" width="108"'), 'assets/images/icon.png', 1024);
+  await render(svg(gathering({ scale: 1 }), { size: 1024 }).replace('viewBox="0 0 100 100"', 'viewBox="-4 -4 108 108"').replace('<rect width="100" height="100"', '<rect x="-4" y="-4" width="108" height="108"'), 'assets/images/icon.png', 1024);
   // Android adaptive icon: transparent foreground inside the 66% safe zone, solid background, monochrome.
   await render(svg(gathering(), { bg: null, size: 1024 }).replace('viewBox="0 0 100 100"', 'viewBox="-35 -35 170 170"'), 'assets/images/android-icon-foreground.png', 1024, true);
   await render(svg('', { size: 1024 }), 'assets/images/android-icon-background.png', 1024);
