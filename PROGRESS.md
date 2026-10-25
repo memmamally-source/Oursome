@@ -4,26 +4,45 @@
 
 **Product:** AI-powered personal, couples & family organiser. Freemium. US first, then UK/CA/AU.
 **Name:** "Oursome" is **provisional** (trademark/domain/store clearance pending). Change it in `src/config/brand.ts` + `app.json` (`name`, `bundleIdentifier`, `package`, `scheme`).
-**Repo:** `memmamally-source/Oursome` — fully separate from Crossword Hub and the travel app. No Firebase project yet.
+**Repo:** `memmamally-source/Oursome` — fully separate from Crossword Hub and the travel app. No Firebase project yet (cloud code is built and off until one is configured, see `docs/CLOUD.md`).
 
 ## Status
 
 | Stage | Status |
 | --- | --- |
-| 1. Beautiful foundation | ✅ Done (local-only, see below) |
+| 1. Beautiful foundation | ✅ Done |
 | 1b. Website first (PWA on GitHub Pages) | ✅ Live at memmamally-source.github.io/Oursome |
-| Overhaul (branch `overhaul-performance-ui-ai`) | ✅ Phases A–E done; PR open, awaiting owner approval to merge (merging deploys). AI service built, not deployed. |
-| 2. Core functionality (Firebase auth, Firestore, notifications) | ⏭ Next |
-| 3. Household sharing | — |
-| 4. AI assistant (server) | — |
-| 5. Smart imports (images/PDF) | — |
-| 6. Premium subscriptions (RevenueCat, sandbox) | — |
-| 7. Polish & testing | — |
+| Overhaul (PRs #2–#5) | ✅ Merged |
+| Redesign + photo albums (branch `redesign-home`) | ✅ Built and tested; PR for review, **not merged** (merging deploys) |
+| 2. Core functionality (accounts, reminders) | ✅ Reminders work while open; Firebase accounts built, off until configured |
+| 3. Household sharing | ✅ Built (Firebase, rules tested on the emulator), off until configured |
+| 4. AI assistant (server) | Built, not deployed (owner decision) |
+| 5. Smart imports (images/PDF) | Text and .ics import done; images/PDF need the AI service |
+| 6. Premium subscriptions | — |
+| 7. Polish & testing | In progress (no physical-device testing yet) |
 | 8. Store release | — |
 
-## Overhaul: performance, UI/UX and AI (branch `overhaul-performance-ui-ai`, not merged)
+## Redesign, functional upgrade and photo albums (branch `redesign-home`, not merged)
 
 Merging to `main` deploys the website, so merge only with the owner's approval.
+
+
+- **R1 Design system:** linen `#F4EEE5`, ivory `#FFF9F0`, terracotta `#B95F49` (solid fills `#A9533F` for AA), sage, honey, espresso; Fraunces headings (self-hosted on web), Nunito Sans text; paper grain on web (`paperProps`); warm dark palette. Each accent has `base/soft/ink/on`.
+- **R2 Motion (`theme/motion.ts`):** `useReducedMotion()` (device setting or Settings → Reduce motion). Orb companion (`components/brand/Orb.tsx`, rate-limited celebrations, never blocks), toasts with Undo, confirm dialog (no browser alerts), fold-away task completion, page turning (`components/journal/PageTurn.tsx`, drag/buttons/arrow keys, fade when reduced).
+- **R3 Home:** greeting over the household cover (scenes or photo, seasonal accent), occasions ribbon, quick actions, shopping, coming up, recently at home (`features/activity`), optional weekly summary (Sun/Mon), dismissible first steps. "Make it yours" (`/household`).
+- **R4 Journal:** memories/milestones/notes with photos (`features/memories`, photos in IndexedDB via `lib/photoStore.ts`), `/journal` book, Our Space timeline.
+- **R5 Functional:** reminder engine (`features/reminders`: events, tasks, briefings, quiet hours hold reminders, dedupe, history; browser notifications when allowed, in-app otherwise; push with the app closed needs a server); `.ics` import/export (`features/calendar/ics.ts`, one-way, labelled so); event participants; multi-day all-day events; assistant covers the brief's seven example requests (scenario tests); shopping own order + often-bought; onboarding refresh.
+- **R6 Cloud (`features/cloud`, off unless `EXPO_PUBLIC_FIREBASE_*` set):** Firebase Auth; share a family (uploads what's shared, keeps local data), 7-day invite codes, join, leave; two-way sync with merge rules in pure `mapping.ts`; Firestore rules in `firebase/firestore.rules` with 15 emulator tests (`npm run test:cloud`, in CI). Firebase loads in its own chunk only when configured. Verified end to end with two browsers against the emulators.
+- **Photo albums (`features/albums`):**
+  - Layout engine (`auto.ts`, pure): 27 page designs on a 4:5 page; dynamic programming over crop loss (hard limit 40%), template taste, fullness and variety; sections by day/month/year with dividers; Growing Up chapters with ages; `redesign()` keeps unchanged sections and manual edits. Deterministic per album.
+  - Photos stay on the device (owner chose on-device storage; cloud photo storage needs a paid plan): IndexedDB original/display (2048 px)/thumb (480 px) on web, app documents on phones (phone path untested). EXIF dates and orientation; resumable two-at-a-time queue with retry; storage estimate and persistence request.
+  - Screens: `/albums`, `/album/new` (choose photos → name → Create album; style suggested from the name), `/album/[id]` (cover, page turning, preloading), `/album/[id]/edit` (designs with previews, swap/replace, crop by drag or buttons, captions, notes, dates, reorder, journal pages, cover/theme/style, redesign, sharing permissions, delete, download).
+  - PDF (`pdf.ts`, jsPDF lazy-loaded): 8 × 10 in, 300 dpi with 1/8 in bleed or 150 dpi for sharing, drawn from the same data; `print.ts` print checks and a `PrintProvider` interface (no provider connected).
+- **QA done on the production build (local Pages-like server):** unit tests 251; rules tests 15 (emulator); Playwright flows for journal, reminders (with a controlled clock), .ics, shopping, two-person cloud sync, albums (40 generated photos with EXIF incl. a rotated one) and both PDF exports (checked with `pdfinfo`/`pdftoppm`); earlier E2E scripts re-run (`families` 15/15, `taskcal` 10/10; the original `e2e` script still expects the sample content removed in PR #4). Album theme colours checked for WCAG AA. Screenshots and `docs/preview/album-page-turn.gif`.
+- **Not done / needs the owner:** physical iPhone/Android testing; a Firebase project (free Spark plan, `docs/CLOUD.md`); cloud photo storage (paid; owner chose on-device); push notifications with the app closed (needs a server); live AI (needs approval and a key); printed-book ordering (no provider).
+
+## Overhaul: performance, UI/UX and AI (merged in PRs #2–#5)
+
 
 - **A. Performance:** icons are an SVG subset (`npm run icons` after using a new icon name). Reanimated and gesture-handler are gone. Two self-hosted variable fonts on web. The service worker caches CORE at install and WARM when the browser is idle. Measured on slow 4G: returning-user Home 7.8 s → 3.9 s, transfer 1.66 → 0.55 MB, Lighthouse 55 → 65.
 - **B. Home and navigation:** logo bar plus greeting card, organiser capture box, My day, My people, lists, coming up. Tabs are Today / Calendar / Tasks / Our Space with a central "+" ("Add or ask"); a sidebar on screens ≥900px. The organiser is a full chat at `/assistant`. `/person/[id]` shows a person page and an add/edit form.
@@ -53,7 +72,7 @@ Merging to `main` deploys the website, so merge only with the owner's approval.
 
 ## Stack (verified Oct 2026)
 
-Expo SDK 58 · React Native 0.88 · React 19.3 · TypeScript 6 · Expo Router 58 (JS tabs with custom tab bar) · Reanimated 4 · Zustand 5 + AsyncStorage persistence · date-fns 4 · react-native-svg · @expo/vector-icons (Ionicons) · Nunito (headings) + Nunito Sans (body), both OFL · Jest (jest-expo) · ESLint (eslint-config-expo, React Compiler rules).
+Expo SDK 58 · React Native 0.88 · React 19.3 · TypeScript 6 · Expo Router 58 (JS tabs with custom tab bar) · Zustand 5 + AsyncStorage persistence · date-fns 4 · react-native-svg · Ionicons SVG subset · Fraunces (headings) + Nunito Sans (body), both OFL · Firebase JS SDK 13 (optional, lazy) · jsPDF 4 (lazy, album export) · Jest (jest-expo) · ESLint (eslint-config-expo, React Compiler rules).
 
 Everything used runs in **Expo Go** — no dev build needed yet.
 
@@ -95,31 +114,27 @@ Decision (23 Oct 2026): launch as a website first, like Crossword Hub. We reuse 
 
 ## Known gaps / outstanding
 
-- No backend: data is per device; invites are placeholders; notification prefs aren't delivered.
-- Reordering uses up/down arrows (drag-to-reorder later).
-- Editing a recurring event edits the whole series (no "this occurrence only" yet).
-- Event attachments not implemented (needs Cloud Storage).
-- External calendar sync (Google/Apple) not started.
-- Week view titles are tiny on narrow phones; consider a 3-day view.
-- Routines/habits UI not built (data model can reuse recurring tasks).
-- Icon concepts in `docs/brand/icon-concepts.png`; "Gathering" chosen provisionally.
+- Not tested on a physical iPhone/Android device (all testing is the web build in Chromium).
+- Cloud sharing and accounts need a Firebase project; until then data is per device and invites explain why they're unavailable.
+- Album photos are per device; shared albums can't show photos on other members' devices until cloud photo storage is chosen.
+- Notifications arrive only while Oursome is open (tab or installed app).
+- Calendar import/export is one-way; no live Google/Apple sync.
+- Editing a recurring event edits the whole series.
 - Legal drafts in `docs/legal/` need professional review.
-- Not yet tested on a physical iPhone/Android device.
 
-## Stage 2 plan (next)
+## Next
 
-1. Create **separate** Firebase projects `oursome-dev` and `oursome-prod` (ask user first — billing/Blaze needed for Functions).
-2. Firebase Auth (email/password, reset); investigate Sign in with Apple (required if Google sign-in is offered on iOS).
-3. Firestore data model `users/{uid}/…` for private data; repositories behind current store APIs; offline persistence.
-4. Expo Notifications for task/event reminders with quiet hours; permission prompt in context.
-5. Account deletion via Cloud Function; data export from server.
-6. EAS project + development build profile.
+1. Owner review of the `redesign-home` PR on a phone, then merge (deploys).
+2. If wanted: create the Firebase project (free Spark plan) and set the repo variables (`docs/CLOUD.md`).
+3. Decide on cloud photo storage (paid options) for shared albums.
+4. Device testing; EAS development build.
 
 ## Handy commands
 
 ```bash
 npm start            # Expo dev server (scan QR with Expo Go)
 npm run check        # typecheck + lint + tests
+npm run test:cloud   # security rules + cloud API against the Firebase emulator (needs Java)
 npm run web          # browser preview
 EXPO_OFFLINE=1 npx expo install <pkg>   # in sandboxes where api.expo.dev is blocked
 ```
