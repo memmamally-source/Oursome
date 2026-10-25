@@ -6,6 +6,7 @@ import { useState, type ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { LogoMark } from '@/components/brand/Logo';
+import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { Avatar, Card, Divider, IconButton, Screen, Segmented, SettingRow, Text, TextField } from '@/components/ui';
 import { Brand } from '@/config/brand';
 import { clearDemoContent, hasDemoContent } from '@/features/demo/seed';
@@ -13,8 +14,7 @@ import { deleteAllLocalData, exportData } from '@/features/settings/account';
 import { useSettings } from '@/features/settings/store';
 import { auth, useSession } from '@/features/session/store';
 import { useSpace } from '@/features/space/store';
-import { formatTime } from '@/lib/dates';
-import { accentKeys, radius, space, useTheme } from '@/theme';
+import { accentKeys, space, useTheme } from '@/theme';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -40,7 +40,6 @@ export default function SettingsScreen() {
   const settings = useSettings();
   const [name, setName] = useState(profile?.name ?? '');
   const [demo, setDemo] = useState(hasDemoContent());
-  const n = settings.notifications;
 
   const saveName = () => {
     if (!name.trim()) return;
@@ -166,69 +165,7 @@ export default function SettingsScreen() {
       </Section>
 
       <Section title="Notifications">
-        <View style={{ backgroundColor: palette.accents.sunshine.soft, borderRadius: radius.md, padding: space.md, marginTop: space.md }}>
-          <Text variant="caption" tone="sunshine">
-            Your choices are saved now. Notification delivery switches on in the next update, and we’ll ask for permission first.
-          </Text>
-        </View>
-        <SettingRow
-          icon="calendar-outline"
-          accent="sky"
-          label="Appointment reminders"
-          value={n.appointments}
-          onValueChange={(v) => settings.setNotifications({ appointments: v })}
-        />
-        <Divider />
-        <SettingRow
-          icon="alarm-outline"
-          accent="coral"
-          label="Task deadlines"
-          value={n.deadlines}
-          onValueChange={(v) => settings.setNotifications({ deadlines: v })}
-        />
-        <Divider />
-        <SettingRow
-          icon="person-add-outline"
-          accent="sunshine"
-          label="Assigned to me"
-          value={n.assignments}
-          onValueChange={(v) => settings.setNotifications({ assignments: v })}
-        />
-        <Divider />
-        <SettingRow
-          icon="home-outline"
-          accent="lavender"
-          label="Household updates"
-          value={n.household}
-          onValueChange={(v) => settings.setNotifications({ household: v })}
-        />
-        <Divider />
-        <SettingRow
-          icon="sunny-outline"
-          accent="sunshine"
-          label="Morning briefing"
-          detail="A gentle summary of your day"
-          value={n.morningBriefing}
-          onValueChange={(v) => settings.setNotifications({ morningBriefing: v })}
-        />
-        <Divider />
-        <SettingRow
-          icon="moon-outline"
-          accent="lavender"
-          label="Evening briefing"
-          detail="A look at tomorrow"
-          value={n.eveningBriefing}
-          onValueChange={(v) => settings.setNotifications({ eveningBriefing: v })}
-        />
-        <Divider />
-        <SettingRow
-          icon="volume-mute-outline"
-          accent="mint"
-          label="Quiet hours"
-          detail={`${formatTime(n.quietHours.from)} – ${formatTime(n.quietHours.to)}`}
-          value={n.quietHours.enabled}
-          onValueChange={(v) => settings.setNotifications({ quietHours: { ...n.quietHours, enabled: v } })}
-        />
+        <NotificationSettings />
       </Section>
 
       {/* Only for accounts that loaded sample content before it was retired. */}

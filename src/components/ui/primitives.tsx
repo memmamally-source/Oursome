@@ -522,6 +522,8 @@ export function SettingRow({
           trackColor={{ true: palette.accents.coral.base, false: palette.border }}
           thumbColor={palette.surface}
           ios_backgroundColor={palette.border}
+          // react-native-web otherwise paints the "on" thumb its default teal.
+          {...({ activeThumbColor: palette.surface } as object)}
         />
       ) : onPress ? (
         <Icon name="chevron-forward" size={18} color={palette.textTertiary} />

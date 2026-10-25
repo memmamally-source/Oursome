@@ -4,6 +4,9 @@ import { persist } from 'zustand/middleware';
 import type { CalendarEvent, CalendarSource } from '@/features/types';
 import { recordActivity } from '@/features/activity/store';
 import { withFamily } from '@/features/space/store';
+
+import { mergeImported, type ImportedEvent } from './ics';
+import { deviceTimeZone } from '@/lib/dates';
 import { createId } from '@/lib/id';
 import { persistStorage, STORE_VERSION } from '@/lib/storage';
 
@@ -24,13 +27,15 @@ type CalendarState = {
   toggleCalendar: (id: string) => void;
   upsertCalendar: (calendar: CalendarSource) => void;
   replaceAll: (events: CalendarEvent[], calendars: CalendarSource[]) => void;
+  /** Import a calendar file's events into their own calendar (re-importing the same file updates it). */
+  importEvents: (imported: ImportedEvent[], calendarName: string) => { added: number; updated: number; calendarId: string };
   clearDemo: () => void;
   reset: () => void;
 };
 
 export const useCalendar = create<CalendarState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       events: [],
       calendars: defaultCalendars,
       addEvent: (draft) => {
@@ -49,6 +54,21 @@ export const useCalendar = create<CalendarState>()(
             : [...s.calendars, calendar],
         })),
       replaceAll: (events, calendars) => set({ events, calendars }),
+      importEvents: (imported, calendarName) => {
+        const s = get();
+        const name = calendarName.trim() || 'Imported';
+        const existing = s.calendars.find((c) => c.kind === 'imported' && c.name === name);
+        const calendarId = existing?.id ?? createId('cal_');
+        const result = mergeImported(s.events, imported, calendarId, deviceTimeZone(), () => createId('e_'));
+        set({
+          events: result.events,
+          calendars: existing
+            ? s.calendars
+            : [...s.calendars, { id: calendarId, name, color: 'lavender', kind: 'imported', visible: true }],
+        });
+        if (result.added) recordActivity('event', `imported ${result.added} ${result.added === 1 ? 'event' : 'events'} from ${name}`);
+        return { added: result.added, updated: result.updated, calendarId };
+      },
       clearDemo: () =>
         set((s) => ({
           events: s.events.filter((e) => !e.isDemo),

@@ -92,3 +92,20 @@ async function openPage(request) {
     return shell;
   }
 }
+
+/** Tapping a reminder opens (or focuses) Oursome on the right screen. */
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const href = new URL((event.notification.data && event.notification.data.href) || '__BASE__/', self.location.origin).href;
+  event.waitUntil(
+    (async () => {
+      const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      const open = windows.find((w) => w.url.startsWith(self.location.origin));
+      if (open) {
+        await open.focus();
+        return open.navigate ? open.navigate(href) : undefined;
+      }
+      return self.clients.openWindow(href);
+    })(),
+  );
+});

@@ -241,7 +241,7 @@ export default function TaskEditor() {
               ]}
             />
             <Text variant="caption" tone="tertiary">
-              Notifications are delivered by your phone and may be delayed by system settings. Delivery switches on in the next update.
+              Reminders appear while Oursome is open, as a notification if you’ve allowed them in Settings.
             </Text>
           </Field>
         </>

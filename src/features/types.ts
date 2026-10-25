@@ -90,6 +90,8 @@ export type CalendarEvent = {
   personId?: string;
   /** Set only on the calendar's read-only view of a dated task (never saved as an event). */
   taskId?: string;
+  /** Identifier from a calendar file this event was imported from (re-importing updates it). */
+  externalId?: string;
   /** Important dates (birthdays, anniversaries) get special treatment on Home. */
   isImportantDate?: boolean;
   createdAt: string;

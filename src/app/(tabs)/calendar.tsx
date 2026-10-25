@@ -196,6 +196,7 @@ export default function CalendarScreen() {
               />
             ))}
             <Chip label="Tasks" small dot="mint" accent="mint" selected={tasksOn} onPress={() => setTasksOn(!tasksOn)} />
+            <Chip label="Import or export" small icon="swap-vertical-outline" accent="sky" onPress={() => router.push('/calendar-files')} />
           </View>
         ) : null}
       </View>
