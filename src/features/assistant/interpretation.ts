@@ -23,14 +23,7 @@ export type PersonMention = {
   household?: boolean | null;
 };
 
-export const ACTION_TYPES = [
-  'create_task',
-  'create_reminder',
-  'create_event',
-  'add_shopping_items',
-  'update_item',
-  'add_person',
-] as const;
+export const ACTION_TYPES = ['create_task', 'create_reminder', 'create_event', 'add_shopping_items', 'update_item', 'add_person'] as const;
 export type ActionType = (typeof ACTION_TYPES)[number];
 
 export type Action = {
@@ -128,11 +121,21 @@ export function sanitizeInterpretation(raw: unknown): Interpretation | null {
       allDay: bool(x.allDay),
       location: str(x.location, 100),
       category: str(x.category, 30),
-      items: Array.isArray(x.items) ? x.items.map((i) => str(i, 60)).filter((i): i is string => !!i).slice(0, 30) : null,
+      items: Array.isArray(x.items)
+        ? x.items
+            .map((i) => str(i, 60))
+            .filter((i): i is string => !!i)
+            .slice(0, 30)
+        : null,
       listName: str(x.listName, 40),
       target: str(x.target, 20),
       relation: str(x.relation, 30)?.toLowerCase() ?? null,
-      assumptions: Array.isArray(x.assumptions) ? x.assumptions.map((s) => str(s, 120)).filter((s): s is string => !!s).slice(0, 4) : null,
+      assumptions: Array.isArray(x.assumptions)
+        ? x.assumptions
+            .map((s) => str(s, 120))
+            .filter((s): s is string => !!s)
+            .slice(0, 4)
+        : null,
     });
   }
   let query: Query | null = null;

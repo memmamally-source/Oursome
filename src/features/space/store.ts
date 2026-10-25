@@ -6,6 +6,8 @@ import { createId } from '@/lib/id';
 import { persistStorage } from '@/lib/storage';
 import { accentKeys, type AccentKey } from '@/theme/tokens';
 
+import { recordActivity } from '@/features/activity/store';
+
 import { allPeople, migrateSpaces } from './families';
 
 /** Local id for the signed-in user until Firebase uids arrive in Stage 2. */
@@ -24,6 +26,8 @@ type SpaceState = {
   createSpace: (name: string, me: { name: string; color: AccentKey }) => Space;
   switchSpace: (id: string) => void;
   renameSpace: (name: string) => void;
+  /** Personalise the family being viewed: name, motto, cover scene or photo. */
+  updateHousehold: (patch: Partial<Pick<Space, 'name' | 'motto' | 'cover' | 'photo'>>) => void;
   addAnnouncement: (text: string) => void;
   removeAnnouncement: (id: string) => void;
   togglePin: (id: string) => void;
@@ -38,6 +42,12 @@ type SpaceState = {
   /** null clears every family (account deletion); a space is added or replaced and made active. */
   replace: (space: Space | null) => void;
   clearDemo: () => void;
+  /** Cloud sync: replace families as they now are (keeps the active one). */
+  setSpaces: (spaces: Space[]) => void;
+  /** Mark a family as shared through the cloud (or no longer). */
+  linkCloud: (id: string, cloudId: string | undefined) => void;
+  /** A family joined with an invite code. */
+  addCloudSpace: (space: Space) => void;
 };
 
 /** Recompute the derived fields whenever families change. */
@@ -73,6 +83,13 @@ export const useSpace = create<SpaceState>()(
         },
         switchSpace: (id) => set((st) => derive(st.spaces, id)),
         renameSpace: (name) => updateActive((s) => ({ ...s, name: name.trim() || s.name })),
+        updateHousehold: (patch) =>
+          updateActive((s) => ({
+            ...s,
+            ...patch,
+            name: patch.name !== undefined ? patch.name.trim() || s.name : s.name,
+            motto: patch.motto !== undefined ? patch.motto.trim().slice(0, 80) || undefined : s.motto,
+          })),
         addAnnouncement: (text) =>
           updateActive((s) => ({
             ...s,
@@ -94,6 +111,7 @@ export const useSpace = create<SpaceState>()(
             relationship: relationship?.trim().toLowerCase() || undefined,
           };
           updateActive((s) => ({ ...s, members: [...s.members, person] }));
+          recordActivity('person', `added ${person.name} to ${get().space?.name ?? 'the household'}`);
           return person;
         },
         updatePerson: (id, patch) =>
@@ -108,6 +126,9 @@ export const useSpace = create<SpaceState>()(
         replace: (space) =>
           set((st) => (space ? derive([...st.spaces.filter((s) => s.id !== space.id), space], space.id) : derive([], null))),
         clearDemo: () => set((st) => derive(st.spaces.filter((s) => !s.isDemo), st.activeId)),
+        setSpaces: (spaces) => set((st) => derive(spaces, st.activeId)),
+        linkCloud: (id, cloudId) => set((st) => derive(st.spaces.map((s) => (s.id === id ? { ...s, cloudId } : s)), st.activeId)),
+        addCloudSpace: (space) => set((st) => derive([...st.spaces.filter((s) => s.id !== space.id), space], space.id)),
       };
     },
     {

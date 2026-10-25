@@ -113,7 +113,7 @@ export default function QuickAdd() {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                <Icon name={a.icon} size={22} color={palette.onAccent} />
+                <Icon name={a.icon} size={22} color={tone.on} />
               </View>
               <Text variant="callout" color={tone.ink} style={{ fontFamily: fonts.bodyBold }} numberOfLines={1}>
                 {a.label}

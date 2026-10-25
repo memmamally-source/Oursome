@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
-    "@expo-google-fonts/nunito": "^0.4.2",
+    "@expo-google-fonts/fraunces": "^0.4.1",
     "@expo-google-fonts/nunito-sans": "^0.4.2",
     "@react-native-async-storage/async-storage": "2.2.0",
     "date-fns": "^4.4.0",
@@ -20,7 +20,9 @@
     "expo-splash-screen": "~58.0.11",
     "expo-status-bar": "~58.0.4",
     "expo-system-ui": "~58.0.6",
+    "firebase": "^13.1.0",
     "jest-expo": "~58.0.12",
+    "jspdf": "^4.2.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-native": "0.88.0",
@@ -34,6 +36,7 @@
     "zustand": "^5.0.16"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
     "@types/jest": "^30.0.0",
     "@types/react": "~19.3.0",
     "eslint": "^9.39.5",
@@ -54,7 +57,8 @@
     "build:web": "node scripts/build-web.js",
     "icons": "node scripts/generate-icons.js",
     "eval:ai": "jest src/features/assistant/__tests__/scenarios.test.ts",
-    "check:server": "npm --prefix server/ai run typecheck && npm --prefix server/ai test"
+    "check:server": "npm --prefix server/ai run typecheck && npm --prefix server/ai test",
+    "test:cloud": "cd firebase && npx --yes firebase-tools@15 emulators:exec --only firestore,auth --project demo-oursome \"cd .. && npx jest -c firebase/jest.config.js\""
   },
   "private": true,
   "jest": {
@@ -68,7 +72,8 @@
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "<rootDir>/server/"
+      "<rootDir>/server/",
+      "<rootDir>/firebase/"
     ]
   }
 }

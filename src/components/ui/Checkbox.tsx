@@ -55,7 +55,7 @@ export function Checkbox({
           borderColor: checked ? tone.base : palette.textTertiary,
           transform: [{ scale }],
         }}>
-        {checked ? <Icon name="checkmark" size={size * 0.68} color={palette.onAccent} /> : null}
+        {checked ? <Icon name="checkmark" size={size * 0.68} color={tone.on} /> : null}
       </Animated.View>
     </Pressable>
   );

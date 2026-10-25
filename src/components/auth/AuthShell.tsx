@@ -3,6 +3,7 @@ import { View } from 'react-native';
 
 import { Wordmark } from '@/components/brand/Logo';
 import { Screen, Text } from '@/components/ui';
+import { cloudConfigured } from '@/features/cloud/config';
 import { space, useTheme } from '@/theme';
 
 /** Shared frame for sign-in / sign-up: brand, heading and a soft colour wash. */
@@ -62,7 +63,9 @@ export function PreviewNotice() {
   return (
     <View style={{ backgroundColor: palette.accents.lavender.soft, borderRadius: 14, padding: space.md }}>
       <Text variant="caption" tone="lavender">
-        Preview build: your account and data are stored on this device only. Secure cloud accounts and sync arrive in the next update.
+        {cloudConfigured
+          ? 'Your account is secured with Firebase. Things you share with your family sync to their devices; everything else stays private.'
+          : 'This copy of Oursome keeps your account and data on this device only. Cloud accounts and family sharing switch on once they’re set up.'}
       </Text>
     </View>
   );

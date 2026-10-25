@@ -5,6 +5,11 @@ import { useEffect } from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { OrbStage } from '@/components/brand/Orb';
+import { ConfirmHost } from '@/components/ui/ConfirmDialog';
+import { ToastHost } from '@/components/ui/Toast';
+import { CloudBoot } from '@/features/cloud';
+import { ReminderEngine } from '@/features/reminders/engine';
 import { useSession } from '@/features/session/store';
 import { useSettings } from '@/features/settings/store';
 import { useAppFonts } from '@/hooks/useAppFonts';
@@ -22,14 +27,14 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
     if (Platform.OS === 'web') (globalThis as { __oursomeRecoverChunk?: (m: string) => void }).__oursomeRecoverChunk?.(error.message);
   }, [error]);
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: '#FFF9F2', gap: 12 }}>
-      <Text style={{ fontSize: 22, fontWeight: '800', color: '#242632' }}>Something went wrong</Text>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: '#F4EEE5', gap: 12 }}>
+      <Text style={{ fontSize: 22, fontWeight: '800', color: '#332B27' }}>Something went wrong</Text>
       <Text style={{ fontSize: 16, color: '#6B6D7B', textAlign: 'center' }}>Your information is safe. Let’s try that again.</Text>
       <Pressable
         onPress={retry}
         accessibilityRole="button"
-        style={{ marginTop: 8, backgroundColor: '#FF7468', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 999 }}>
-        <Text style={{ fontSize: 16, fontWeight: '700', color: '#242632' }}>Try again</Text>
+        style={{ marginTop: 8, backgroundColor: '#A9533F', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 999 }}>
+        <Text style={{ fontSize: 16, fontWeight: '700', color: '#FFF9F0' }}>Try again</Text>
       </Pressable>
     </View>
   );
@@ -94,6 +99,15 @@ function AppNavigator() {
           <Stack.Screen name="settings" />
           <Stack.Screen name="import" options={{ presentation: 'modal' }} />
           <Stack.Screen name="space-create" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="household" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="memory/[id]" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="journal" />
+          <Stack.Screen name="calendar-files" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="join" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="albums" />
+          <Stack.Screen name="album/new" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="album/[id]/index" />
+          <Stack.Screen name="album/[id]/edit" />
           <Stack.Screen name="premium" options={{ presentation: 'modal' }} />
         </Stack.Protected>
         <Stack.Protected guard={!signedIn}>
@@ -101,6 +115,12 @@ function AppNavigator() {
           <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
         </Stack.Protected>
       </Stack>
+      {/* Overlays: never take taps outside their own content. */}
+      <CloudBoot />
+      <ReminderEngine />
+      <OrbStage />
+      <ToastHost />
+      <ConfirmHost />
     </NavigationThemeProvider>
   );
 }

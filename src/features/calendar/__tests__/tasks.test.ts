@@ -28,13 +28,22 @@ describe('tasks on the calendar', () => {
       '2026-10-31',
     );
     expect(occ.map((o) => o.event.taskId)).toEqual(['a', 'b']);
-    expect(occ[0]).toMatchObject({ date: '2026-10-26', start: '2026-10-26T09:00', end: '2026-10-26T09:30', event: { allDay: false, calendarId: TASKS_CALENDAR_ID } });
+    expect(occ[0]).toMatchObject({
+      date: '2026-10-26',
+      start: '2026-10-26T09:00',
+      end: '2026-10-26T09:30',
+      event: { allDay: false, calendarId: TASKS_CALENDAR_ID },
+    });
     expect(occ[1].event.allDay).toBe(true);
   });
 
   it('belongs to the assignee, or to me when unassigned', () => {
     const [mine, hers, noted] = taskOccurrences(
-      [task({ id: 'a', due: '2026-10-25' }), task({ id: 'b', due: '2026-10-25', assigneeId: 'p_ru' }), task({ id: 'c', due: '2026-10-25', assigneeName: 'Bob' })],
+      [
+        task({ id: 'a', due: '2026-10-25' }),
+        task({ id: 'b', due: '2026-10-25', assigneeId: 'p_ru' }),
+        task({ id: 'c', due: '2026-10-25', assigneeName: 'Bob' }),
+      ],
       '2026-10-25',
       '2026-10-25',
     );

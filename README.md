@@ -1,6 +1,6 @@
 # oursome.
 
-**Life’s better together.** An AI-powered personal, couples and family organiser: calendars, tasks, reminders, shopping lists and a shared “Our Space”, in one warm, colourful app.
+**Life’s better together.** A warm home for a family’s plans and memories: calendars, tasks, reminders, shopping lists, a journal, photo albums designed like printed photo books, and a shared “Our Space”.
 
 > The name “Oursome” is provisional pending trademark and store clearance. Branding lives in `src/config/brand.ts`.
 
@@ -19,6 +19,14 @@ Type anything in everyday words: "Rufaida needs to take the kids to the park", "
 - **Basic mode** (default): runs on the device, and messages aren't sent anywhere.
 - **Smart mode:** the AI service in [`server/ai`](server/ai/README.md) (Claude via a Cloudflare Worker). It is built and tested but **not deployed**; switching it on needs the owner's approval, an Anthropic API key and a model choice. Costs and steps are in that README.
 
+## Photo albums
+
+Choose photos, name the album and tap **Create album**: Oursome designs the pages (grids, magazine layouts, polaroids, scrapbook pages, timelines) by date, with a style suggested from the name. Read it by turning pages, edit anything you like, and download a print-ready PDF (8 × 10 in, 300 dpi with bleed). Photos stay on your device.
+
+## Sharing with your family
+
+Accounts and family sharing use Firebase and are off until a Firebase project is configured. See [`docs/CLOUD.md`](docs/CLOUD.md) (free Spark plan). Private things never leave the device.
+
 ## Preview the native app on your iPhone
 
 1. Install **Expo Go** from the App Store.
@@ -31,7 +39,7 @@ Type anything in everyday words: "Rufaida needs to take the kids to the park", "
    ```
 3. Scan the QR code with the iPhone Camera app. It opens in Expo Go.
    - Phone and computer on different networks? Use `npx expo start --tunnel`.
-4. Tap **Get started**, create an account (stored on the phone only in this preview) and keep **Explore with sample content** on.
+4. Tap **Get started** and create an account (stored on the phone only unless cloud sharing is configured).
 
 You can also run `npm run web` for a quick look in the browser.
 
@@ -44,6 +52,7 @@ You can also run `npm run web` for a quick look in the browser.
 | `npm run build:web` | Build the website into `dist/` |
 | `npm run check` | TypeScript, ESLint and unit tests |
 | `npm test` | Unit tests only |
+| `npm run test:cloud` | Firestore security rules and cloud API against the local Firebase emulator (needs Java) |
 | `npm run check:server` | AI service typecheck and tests (fake model, no cost) |
 | `npm run eval:ai` | Organiser scenarios against a live AI service (`AI_EVAL_ENDPOINT=<url>`; costs a few cents) |
 | `npm run icons` | Regenerate the icon subset after using a new icon name |
@@ -59,7 +68,8 @@ src/
   lib/            Dates, ids, storage, haptics
   theme/          Design tokens and theme provider
 server/ai/        AI service (Cloudflare Worker, not deployed)
-docs/             Brand concepts, legal drafts
+firebase/         Firestore rules, emulator config and rules tests
+docs/             Cloud setup, previews, brand concepts, legal drafts
 ```
 
 See [`PROGRESS.md`](PROGRESS.md) for status, decisions and next steps.

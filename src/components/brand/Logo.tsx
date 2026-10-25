@@ -7,14 +7,15 @@ import { fonts, useTheme } from '@/theme';
 import { Text } from '../ui/Text';
 
 /**
- * "Gathering" mark: four rounded pieces — one per brand colour — circling
- * together to form an "o". Separate pieces, one whole.
+ * "Gathering" mark: four rounded pieces circling a terracotta orb, the
+ * household around its warm centre. The orb is also Oursome's animated
+ * companion (components/brand/Orb.tsx).
  */
 export const MARK_SEGMENTS = [
-  { color: Brand.colors.coral, start: -158 },
-  { color: Brand.colors.sunshine, start: -68 },
-  { color: Brand.colors.mint, start: 22 },
-  { color: Brand.colors.sky, start: 112 },
+  { color: Brand.colors.honey, start: -158 },
+  { color: Brand.colors.sage, start: -68 },
+  { color: Brand.colors.slate, start: 22 },
+  { color: Brand.colors.heather, start: 112 },
 ] as const;
 
 const SPAN = 46;
@@ -41,7 +42,7 @@ export function LogoMark({ size = 48, dot = true }: { size?: number; dot?: boole
           fill="none"
         />
       ))}
-      {dot ? <Circle cx={50} cy={50} r={7} fill={Brand.colors.lavender} /> : null}
+      {dot ? <Circle cx={50} cy={50} r={11} fill={Brand.colors.terracotta} /> : null}
     </Svg>
   );
 }
@@ -53,7 +54,7 @@ export function Wordmark({ size = 28, withMark = true }: { size?: number; withMa
       {withMark ? <LogoMark size={size * 1.25} /> : null}
       <Text style={{ fontFamily: fonts.display, fontSize: size, lineHeight: size * 1.2, letterSpacing: -size * 0.03, color: palette.text }}>
         {Brand.wordmark}
-        <Text style={{ fontFamily: fonts.display, fontSize: size, color: palette.accents.coral.base }}>.</Text>
+        <Text style={{ fontFamily: fonts.display, fontSize: size, color: Brand.colors.terracotta }}>.</Text>
       </Text>
     </View>
   );

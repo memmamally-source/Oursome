@@ -195,6 +195,8 @@ export function ProposalCard({ proposal: p }: { proposal: Proposal }) {
         reminder: p.kind === 'reminder' ? '1' : '',
         assigneeId: who?.status === 'member' ? who.memberId : '',
         assigneeName: who?.status === 'unknown' || who?.status === 'suggested' ? who.name : '',
+        // "Remind us…" is for the household: keep it shared.
+        shared: p.visibility === 'shared' ? '1' : '',
       },
     });
   };

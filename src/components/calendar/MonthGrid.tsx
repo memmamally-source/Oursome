@@ -72,7 +72,13 @@ export function MonthGrid({ anchor, selected, today, onSelect, dots, compact }: 
                     variant="callout"
                     style={{ fontFamily: isToday || isSelected ? fonts.bodyBold : fonts.bodyMedium }}
                     color={
-                      isSelected ? palette.onAccent : isToday ? palette.accents.coral.ink : inMonth ? palette.text : palette.textTertiary
+                      isSelected
+                        ? palette.accents.coral.on
+                        : isToday
+                          ? palette.accents.coral.ink
+                          : inMonth
+                            ? palette.text
+                            : palette.textTertiary
                     }>
                     {d.getDate()}
                   </Text>
@@ -84,7 +90,7 @@ export function MonthGrid({ anchor, selected, today, onSelect, dots, compact }: 
                           width: 5,
                           height: 5,
                           borderRadius: 3,
-                          backgroundColor: isSelected ? palette.onAccent : palette.accents[a].base,
+                          backgroundColor: isSelected ? palette.accents.coral.on : palette.accents[a].base,
                           opacity: inMonth ? 1 : 0.4,
                         }}
                       />
@@ -127,18 +133,23 @@ export function WeekStrip({ anchor, selected, today, onSelect, dots }: Omit<Prop
             }}>
             <Text
               variant="caption"
-              color={isSelected ? palette.onAccent : palette.textSecondary}
+              color={isSelected ? palette.accents.coral.on : palette.textSecondary}
               style={{ fontFamily: fonts.bodyBold, fontSize: 11 }}>
               {format(d, 'EEE')}
             </Text>
-            <Text variant="subheading" color={isSelected ? palette.onAccent : isToday ? palette.accents.coral.ink : palette.text}>
+            <Text variant="subheading" color={isSelected ? palette.accents.coral.on : isToday ? palette.accents.coral.ink : palette.text}>
               {d.getDate()}
             </Text>
             <View style={{ flexDirection: 'row', gap: 2, height: 5 }}>
               {dayDots.slice(0, 3).map((a, i) => (
                 <View
                   key={i}
-                  style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: isSelected ? palette.onAccent : palette.accents[a].base }}
+                  style={{
+                    width: 5,
+                    height: 5,
+                    borderRadius: 3,
+                    backgroundColor: isSelected ? palette.accents.coral.on : palette.accents[a].base,
+                  }}
                 />
               ))}
             </View>

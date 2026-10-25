@@ -12,6 +12,8 @@ import { startOfWeek } from 'date-fns/startOfWeek';
 
 import { fromDateKey, toDateKey, type DateKey } from '@/lib/dates';
 
+import { expandOccurrences } from '@/features/calendar/recurrence';
+
 import type { AssistantContext } from './context';
 import type { Action, Interpretation, PersonMention, Query } from './interpretation';
 import { capitalise, cleanTitle, extractWhen, looksLikeEvent, parseCapture, restoreCase, startsWithTaskVerb } from './parser';
@@ -53,7 +55,9 @@ function personFrom(phrase: string, ctx: AssistantContext): PersonMention | null
 
 function isKnown(name: string, ctx: AssistantContext): boolean {
   const n = name.toLowerCase();
-  return ctx.people.some((m) => m.name.toLowerCase() === n || m.name.toLowerCase().split(' ')[0] === n || (m.aliases ?? []).some((a) => a.toLowerCase() === n));
+  return ctx.people.some(
+    (m) => m.name.toLowerCase() === n || m.name.toLowerCase().split(' ')[0] === n || (m.aliases ?? []).some((a) => a.toLowerCase() === n),
+  );
 }
 
 const VERB_START =
@@ -114,7 +118,13 @@ function clause(
   if (!who || who.self) {
     const forWho = t.match(/^(.+?)\s+for\s+(me|myself|(?:my|our)\s+[a-z]+|[A-Z][a-zA-Z-]+)(?=[\s,.!?]|$)(.*)$/);
     const mention = forWho ? personFrom(forWho[2], ctx) : null;
-    if (forWho && mention && !mention.household && !mention.pronoun && (!mention.name || isKnown(mention.name, ctx) || looksLikeEvent(forWho[1]))) {
+    if (
+      forWho &&
+      mention &&
+      !mention.household &&
+      !mention.pronoun &&
+      (!mention.name || isKnown(mention.name, ctx) || looksLikeEvent(forWho[1]))
+    ) {
       who = mention;
       t = `${forWho[1]}${forWho[3]}`;
     }
@@ -130,7 +140,15 @@ function clause(
     const w = extractWhen(t.toLowerCase(), ctx.now);
     const title = restoreCase(cleanTitle(w.rest), t);
     return {
-      action: { type: 'create_task', title, person: who, date: w.date ?? null, time: w.time ?? null, category: 'shopping', assumptions: w.assumptions },
+      action: {
+        type: 'create_task',
+        title,
+        person: who,
+        date: w.date ?? null,
+        time: w.time ?? null,
+        category: 'shopping',
+        assumptions: w.assumptions,
+      },
     };
   }
 
@@ -143,9 +161,11 @@ function clause(
         ? parsed.pending.find((p) => p.kind !== 'shopping')
         : undefined;
   if (!proposal) return { clarify: 'I didn’t quite catch that — what should I add?' };
-  if (proposal.kind === 'shopping') return { action: { type: 'add_shopping_items', items: proposal.items ?? [], listName: proposal.listName, person: null } };
+  if (proposal.kind === 'shopping')
+    return { action: { type: 'add_shopping_items', items: proposal.items ?? [], listName: proposal.listName, person: null } };
 
-  let type: Action['type'] = proposal.kind === 'event' ? 'create_event' : proposal.kind === 'reminder' || reminder ? 'create_reminder' : 'create_task';
+  let type: Action['type'] =
+    proposal.kind === 'event' ? 'create_event' : proposal.kind === 'reminder' || reminder ? 'create_reminder' : 'create_task';
   // "Sarah has a dentist appointment" is an event; "Rufaida needs to collect the kids at 3" is a task.
   if (subjectHas && looksLikeEvent(proposal.title)) type = 'create_event';
   if (!subjectHas && type === 'create_event' && startsWithTaskVerb(proposal.title)) type = 'create_task';
@@ -253,11 +273,22 @@ function detectQuery(original: string, lower: string, ctx: AssistantContext): Qu
   // "Could Rufaida take the kids swimming?" is a request for Rufaida, not a question about the calendar.
   const polite = original.match(/^(?:[Cc]an|[Cc]ould|[Ww]ould|[Ww]ill)\s+(\S+(?:\s+[A-Z]\S*)?)\s+[a-z]/);
   if (polite && personFrom(polite[1], ctx) && !/^(i|we|you)$/i.test(polite[1])) return null;
-  if (/^plan\b|^organi[sz]e (my|our) (day|tasks|saturday|sunday|weekend|monday|tuesday|wednesday|thursday|friday)|without overlapping|avoid clashes/.test(lower)) {
+  if (
+    /^plan\b|^organi[sz]e (my|our) (day|tasks|saturday|sunday|weekend|monday|tuesday|wednesday|thursday|friday)|without overlapping|avoid clashes/.test(
+      lower,
+    )
+  ) {
     const r = rangeFrom(lower, ctx);
-    return { kind: 'plan', from: r.from ?? ctx.today, to: r.from ?? ctx.today, person: /\b(our|we|us)\b/.test(lower) ? { household: true } : { self: true } };
+    return {
+      kind: 'plan',
+      from: r.from ?? ctx.today,
+      to: r.from ?? ctx.today,
+      person: /\b(our|we|us)\b/.test(lower) ? { household: true } : { self: true },
+    };
   }
-  const question = /\?$/.test(original) || /^(what|whats|what's|who|whos|who's|when|which|do|does|did|is|are|have|has|anything|any|how many|show|list|tell me)\b/.test(lower);
+  const question =
+    /\?$/.test(original) ||
+    /^(what|whats|what's|who|whos|who's|when|which|do|does|did|is|are|have|has|anything|any|how many|show|list|tell me)\b/.test(lower);
   if (!question) return null;
   const r = rangeFrom(lower, ctx);
   if (/\b(overdue|late|missed|behind)\b/.test(lower)) return { kind: 'overdue', person: queryPerson(original, ctx) };
@@ -267,20 +298,81 @@ function detectQuery(original: string, lower: string, ctx: AssistantContext): Qu
     return { kind: 'responsibility', topic, from: r.from ?? null, to: r.to ?? null };
   }
   const person = queryPerson(original, ctx);
-  if (/\b(to ?do|tasks?|chores?|jobs?)\b/.test(lower) && !r.from) return { kind: 'tasks', person };
+  if (/\b(to ?do|tasks?|chores?|jobs?)\b/.test(lower))
+    return r.from ? { kind: 'tasks', person, from: r.from, to: r.to ?? r.from } : { kind: 'tasks', person };
   return { kind: 'agenda', person, from: r.from ?? ctx.today, to: r.to ?? r.from ?? ctx.today };
 }
 
+/** "Add these ingredients: flour, eggs…" or a pasted list, one item per line. */
+const LIST_INTRO =
+  /^(?:please\s+)?(?:add|put|get|buy)\s+(?:these|the following|this|those|some|all (?:of )?these)?\s*(?:ingredients|items|things|groceries|bits)\b[^:\n]*(?::|\n)([\s\S]+)$/i;
+
+function listItems(text: string): string[] {
+  return text
+    .split(/\n|,|;|\band\b|&/)
+    .map((s) =>
+      s
+        .trim()
+        .replace(/^(?:[-•*]|\d+[.)])\s*/, '')
+        .replace(/[.!]+$/, '')
+        .replace(/^(?:some|a|an|the|more)\s+/i, ''),
+    )
+    .filter(Boolean)
+    .map(capitalise);
+}
+
+/** "Remind us about our anniversary": a reminder the day before a saved important date. */
+function occasionReminder(lower: string, ctx: AssistantContext): Interpretation | null {
+  const m = lower.match(
+    /^remind\s+(us|me|everyone)\s+(?:about|of)\s+(?:our|my|the|mum's|mom's|dad's|[a-z]+'s)?\s*(anniversary|birthday|[a-z' ]*birthday|[a-z' ]*anniversary)$/,
+  );
+  if (!m) return null;
+  const words = m[2].split(/\s+/).filter((w) => w.length > 2);
+  const candidates = ctx.events.filter((e) => e.isImportantDate || e.recurrence?.freq === 'yearly');
+  const match = candidates.find((e) => words.every((w) => e.title.toLowerCase().replace(/['’]/g, "'").includes(w)));
+  const what = m[2];
+  if (!match) {
+    return {
+      reply: '',
+      actions: [],
+      clarify: {
+        question: `When is your ${what}? Add it as an important date on the calendar and I’ll remind you the day before.`,
+        about: 'date',
+      },
+    };
+  }
+  const next = expandOccurrences([match], ctx.today, toDateKey(addDays(fromDateKey(ctx.today), 400)))[0];
+  if (!next) return null;
+  const date = toDateKey(addDays(fromDateKey(next.date), -1));
+  return {
+    reply: '',
+    actions: [
+      {
+        type: 'create_reminder',
+        title: `${match.title} is tomorrow`,
+        person: m[1] === 'me' ? { self: true } : { household: true },
+        date: date < ctx.today ? next.date : date,
+        time: '09:00',
+        assumptions: ['The day before, at 9 AM, so there’s time to plan'],
+      },
+    ],
+  };
+}
+
 export function interpretBasic(input: string, ctx: AssistantContext): Interpretation {
-  const original = input
-    .trim()
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
-    .replace(/\s+/g, ' ');
+  const list = input.trim().match(LIST_INTRO);
+  if (list) {
+    const found = listItems(list[1]);
+    if (found.length) return { reply: '', actions: [{ type: 'add_shopping_items', items: found, person: null }] };
+  }
+  const original = input.trim().replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/\s+/g, ' ');
   const stripped = original.replace(/^(?:hey|hi|ok|okay|so)[,!]?\s+/i, '');
   const lower = stripped.toLowerCase().replace(/[.!]+$/, '');
   const none = (clarify: string): Interpretation => ({ reply: '', actions: [], clarify: { question: clarify, about: 'what' } });
   if (!lower) return none('What would you like me to do?');
+
+  const occasion = occasionReminder(lower, ctx);
+  if (occasion) return occasion;
 
   const query = detectQuery(stripped, lower, ctx);
   if (query) return { reply: '', actions: [], query };
@@ -292,27 +384,55 @@ export function interpretBasic(input: string, ctx: AssistantContext): Interpreta
     .replace(/^(?:[Cc]an|[Cc]ould|[Ww]ould|[Ww]ill)\s+([A-Z]\S*(?:\s+[A-Z]\S*)?|my\s+[a-z]+)\s+(?=[a-z])/, '$1 will ');
 
   // ── Household directory ──
-  const addPerson = text.match(/^add\s+(?:my\s+([a-z]+)\s+)?([A-Za-z][A-Za-z'’ -]*?)\s+(?:to|into)\s+(?:our|the|my)\s+(?:household|family|home|space|our space|people)$/i);
+  const addPerson = text.match(
+    /^add\s+(?:my\s+([a-z]+)\s+)?([A-Za-z][A-Za-z'’ -]*?)\s+(?:to|into)\s+(?:our|the|my)\s+(?:household|family|home|space|our space|people)$/i,
+  );
   if (addPerson) {
-    return { reply: '', actions: [{ type: 'add_person', title: addPerson[2].split(/\s+/).map(capitalise).join(' '), relation: addPerson[1]?.toLowerCase() ?? null }] };
+    return {
+      reply: '',
+      actions: [
+        { type: 'add_person', title: addPerson[2].split(/\s+/).map(capitalise).join(' '), relation: addPerson[1]?.toLowerCase() ?? null },
+      ],
+    };
   }
 
   // ── Follow-ups about the conversation ──
   const hasThread = ctx.proposals.length > 0;
-  const change = text.match(/^(?:actually|no|sorry|oh|wait|hmm|ok|okay)?[,\s]*(?:make|change|move|switch|set|do|put)\s+(?:that|it|this)\s+(?:to|for|on|into|at)?\s*(.+)$/i);
+  const change = text.match(
+    /^(?:actually|no|sorry|oh|wait|hmm|ok|okay)?[,\s]*(?:make|change|move|switch|set|do|put)\s+(?:that|it|this)\s+(?:to|for|on|into|at)?\s*(.+)$/i,
+  );
   if (change && hasThread && !/\b(list|tasks?)\b/i.test(change[1])) {
     const w = extractWhen(change[1].toLowerCase(), ctx.now);
-    if (w.date || w.time) return { reply: '', actions: [{ type: 'update_item', target: 'last', date: w.date ?? null, time: w.time ?? null, endTime: w.endTime ?? null, assumptions: w.assumptions }] };
+    if (w.date || w.time)
+      return {
+        reply: '',
+        actions: [
+          {
+            type: 'update_item',
+            target: 'last',
+            date: w.date ?? null,
+            time: w.time ?? null,
+            endTime: w.endTime ?? null,
+            assumptions: w.assumptions,
+          },
+        ],
+      };
   }
-  const onList = text.match(/^(?:put|add|move|give)\s+(?:it|that|this)\s+(?:on|to|onto|for)\s+(her|his|their|[A-Za-z]+(?:'s|’s)?|my\s+[a-z]+(?:'s|’s)?)\s*(?:list|tasks?|to-?do(?: list)?)?$/i);
+  const onList = text.match(
+    /^(?:put|add|move|give)\s+(?:it|that|this)\s+(?:on|to|onto|for)\s+(her|his|their|[A-Za-z]+(?:'s|’s)?|my\s+[a-z]+(?:'s|’s)?)\s*(?:list|tasks?|to-?do(?: list)?)?$/i,
+  );
   if (onList && hasThread) {
     const who = onList[1].replace(/(?:'s|’s)$/, '');
     const person = /^(her|his|their)$/i.test(who) ? { pronoun: true } : personFrom(who, ctx);
     if (person) return { reply: '', actions: [{ type: 'update_item', target: 'last', person }] };
   }
   const reassign =
-    text.match(/^(?:give|assign|hand|pass)\s+([A-Za-z]+|my\s+[a-z]+)\s+(?:the|that|this)\s+(.+?)(?:\s+(?:task|job|one))?(?:\s+instead)?$/i) ??
-    text.match(/^(?:give|assign|hand|pass|move)\s+(?:the|that|this)\s+(.+?)(?:\s+(?:task|job))?\s+to\s+([A-Za-z]+|my\s+[a-z]+)(?:\s+instead)?$/i);
+    text.match(
+      /^(?:give|assign|hand|pass)\s+([A-Za-z]+|my\s+[a-z]+)\s+(?:the|that|this)\s+(.+?)(?:\s+(?:task|job|one))?(?:\s+instead)?$/i,
+    ) ??
+    text.match(
+      /^(?:give|assign|hand|pass|move)\s+(?:the|that|this)\s+(.+?)(?:\s+(?:task|job))?\s+to\s+([A-Za-z]+|my\s+[a-z]+)(?:\s+instead)?$/i,
+    );
   if (reassign) {
     const first = /^(give|assign|hand|pass)\s+(?:[A-Za-z]+|my\s+[a-z]+)\s+(?:the|that|this)\s/i.test(text);
     const who = first ? reassign[1] : reassign[2];
@@ -327,14 +447,16 @@ export function interpretBasic(input: string, ctx: AssistantContext): Interpreta
     const w = extractWhen(move[2].toLowerCase(), ctx.now);
     const target = findTarget(move[1], ctx);
     if (!target) return none(`I couldn’t find your ${move[1]}. Which one do you mean?`);
-    if (w.date || w.time) return { reply: '', actions: [{ type: 'update_item', target, date: w.date ?? null, time: w.time ?? null, assumptions: w.assumptions }] };
+    if (w.date || w.time)
+      return {
+        reply: '',
+        actions: [{ type: 'update_item', target, date: w.date ?? null, time: w.time ?? null, assumptions: w.assumptions }],
+      };
   }
   text = text.replace(/^(?:also|and)\s+/i, '');
 
   // ── Who is it for? ──
-  text = text
-    .replace(/^([A-Za-z]+)['’]s got\b/, '$1 has got')
-    .replace(/^(we|they|i)(?:['’]ve| have) got\b/i, '$1 have got');
+  text = text.replace(/^([A-Za-z]+)['’]s got\b/, '$1 has got').replace(/^(we|they|i)(?:['’]ve| have) got\b/i, '$1 have got');
   const kids = text.match(/^(?:the\s+|our\s+)?(kids|children|boys|girls)\s+(?:have got|have|['’]ve got)\s+(.+)$/i);
   if (kids) text = `we have got ${kids[2]}`;
   const weNeed = text.match(/^(?:we|i)\s+(?:need|are out of|['’]re out of|have run out of|['’]ve run out of|ran out of)\s+(?!to\b)(.+)$/i);
@@ -351,7 +473,8 @@ export function interpretBasic(input: string, ctx: AssistantContext): Interpreta
     }
     return null;
   };
-  const NEEDS_RE = /^(?:needs? to|has to|have to|has got to|must|should|is going to|are going to|is to|is supposed to|will|wants? to|ought to)\s+/i;
+  const NEEDS_RE =
+    /^(?:needs? to|has to|have to|has got to|must|should|is going to|are going to|is to|is supposed to|will|wants? to|ought to)\s+/i;
   const HAS_RE = /^(?:has got|have got|has|have)\s+(?:a|an|the|her|his|their|our|my)?\s*/i;
 
   let person: PersonMention | null = null;
@@ -360,7 +483,8 @@ export function interpretBasic(input: string, ctx: AssistantContext): Interpreta
   let asReminder = false;
   const lead = text.match(/^(remind|ask|tell|get|have)\s+(.+)$/i);
   const fromLead = lead
-    ? (subjectThen(lead[2], /^(?:to|about|that)\s+/i) ?? (/^(ask|tell|get|have)$/i.test(lead[1]) ? subjectThen(lead[2], /^(?=[a-z])/) : null))
+    ? (subjectThen(lead[2], /^(?:to|about|that)\s+/i) ??
+      (/^(ask|tell|get|have)$/i.test(lead[1]) ? subjectThen(lead[2], /^(?=[a-z])/) : null))
     : null;
   const needs = !fromLead ? subjectThen(text, NEEDS_RE) : null;
   const has = !fromLead && !needs ? subjectThen(text, HAS_RE) : null;

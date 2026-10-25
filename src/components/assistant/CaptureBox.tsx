@@ -71,7 +71,7 @@ export function CaptureBox({ autoFocus, onSent }: { autoFocus?: boolean; onSent?
             backgroundColor: text.trim() ? palette.accents.coral.base : palette.surfaceSunken,
             opacity: pressed ? 0.85 : 1,
           })}>
-          <Icon name="arrow-up" size={22} color={text.trim() ? palette.onAccent : palette.textTertiary} />
+          <Icon name="arrow-up" size={22} color={text.trim() ? palette.accents.coral.on : palette.textTertiary} />
         </Pressable>
       </View>
 

@@ -1,19 +1,21 @@
+import { confirmAction } from '@/components/ui/ConfirmDialog';
 import { Icon } from '@/components/ui/Icon';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
-import { Alert, Platform, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { LogoMark } from '@/components/brand/Logo';
+import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { Avatar, Card, Divider, IconButton, Screen, Segmented, SettingRow, Text, TextField } from '@/components/ui';
 import { Brand } from '@/config/brand';
+import { cloudConfigured } from '@/features/cloud';
 import { clearDemoContent, hasDemoContent } from '@/features/demo/seed';
 import { deleteAllLocalData, exportData } from '@/features/settings/account';
 import { useSettings } from '@/features/settings/store';
 import { auth, useSession } from '@/features/session/store';
 import { useSpace } from '@/features/space/store';
-import { formatTime } from '@/lib/dates';
-import { accentKeys, radius, space, useTheme } from '@/theme';
+import { accentKeys, space, useTheme } from '@/theme';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -29,14 +31,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function confirm(title: string, message: string, action: string, run: () => void) {
-  if (Platform.OS === 'web') {
-    if (window.confirm(`${title}\n\n${message}`)) run();
-    return;
-  }
-  Alert.alert(title, message, [
-    { text: 'Cancel', style: 'cancel' },
-    { text: action, style: 'destructive', onPress: run },
-  ]);
+  confirmAction({ title, message, confirmLabel: action, destructive: true }).then((ok) => ok && run());
 }
 
 export default function SettingsScreen() {
@@ -46,7 +41,6 @@ export default function SettingsScreen() {
   const settings = useSettings();
   const [name, setName] = useState(profile?.name ?? '');
   const [demo, setDemo] = useState(hasDemoContent());
-  const n = settings.notifications;
 
   const saveName = () => {
     if (!name.trim()) return;
@@ -125,7 +119,7 @@ export default function SettingsScreen() {
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-          <Icon name="diamond" size={22} color={palette.onAccent} />
+          <Icon name="diamond" size={22} color={palette.accents.lavender.on} />
         </View>
         <View style={{ flex: 1 }}>
           <Text variant="subheading">{Brand.name} Premium</Text>
@@ -151,70 +145,39 @@ export default function SettingsScreen() {
         />
       </View>
 
-      <Section title="Notifications">
-        <View style={{ backgroundColor: palette.accents.sunshine.soft, borderRadius: radius.md, padding: space.md, marginTop: space.md }}>
-          <Text variant="caption" tone="sunshine">
-            Your choices are saved now. Notification delivery switches on in the next update, and we’ll ask for permission first.
-          </Text>
-        </View>
+      <Section title="Motion & celebrations">
         <SettingRow
-          icon="calendar-outline"
-          accent="sky"
-          label="Appointment reminders"
-          value={n.appointments}
-          onValueChange={(v) => settings.setNotifications({ appointments: v })}
-        />
-        <Divider />
-        <SettingRow
-          icon="alarm-outline"
-          accent="coral"
-          label="Task deadlines"
-          value={n.deadlines}
-          onValueChange={(v) => settings.setNotifications({ deadlines: v })}
-        />
-        <Divider />
-        <SettingRow
-          icon="person-add-outline"
-          accent="sunshine"
-          label="Assigned to me"
-          value={n.assignments}
-          onValueChange={(v) => settings.setNotifications({ assignments: v })}
-        />
-        <Divider />
-        <SettingRow
-          icon="home-outline"
-          accent="lavender"
-          label="Household updates"
-          value={n.household}
-          onValueChange={(v) => settings.setNotifications({ household: v })}
-        />
-        <Divider />
-        <SettingRow
-          icon="sunny-outline"
-          accent="sunshine"
-          label="Morning briefing"
-          detail="A gentle summary of your day"
-          value={n.morningBriefing}
-          onValueChange={(v) => settings.setNotifications({ morningBriefing: v })}
-        />
-        <Divider />
-        <SettingRow
-          icon="moon-outline"
-          accent="lavender"
-          label="Evening briefing"
-          detail="A look at tomorrow"
-          value={n.eveningBriefing}
-          onValueChange={(v) => settings.setNotifications({ eveningBriefing: v })}
-        />
-        <Divider />
-        <SettingRow
-          icon="volume-mute-outline"
+          icon="leaf-outline"
           accent="mint"
-          label="Quiet hours"
-          detail={`${formatTime(n.quietHours.from)} – ${formatTime(n.quietHours.to)}`}
-          value={n.quietHours.enabled}
-          onValueChange={(v) => settings.setNotifications({ quietHours: { ...n.quietHours, enabled: v } })}
+          label="Reduce motion"
+          detail="Things appear in place instead of moving. Oursome also follows your device setting."
+          value={settings.motion === 'reduced'}
+          onValueChange={(v) => settings.setMotion(v ? 'reduced' : 'system')}
         />
+        <Divider />
+        <SettingRow
+          icon="sparkles-outline"
+          accent="sunshine"
+          label="Celebrations"
+          detail="The orb's little bounces and decorations for birthdays and anniversaries."
+          value={settings.celebrations}
+          onValueChange={settings.setCelebrations}
+        />
+      </Section>
+
+      <Section title="Home">
+        <SettingRow
+          icon="calendar-clear-outline"
+          accent="sky"
+          label="Weekly summary"
+          detail="On Sundays and Mondays: what got done, and a glance at the week ahead."
+          value={settings.weeklySummary}
+          onValueChange={settings.setWeeklySummary}
+        />
+      </Section>
+
+      <Section title="Notifications">
+        <NotificationSettings />
       </Section>
 
       {/* Only for accounts that loaded sample content before it was retired. */}
@@ -246,7 +209,11 @@ export default function SettingsScreen() {
           icon="shield-checkmark-outline"
           accent="mint"
           label="Where your data lives"
-          detail="This preview keeps everything on this device. Nothing is sent to a server."
+          detail={
+            cloudConfigured
+              ? 'Private things stay on this device. Families you choose to share sync through Firebase, visible only to their members.'
+              : 'Everything stays on this device. Nothing is sent to a server.'
+          }
         />
       </Section>
 

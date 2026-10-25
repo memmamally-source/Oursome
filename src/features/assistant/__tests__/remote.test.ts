@@ -18,7 +18,9 @@ const ctx: AssistantContext = {
 const URL_ = 'https://ai.example';
 
 const respond = (status: number, body: unknown) =>
-  Promise.resolve(new Response(typeof body === 'string' ? body : JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }));
+  Promise.resolve(
+    new Response(typeof body === 'string' ? body : JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } }),
+  );
 
 describe('AI service client', () => {
   const realFetch = globalThis.fetch;
@@ -33,7 +35,9 @@ describe('AI service client', () => {
   });
 
   it('returns a validated interpretation and sends no IDs', async () => {
-    globalThis.fetch = jest.fn(() => respond(200, { interpretation: { reply: '', actions: [{ type: 'create_task', title: 'Pay rent' }] } })) as jest.Mock;
+    globalThis.fetch = jest.fn(() =>
+      respond(200, { interpretation: { reply: '', actions: [{ type: 'create_task', title: 'Pay rent' }] } }),
+    ) as jest.Mock;
     const r = await interpretRemote('Pay rent', ctx, [], URL_);
     expect(r.actions[0]).toMatchObject({ type: 'create_task', title: 'Pay rent' });
     const sent = (globalThis.fetch as jest.Mock).mock.calls[0][1].body as string;

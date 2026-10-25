@@ -19,7 +19,7 @@ import type { EventOccurrence, Member } from '@/features/types';
 import { useLayout } from '@/hooks/useLayout';
 import { useNow } from '@/hooks/useNow';
 import { addDays, format, fromDateKey, relativeDayLabel, toDateKey, type DateKey } from '@/lib/dates';
-import { fonts, layout, radius, space, useTheme, type AccentKey } from '@/theme';
+import { fonts, layout, paperProps, radius, space, useTheme, type AccentKey } from '@/theme';
 
 export default function CalendarScreen() {
   const { palette } = useTheme();
@@ -92,7 +92,7 @@ export default function CalendarScreen() {
   const showsToday = view === 'days' ? columns.includes(today) : selected === today;
 
   return (
-    <View style={{ flex: 1, backgroundColor: palette.background }}>
+    <View {...paperProps} style={{ flex: 1, backgroundColor: palette.background }}>
       <View
         style={{
           paddingTop: insets.top + space.lg,
@@ -196,6 +196,7 @@ export default function CalendarScreen() {
               />
             ))}
             <Chip label="Tasks" small dot="mint" accent="mint" selected={tasksOn} onPress={() => setTasksOn(!tasksOn)} />
+            <Chip label="Import or export" small icon="swap-vertical-outline" accent="sky" onPress={() => router.push('/calendar-files')} />
           </View>
         ) : null}
       </View>

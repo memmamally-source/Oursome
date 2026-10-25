@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+import { cloudConfigured } from '@/features/cloud/config';
 import { deviceTimeZone } from '@/lib/dates';
 import { persistStorage, STORE_VERSION } from '@/lib/storage';
 import type { AccentKey } from '@/theme/tokens';
@@ -102,4 +103,14 @@ export const localAuth: AuthService = {
   },
 };
 
-export const auth: AuthService = localAuth;
+/** The account service in use: Firebase when cloud sharing is configured, otherwise this device only. */
+async function service(): Promise<AuthService> {
+  return cloudConfigured ? (await import('@/features/cloud/runtime')).firebaseAuth : localAuth;
+}
+
+export const auth: AuthService = {
+  signUp: async (input) => (await service()).signUp(input),
+  signIn: async (input) => (await service()).signIn(input),
+  sendPasswordReset: async (email) => (await service()).sendPasswordReset(email),
+  signOut: async () => (await service()).signOut(),
+};

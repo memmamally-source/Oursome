@@ -26,3 +26,20 @@ jobs:
         run: npm run build:web
         env:
           EXPO_BASE_URL: /Oursome
+
+  cloud-rules:
+    # Security rules and cloud API, against the local Firebase emulators (no real project).
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      - run: npm run test:cloud

@@ -39,6 +39,15 @@ type SettingsState = {
   taskSortMode: 'smart' | 'manual';
   /** Show dated tasks on the calendar. */
   tasksOnCalendar: boolean;
+  /** Motion: follow the device setting, or always reduce. */
+  motion: 'system' | 'reduced';
+  /** Optional celebrations: the orb's bounces and occasion decorations. */
+  celebrations: boolean;
+  setMotion: (motion: 'system' | 'reduced') => void;
+  setCelebrations: (on: boolean) => void;
+  /** A look back at the week on Home, on Sundays and Mondays. */
+  weeklySummary: boolean;
+  setWeeklySummary: (on: boolean) => void;
   setTheme: (theme: ThemePreference) => void;
   completeOnboarding: () => void;
   toggleSection: (section: DashboardSection) => void;
@@ -66,6 +75,9 @@ const defaults = {
   dismissedSuggestions: [] as string[],
   taskSortMode: 'smart' as const,
   tasksOnCalendar: true,
+  motion: 'system' as 'system' | 'reduced',
+  celebrations: true,
+  weeklySummary: true,
 };
 
 export const useSettings = create<SettingsState>()(
@@ -78,6 +90,9 @@ export const useSettings = create<SettingsState>()(
       setNotifications: (patch) => set((s) => ({ notifications: { ...s.notifications, ...patch } })),
       dismissSuggestion: (id) => set((s) => ({ dismissedSuggestions: [...s.dismissedSuggestions.slice(-50), id] })),
       setTaskSortMode: (taskSortMode) => set({ taskSortMode }),
+      setMotion: (motion) => set({ motion }),
+      setCelebrations: (celebrations) => set({ celebrations }),
+      setWeeklySummary: (weeklySummary) => set({ weeklySummary }),
       setTasksOnCalendar: (tasksOnCalendar) => set({ tasksOnCalendar }),
       reset: () => set({ ...defaults }),
     }),

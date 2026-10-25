@@ -6,6 +6,11 @@ export function eventOwner(event: CalendarEvent, calendars: CalendarSource[]): s
   return event.personId ?? calendars.find((c) => c.id === event.calendarId)?.memberId;
 }
 
+/** Whether an event involves a person: theirs, or they're going. */
+export function eventInvolves(event: CalendarEvent, personId: string, calendars: CalendarSource[]): boolean {
+  return eventOwner(event, calendars) === personId || !!event.participantIds?.includes(personId);
+}
+
 /** Tasks belong to their assignee; unassigned tasks are the signed-in user's own. */
 export function isTaskFor(task: Task, person: Member): boolean {
   if (task.assigneeId) return task.assigneeId === person.id;
@@ -27,7 +32,7 @@ export function plateCounts(
   const counts: Record<string, number> = {};
   for (const p of people) {
     const due = openTasksFor(p, tasks).filter((t) => t.due && t.due <= today).length;
-    const events = todayOccurrences.filter((o) => eventOwner(o.event, calendars) === p.id).length;
+    const events = todayOccurrences.filter((o) => eventInvolves(o.event, p.id, calendars)).length;
     counts[p.id] = due + events;
   }
   return counts;

@@ -8,16 +8,23 @@ type Props = Omit<PressableProps, 'style' | 'children'> & {
   scaleTo?: number;
 };
 
-// On web a CSS transition keeps the press feedback off the JS thread.
-const webTransition = Platform.OS === 'web' ? ({ transitionProperty: 'transform', transitionDuration: '140ms' } as ViewStyle) : null;
+// On web a CSS transition keeps the feedback off the JS thread; a springy curve feels tactile.
+const webTransition =
+  Platform.OS === 'web'
+    ? ({ transitionProperty: 'transform, box-shadow', transitionDuration: '180ms', transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)' } as ViewStyle)
+    : null;
 
-/** Pressable with a subtle press-in scale — the base micro-interaction. */
+/** Pressable with a subtle press-in scale and (on web) a gentle lift on hover. */
 export function PressableScale({ style, children, scaleTo = 0.97, ...rest }: Props) {
   return (
     <Pressable
       accessibilityRole="button"
       {...rest}
-      style={({ pressed }) => [style, webTransition, { transform: [{ scale: pressed ? scaleTo : 1 }] }]}>
+      style={(state) => {
+        const { pressed } = state;
+        const hovered = (state as { hovered?: boolean }).hovered;
+        return [style, webTransition, { transform: [{ scale: pressed ? scaleTo : 1 }, { translateY: hovered && !pressed ? -2 : 0 }] }];
+      }}>
       {children}
     </Pressable>
   );

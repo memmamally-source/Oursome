@@ -1,7 +1,8 @@
+import { confirmAction } from '@/components/ui/ConfirmDialog';
 import { Icon } from '@/components/ui/Icon';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Platform, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 
 import { ChipRow, DatePicker, Field, RepeatPicker, ReminderPicker, TimePicker } from '@/components/forms/Fields';
 import { Button, Chip, ModalHeader, ModalScreen, Segmented, SettingRow, Text } from '@/components/ui';
@@ -23,28 +24,36 @@ export default function EventEditor() {
     endTime?: string;
     location?: string;
     allDay?: string;
+    /** '1' starts a yearly, all-day important date (birthday, anniversary). */
+    important?: string;
   }>();
   const { palette } = useTheme();
   const existing = useCalendar((s) => s.events.find((e) => e.id === params.id));
   const calendars = useCalendar((s) => s.calendars);
   const { addEvent, updateEvent, removeEvent } = useCalendar.getState();
   const hasSpace = useSpace((s) => !!s.space);
+  const people = useSpace((s) => s.people);
 
   const initialStart = existing ? timeKeyOf(existing.start) : params.time || '09:00';
   const initialEnd = existing ? timeKeyOf(existing.end) : params.endTime || timeFromMinutes(minutesOfDay(initialStart) + 60);
 
   const [title, setTitle] = useState(existing?.title ?? params.title ?? '');
-  const [allDay, setAllDay] = useState(existing?.allDay ?? !!params.allDay);
+  const [allDay, setAllDay] = useState(existing?.allDay ?? (!!params.allDay || !!params.important));
   const [date, setDate] = useState(existing ? dateKeyOf(existing.start) : params.date || todayKey());
+  // All-day events can run over several days ("Half term", "Grandma visits").
+  const [lastDay, setLastDay] = useState<string | undefined>(
+    existing?.allDay && dateKeyOf(existing.end) > dateKeyOf(existing.start) ? dateKeyOf(existing.end) : undefined,
+  );
   const [start, setStart] = useState(initialStart);
   const [duration, setDuration] = useState(Math.max(15, minutesOfDay(initialEnd) - minutesOfDay(initialStart)));
   const [calendarId, setCalendarId] = useState(existing?.calendarId ?? PERSONAL_CALENDAR_ID);
   const [location, setLocation] = useState(existing?.location ?? params.location ?? '');
   const [notes, setNotes] = useState(existing?.notes ?? '');
-  const [recurrence, setRecurrence] = useState(existing?.recurrence ?? null);
+  const [recurrence, setRecurrence] = useState(existing?.recurrence ?? (params.important ? { freq: 'yearly' as const } : null));
   const [reminderMinutes, setReminderMinutes] = useState<number | null>(existing?.reminderMinutes ?? 30);
   const [visibility, setVisibility] = useState(existing?.visibility ?? 'private');
-  const [important, setImportant] = useState(!!existing?.isImportantDate);
+  const [important, setImportant] = useState(existing ? !!existing.isImportantDate : !!params.important);
+  const [going, setGoing] = useState<string[]>(existing?.participantIds ?? []);
 
   const endMinutes = Math.min(minutesOfDay(start) + duration, 23 * 60 + 59);
   const end = timeFromMinutes(endMinutes);
@@ -57,7 +66,7 @@ export default function EventEditor() {
     const data = {
       title: title.trim(),
       start: combine(date, allDay ? '00:00' : start),
-      end: combine(date, allDay ? '23:59' : end),
+      end: combine(allDay && lastDay && lastDay > date ? lastDay : date, allDay ? '23:59' : end),
       allDay,
       timeZone,
       calendarId,
@@ -67,6 +76,7 @@ export default function EventEditor() {
       reminderMinutes,
       visibility: hasSpace ? visibility : ('private' as const),
       isImportantDate: important,
+      participantIds: going.length ? going : undefined,
       isDemo: existing?.isDemo,
     };
     if (existing) updateEvent(existing.id, data);
@@ -82,14 +92,7 @@ export default function EventEditor() {
       router.back();
     };
     const msg = existing.recurrence ? 'This deletes every occurrence of the series.' : 'This can’t be undone.';
-    if (Platform.OS === 'web') {
-      if (window.confirm(`Delete this event? ${msg}`)) run();
-      return;
-    }
-    Alert.alert('Delete event?', msg, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: run },
-    ]);
+    confirmAction({ title: 'Delete this event?', message: msg, confirmLabel: 'Delete', destructive: true }).then((ok) => ok && run());
   };
 
   return (
@@ -119,6 +122,12 @@ export default function EventEditor() {
         <SettingRow icon="sunny-outline" accent="sunshine" label="All day" value={allDay} onValueChange={setAllDay} />
       </View>
 
+      {allDay ? (
+        <Field icon="calendar-number-outline" label="Last day" accent="sky">
+          <DatePicker value={lastDay && lastDay > date ? lastDay : undefined} onChange={setLastDay} optional emptyLabel="Same day" accent="sky" />
+        </Field>
+      ) : null}
+
       {!allDay ? (
         <>
           <Field icon="time-outline" label={`Starts · ${formatTime(start)}`} accent="sky">
@@ -135,6 +144,24 @@ export default function EventEditor() {
             Times shown in {timeZone.replace(/_/g, ' ')}
           </Text>
         </>
+      ) : null}
+
+      {people.length > 1 ? (
+        <Field icon="people-circle-outline" label="Who’s going" accent="lavender">
+          <ChipRow>
+            {people.map((p) => (
+              <Chip
+                key={p.id}
+                label={p.isMe ? 'Me' : p.name}
+                small
+                dot={p.color}
+                accent={p.color}
+                selected={going.includes(p.id)}
+                onPress={() => setGoing((g) => (g.includes(p.id) ? g.filter((id) => id !== p.id) : [...g, p.id]))}
+              />
+            ))}
+          </ChipRow>
+        </Field>
       ) : null}
 
       <Field icon="albums-outline" label="Calendar" accent={accent}>

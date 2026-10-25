@@ -186,3 +186,37 @@ export function groupItems(items: ShoppingItem[]): { category: ShoppingCategory;
     }))
     .filter((g) => g.items.length > 0);
 }
+
+/** The household's own order: as arranged, then oldest first. */
+export function manualOrder(items: ShoppingItem[]): ShoppingItem[] {
+  return [...items].sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity) || a.createdAt.localeCompare(b.createdAt));
+}
+
+/** New positions after moving one item up or down among `items` (already in display order). */
+export function moveInOrder(items: ShoppingItem[], id: string, dir: -1 | 1): Record<string, number> {
+  const i = items.findIndex((x) => x.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= items.length) return {};
+  const ids = items.map((x) => x.id);
+  [ids[i], ids[j]] = [ids[j], ids[i]];
+  return Object.fromEntries(ids.map((x, k) => [x, k]));
+}
+
+export type BoughtHistory = Record<string, { name: string; count: number; last: string }>;
+
+/** Remember a purchase, by name (case-insensitive). */
+export function recordBought(history: BoughtHistory, name: string, at: string): BoughtHistory {
+  const key = name.trim().toLowerCase();
+  const prev = history[key];
+  return { ...history, [key]: { name: prev?.name ?? name.trim(), count: (prev?.count ?? 0) + 1, last: at } };
+}
+
+/** Things bought at least twice that aren't on the list now: most often, then most recent. */
+export function frequentItems(history: BoughtHistory, onList: string[], limit = 8): string[] {
+  const now = new Set(onList.map((n) => n.toLowerCase()));
+  return Object.entries(history)
+    .filter(([key, h]) => h.count >= 2 && !now.has(key))
+    .sort(([, a], [, b]) => b.count - a.count || b.last.localeCompare(a.last))
+    .slice(0, limit)
+    .map(([, h]) => h.name);
+}

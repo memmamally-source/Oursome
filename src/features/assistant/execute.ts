@@ -5,7 +5,16 @@ import { familyOf } from '@/features/space/families';
 import { ME_ID, useSpace } from '@/features/space/store';
 import { useTasks } from '@/features/tasks/store';
 import type { Member, Task } from '@/features/types';
-import { combine, dateKeyOf, deviceTimeZone, fromLocalDateTime, minutesOfDay, timeFromMinutes, timeKeyOf, toLocalDateTime } from '@/lib/dates';
+import {
+  combine,
+  dateKeyOf,
+  deviceTimeZone,
+  fromLocalDateTime,
+  minutesOfDay,
+  timeFromMinutes,
+  timeKeyOf,
+  toLocalDateTime,
+} from '@/lib/dates';
 
 import { blockingIssue, type Assignee, type Proposal } from './proposals';
 
@@ -93,7 +102,13 @@ export function executeProposal(p: Proposal): Proposal {
         (wanted && shop.lists.find((l) => l.name.toLowerCase() === wanted)) ||
         shop.lists.find((l) => /grocer|shopping/i.test(l.name)) ||
         shop.lists[0];
-      if (!list) list = shop.addList({ name: p.listName ?? 'Groceries', color: 'mint', icon: 'basket-outline', visibility: useSpace.getState().space ? 'shared' : 'private' });
+      if (!list)
+        list = shop.addList({
+          name: p.listName ?? 'Groceries',
+          color: 'mint',
+          icon: 'basket-outline',
+          visibility: useSpace.getState().space ? 'shared' : 'private',
+        });
       for (const item of p.items ?? []) useShopping.getState().addItem(list.id, item, ME_ID);
       return { ...p, status: 'saved', savedRef: { kind: 'list', id: list.id } };
     }
@@ -146,7 +161,10 @@ const setAssignee = (p: Proposal, a: Assignee | undefined): Proposal =>
 /** Pick an existing member; optionally remember the relationship ("Rufaida is my wife"). */
 export function chooseMember(p: Proposal, member: Member, rememberRelation?: string): Proposal {
   if (rememberRelation) useSpace.getState().updatePerson(member.id, { relationship: rememberRelation });
-  return setAssignee(p, member.isMe ? { status: 'me', memberId: member.id, name: member.name } : { status: 'member', memberId: member.id, name: member.name });
+  return setAssignee(
+    p,
+    member.isMe ? { status: 'me', memberId: member.id, name: member.name } : { status: 'member', memberId: member.id, name: member.name },
+  );
 }
 
 /** Add the named person to the household (no account, no invitation sent). */

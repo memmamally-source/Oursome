@@ -66,7 +66,8 @@ export function resolvePerson(m: PersonMention | null | undefined, ctx: Assistan
   if (m.household) return { status: 'household', name: 'Everyone' };
   if (m.pronoun && !m.name && !m.relation) {
     const last = ctx.people.find((p) => p.id === ctx.lastPersonId);
-    if (last) return last.isMe ? { status: 'me', memberId: last.id, name: last.name } : { status: 'member', memberId: last.id, name: last.name };
+    if (last)
+      return last.isMe ? { status: 'me', memberId: last.id, name: last.name } : { status: 'member', memberId: last.id, name: last.name };
     if (ctx.lastPersonName) return { status: 'unknown', name: ctx.lastPersonName };
     return { status: 'unclear', name: 'them' };
   }
@@ -168,7 +169,10 @@ export function resolveInterpretation(interp: Interpretation, ctx: AssistantCont
       const ref = action.target ?? 'last';
       const proposal = ref === 'last' ? lastProposal() : ref.startsWith('p') ? proposalByRef(ref) : undefined;
       if (proposal && proposal.status !== 'saved') {
-        const next = applyChanges(proposal, changes, [...proposal.assumptions.filter((a) => !changes.date || !/day|date|week|month/i.test(a)), ...assumptions]);
+        const next = applyChanges(proposal, changes, [
+          ...proposal.assumptions.filter((a) => !changes.date || !/day|date|week|month/i.test(a)),
+          ...assumptions,
+        ]);
         if (out.proposals.includes(proposal)) out.proposals[out.proposals.indexOf(proposal)] = next;
         else revised.set(proposal.id, next);
         continue;
@@ -189,7 +193,10 @@ export function resolveInterpretation(interp: Interpretation, ctx: AssistantCont
         title: task?.title ?? event!.title,
         categoryId: task?.categoryId ?? 'personal',
         visibility: task?.visibility ?? event!.visibility,
-        update: { target: task ? { kind: 'task', id: task.id, title: task.title } : { kind: 'event', id: event!.id, title: event!.title }, changes },
+        update: {
+          target: task ? { kind: 'task', id: task.id, title: task.title } : { kind: 'event', id: event!.id, title: event!.title },
+          changes,
+        },
         assumptions,
         status: 'pending',
       });
@@ -262,7 +269,8 @@ export function resolveInterpretation(interp: Interpretation, ctx: AssistantCont
   out.updated = [...revised.values()];
   if (interp.query) out.query = interp.query;
   // A date the user must choose ("11/12") is asked even alongside the proposal it belongs to.
-  if (interp.clarify && (interp.clarify.about === 'date' || (!out.proposals.length && !out.updated.length))) out.clarify = interp.clarify.question;
+  if (interp.clarify && (interp.clarify.about === 'date' || (!out.proposals.length && !out.updated.length)))
+    out.clarify = interp.clarify.question;
   if (interp.reply && !out.proposals.length && !out.updated.length && !out.query && !out.clarify) out.reply = interp.reply;
   return out;
 }
@@ -272,7 +280,9 @@ export function resolveInterpretation(interp: Interpretation, ctx: AssistantCont
 function when(p: { date?: DateKey; time?: string; allDay?: boolean }, now: Date): string {
   if (!p.date) return '';
   const day = relativeDayLabel(p.date, now);
-  const dayText = /^(Today|Tomorrow|Yesterday)$/.test(day) ? day.toLowerCase() : `on ${day.includes(' ') ? format(fromDateKey(p.date), 'EEEE d MMMM') : day}`;
+  const dayText = /^(Today|Tomorrow|Yesterday)$/.test(day)
+    ? day.toLowerCase()
+    : `on ${day.includes(' ') ? format(fromDateKey(p.date), 'EEEE d MMMM') : day}`;
   return p.time && !p.allDay ? `${dayText} at ${formatTime(p.time)}` : dayText;
 }
 
@@ -297,7 +307,12 @@ export function describeProposal(p: Proposal, now: Date): string {
       return `I’ll remind ${who} to ${what}${w ? ` ${w}` : ''}.${p.date ? '' : ' When should the reminder go off?'}`;
     }
     case 'event': {
-      const whose = !p.assignee || p.assignee.status === 'me' ? 'your calendar' : p.assignee.status === 'household' ? 'the family calendar' : `${possessive(p.assignee.name)} calendar`;
+      const whose =
+        !p.assignee || p.assignee.status === 'me'
+          ? 'your calendar'
+          : p.assignee.status === 'household'
+            ? 'the family calendar'
+            : `${possessive(p.assignee.name)} calendar`;
       return `I’ll add “${p.title}” to ${whose}${w ? ` ${w}` : ''}.${p.date ? '' : ' Which day is it?'}`;
     }
     case 'shopping': {

@@ -54,7 +54,8 @@ export function TimeGrid({ days, occurrences, today, nowTime, height, onSelectDa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [days.join()]);
 
-  const colour = (calendarId: string) => (calendarId === TASKS_CALENDAR_ID ? 'mint' : (calendars.find((c) => c.id === calendarId)?.color ?? 'sky'));
+  const colour = (calendarId: string) =>
+    calendarId === TASKS_CALENDAR_ID ? 'mint' : (calendars.find((c) => c.id === calendarId)?.color ?? 'sky');
 
   return (
     <View
@@ -95,7 +96,7 @@ export function TimeGrid({ days, occurrences, today, nowTime, height, onSelectDa
                         justifyContent: 'center',
                         backgroundColor: isToday ? palette.accents.coral.base : 'transparent',
                       }}>
-                      <Text variant="bodyStrong" color={isToday ? palette.onAccent : palette.text}>
+                      <Text variant="bodyStrong" color={isToday ? palette.accents.coral.on : palette.text}>
                         {format(d, 'd')}
                       </Text>
                     </View>

@@ -1,10 +1,14 @@
-import { Icon } from '@/components/ui/Icon';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Animated, Pressable, ScrollView, TextInput, View } from 'react-native';
 
-import { Button, Card, Checkbox, EmptyState, IconButton, Screen, Text } from '@/components/ui';
-import { groupItems, shoppingCategoryMeta } from '@/features/shopping/logic';
+import { confirmAction } from '@/components/ui/ConfirmDialog';
+import { Icon } from '@/components/ui/Icon';
+import { toast } from '@/components/ui/Toast';
+import { useFoldAway } from '@/components/ui/useFoldAway';
+
+import { Button, Card, Checkbox, EmptyState, IconButton, Screen, Segmented, Text } from '@/components/ui';
+import { frequentItems, groupItems, manualOrder, shoppingCategoryMeta } from '@/features/shopping/logic';
 import { useShopping } from '@/features/shopping/store';
 import { memberById, ME_ID, useSpace } from '@/features/space/store';
 import type { ShoppingItem } from '@/features/types';
@@ -17,7 +21,9 @@ export default function ShoppingListScreen() {
   const list = useShopping((s) => s.lists.find((l) => l.id === id));
   const allItems = useShopping((s) => s.items);
   const favourites = useShopping((s) => s.favourites);
-  const { addItem, togglePurchased, removeItem, clearPurchased, toggleFavourite, removeList, updateList } = useShopping.getState();
+  const history = useShopping((s) => s.bought);
+  const { addItem, togglePurchased, removeItem, clearPurchased, toggleFavourite, removeList, updateList, moveItem } =
+    useShopping.getState();
   const hasSpace = useSpace((s) => !!s.space);
   const [draft, setDraft] = useState('');
 
@@ -39,7 +45,12 @@ export default function ShoppingListScreen() {
   const items = allItems.filter((i) => i.listId === list.id);
   const open = items.filter((i) => !i.purchased);
   const bought = items.filter((i) => i.purchased);
-  const suggestions = favourites.filter((f) => !open.some((i) => i.name.toLowerCase() === f.toLowerCase())).slice(0, 8);
+  const onList = (name: string) => open.some((i) => i.name.toLowerCase() === name.toLowerCase());
+  const starred = favourites.filter((f) => !onList(f));
+  const often = frequentItems(history, [...open.map((i) => i.name), ...starred], Math.max(0, 8 - starred.length));
+  const suggestions = [...starred.slice(0, 8).map((name) => ({ name, starred: true })), ...often.map((name) => ({ name, starred: false }))];
+  const manual = list.sortMode === 'manual';
+  const ordered = manualOrder(open);
 
   const add = (value = draft) => {
     if (!value.trim()) return;
@@ -48,19 +59,22 @@ export default function ShoppingListScreen() {
     setDraft('');
   };
 
+  const removeWithUndo = (item: ShoppingItem) => {
+    removeItem(item.id);
+    toast({ message: `Removed ${item.name}`, action: { label: 'Undo', onPress: () => useShopping.getState().restoreItems([item]) } });
+  };
+
   const confirmDelete = () => {
     const run = () => {
       removeList(list.id);
       router.back();
     };
-    if (Platform.OS === 'web') {
-      if (window.confirm(`Delete “${list.name}” and all its items?`)) run();
-      return;
-    }
-    Alert.alert('Delete list?', `“${list.name}” and all its items will be removed.`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: run },
-    ]);
+    confirmAction({
+      title: 'Delete this list?',
+      message: `“${list.name}” and all its items will be removed.`,
+      confirmLabel: 'Delete',
+      destructive: true,
+    }).then((ok) => ok && run());
   };
 
   return (
@@ -85,7 +99,7 @@ export default function ShoppingListScreen() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
           <View
             style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: tone.base, alignItems: 'center', justifyContent: 'center' }}>
-            <Icon name={list.icon} size={24} color={palette.onAccent} />
+            <Icon name={list.icon} size={24} color={tone.on} />
           </View>
           <View style={{ flex: 1 }}>
             <Text variant="title" numberOfLines={1} accessibilityRole="header">
@@ -134,12 +148,12 @@ export default function ShoppingListScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: space.sm }}
           style={{ marginBottom: space.lg }}>
-          {suggestions.map((f) => (
+          {suggestions.map(({ name: f, starred: isStar }) => (
             <Pressable
               key={f}
               onPress={() => add(f)}
               accessibilityRole="button"
-              accessibilityLabel={`Add ${f}`}
+              accessibilityLabel={`Add ${f}${isStar ? '' : ', often bought'}`}
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -147,15 +161,33 @@ export default function ShoppingListScreen() {
                 paddingHorizontal: 12,
                 height: 32,
                 borderRadius: radius.pill,
-                backgroundColor: palette.accents.sunshine.soft,
+                backgroundColor: isStar ? palette.accents.sunshine.soft : palette.surfaceSunken,
               }}>
-              <Icon name="star" size={12} color={palette.accents.sunshine.ink} />
-              <Text variant="callout" tone="sunshine">
+              <Icon
+                name={isStar ? 'star' : 'time-outline'}
+                size={12}
+                color={isStar ? palette.accents.sunshine.ink : palette.textSecondary}
+              />
+              <Text variant="callout" tone={isStar ? 'sunshine' : 'secondary'}>
                 {f}
               </Text>
             </Pressable>
           ))}
         </ScrollView>
+      ) : null}
+
+      {open.length > 1 ? (
+        <View style={{ marginBottom: space.lg }}>
+          <Segmented
+            value={manual ? 'manual' : 'aisle'}
+            onChange={(v) => updateList(list.id, { sortMode: v })}
+            accent={list.color}
+            options={[
+              { value: 'aisle', label: 'By aisle', icon: 'grid-outline' },
+              { value: 'manual', label: 'My order', icon: 'reorder-four-outline' },
+            ]}
+          />
+        </View>
       ) : null}
 
       {open.length === 0 ? (
@@ -166,6 +198,22 @@ export default function ShoppingListScreen() {
             title={bought.length ? 'All done!' : 'Nothing on the list'}
             body={bought.length ? 'Everything’s in the basket.' : 'Add the first item above.'}
           />
+        </Card>
+      ) : manual ? (
+        <Card padded={false} style={{ paddingHorizontal: space.md, marginBottom: space.lg }}>
+          {ordered.map((i, idx) => (
+            <ItemRow
+              key={i.id}
+              item={i}
+              first={idx === 0}
+              favourite={favourites.includes(i.name)}
+              onToggle={() => togglePurchased(i.id)}
+              onFavourite={() => toggleFavourite(i.name)}
+              onRemove={() => removeWithUndo(i)}
+              onMove={(dir) => moveItem(ordered, i.id, dir)}
+              canMove={[idx > 0, idx < ordered.length - 1]}
+            />
+          ))}
         </Card>
       ) : (
         groupItems(open).map((g) => {
@@ -187,7 +235,7 @@ export default function ShoppingListScreen() {
                     favourite={favourites.includes(i.name)}
                     onToggle={() => togglePurchased(i.id)}
                     onFavourite={() => toggleFavourite(i.name)}
-                    onRemove={() => removeItem(i.id)}
+                    onRemove={() => removeWithUndo(i)}
                   />
                 ))}
               </Card>
@@ -202,7 +250,20 @@ export default function ShoppingListScreen() {
             <Text variant="overline" tone="mint">
               In the basket · {bought.length}
             </Text>
-            <Button label="Clear" size="sm" variant="ghost" accent="coral" onPress={() => clearPurchased(list.id)} />
+            <Button
+              label="Clear"
+              size="sm"
+              variant="ghost"
+              accent="coral"
+              onPress={() => {
+                const cleared = bought;
+                clearPurchased(list.id);
+                toast({
+                  message: `Cleared ${cleared.length} from the basket`,
+                  action: { label: 'Undo', onPress: () => useShopping.getState().restoreItems(cleared) },
+                });
+              }}
+            />
           </View>
           <Card padded={false} style={{ paddingHorizontal: space.md, opacity: 0.85 }}>
             {bought.map((i, idx) => (
@@ -213,7 +274,7 @@ export default function ShoppingListScreen() {
                 favourite={favourites.includes(i.name)}
                 onToggle={() => togglePurchased(i.id)}
                 onFavourite={() => toggleFavourite(i.name)}
-                onRemove={() => removeItem(i.id)}
+                onRemove={() => removeWithUndo(i)}
               />
             ))}
           </Card>
@@ -233,6 +294,8 @@ function ItemRow({
   onToggle,
   onFavourite,
   onRemove,
+  onMove,
+  canMove,
 }: {
   item: ShoppingItem;
   first: boolean;
@@ -240,56 +303,86 @@ function ItemRow({
   onToggle: () => void;
   onFavourite: () => void;
   onRemove: () => void;
+  /** "My order": move up (-1) or down (1). */
+  onMove?: (dir: -1 | 1) => void;
+  canMove?: [boolean, boolean];
 }) {
   const { palette } = useTheme();
   const adder = useSpace((s) => memberById(s.people, item.addedBy));
+  const { style: foldStyle, onLayout, run, folding } = useFoldAway();
+  // Buying slides the item into the basket; putting it back is instant.
+  const toggle = () => (item.purchased ? onToggle() : run(onToggle));
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: space.md,
-        paddingVertical: space.md,
-        borderTopWidth: first ? 0 : 1,
-        borderTopColor: palette.border,
-      }}>
-      <Checkbox
-        checked={item.purchased}
-        onToggle={onToggle}
-        label={item.purchased ? `Put ${item.name} back on the list` : `Mark ${item.name} as bought`}
-      />
-      <Pressable onPress={onToggle} style={{ flex: 1 }} accessibilityElementsHidden importantForAccessibility="no">
-        <Text
-          variant="body"
-          tone={item.purchased ? 'tertiary' : 'primary'}
-          style={{ textDecorationLine: item.purchased ? 'line-through' : 'none' }}>
-          {item.name}
-          {item.quantity ? (
-            <Text variant="callout" tone="secondary">
-              {'  '}× {item.quantity}
+    <Animated.View onLayout={onLayout} style={foldStyle}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: space.md,
+          paddingVertical: space.md,
+          borderTopWidth: first ? 0 : 1,
+          borderTopColor: palette.border,
+        }}>
+        <Checkbox
+          checked={item.purchased || folding}
+          onToggle={toggle}
+          label={item.purchased ? `Put ${item.name} back on the list` : `Mark ${item.name} as bought`}
+        />
+        <Pressable onPress={toggle} style={{ flex: 1 }} accessibilityElementsHidden importantForAccessibility="no">
+          <Text
+            variant="body"
+            tone={item.purchased ? 'tertiary' : 'primary'}
+            style={{ textDecorationLine: item.purchased ? 'line-through' : 'none' }}>
+            {item.name}
+            {item.quantity ? (
+              <Text variant="callout" tone="secondary">
+                {'  '}× {item.quantity}
+              </Text>
+            ) : null}
+          </Text>
+          {adder && !adder.isMe ? (
+            <Text variant="caption" tone="tertiary">
+              Added by {adder.name}
             </Text>
           ) : null}
-        </Text>
-        {adder && !adder.isMe ? (
-          <Text variant="caption" tone="tertiary">
-            Added by {adder.name}
-          </Text>
+        </Pressable>
+        {onMove ? (
+          <View style={{ flexDirection: 'row', gap: 2 }}>
+            <Pressable
+              onPress={() => onMove(-1)}
+              disabled={!canMove?.[0]}
+              hitSlop={6}
+              accessibilityRole="button"
+              accessibilityLabel={`Move ${item.name} up`}
+              style={{ opacity: canMove?.[0] ? 1 : 0.3, padding: 2 }}>
+              <Icon name="chevron-up" size={18} color={palette.textSecondary} />
+            </Pressable>
+            <Pressable
+              onPress={() => onMove(1)}
+              disabled={!canMove?.[1]}
+              hitSlop={6}
+              accessibilityRole="button"
+              accessibilityLabel={`Move ${item.name} down`}
+              style={{ opacity: canMove?.[1] ? 1 : 0.3, padding: 2 }}>
+              <Icon name="chevron-down" size={18} color={palette.textSecondary} />
+            </Pressable>
+          </View>
         ) : null}
-      </Pressable>
-      <Pressable
-        onPress={onFavourite}
-        hitSlop={8}
-        accessibilityRole="button"
-        accessibilityLabel={favourite ? `Remove ${item.name} from favourites` : `Add ${item.name} to favourites`}>
-        <Icon
-          name={favourite ? 'star' : 'star-outline'}
-          size={18}
-          color={favourite ? palette.accents.sunshine.base : palette.textTertiary}
-        />
-      </Pressable>
-      <Pressable onPress={onRemove} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Delete ${item.name}`}>
-        <Icon name="close" size={18} color={palette.textTertiary} />
-      </Pressable>
-    </View>
+        <Pressable
+          onPress={onFavourite}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={favourite ? `Remove ${item.name} from favourites` : `Add ${item.name} to favourites`}>
+          <Icon
+            name={favourite ? 'star' : 'star-outline'}
+            size={18}
+            color={favourite ? palette.accents.sunshine.base : palette.textTertiary}
+          />
+        </Pressable>
+        <Pressable onPress={onRemove} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Delete ${item.name}`}>
+          <Icon name="close" size={18} color={palette.textTertiary} />
+        </Pressable>
+      </View>
+    </Animated.View>
   );
 }

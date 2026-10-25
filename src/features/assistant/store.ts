@@ -77,7 +77,9 @@ export const useAssistant = create<AssistantState>()((set, get) => ({
             ? {
                 ...t,
                 thinking: false,
-                text: text_ || (!resolution.proposals.length && !resolution.updated.length && !answer ? 'I’m not sure how to help with that yet.' : ''),
+                text:
+                  text_ ||
+                  (!resolution.proposals.length && !resolution.updated.length && !answer ? 'I’m not sure how to help with that yet.' : ''),
                 proposalIds: resolution.proposals.map((p) => p.id),
                 revisedIds: resolution.updated.map((p) => p.id),
                 answer,
@@ -90,7 +92,9 @@ export const useAssistant = create<AssistantState>()((set, get) => ({
       }));
     } catch {
       set((s) => ({
-        turns: s.turns.map((t) => (t.id === pending.id ? { ...t, thinking: false, text: 'Something went wrong there. Please try again.' } : t)),
+        turns: s.turns.map((t) =>
+          t.id === pending.id ? { ...t, thinking: false, text: 'Something went wrong there. Please try again.' } : t,
+        ),
         busy: false,
       }));
     }

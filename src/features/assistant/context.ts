@@ -111,11 +111,32 @@ export function toModelContext(ctx: AssistantContext) {
     lastPerson: ctx.lastPersonName ?? null,
     tasks: ctx.tasks
       .filter((t) => taskRefs.has(t.id))
-      .map((t) => ({ ref: taskRefs.get(t.id), title: t.title, due: t.due ?? null, time: t.dueTime ?? null, assignee: who(t.assigneeId, t.assigneeName) })),
+      .map((t) => ({
+        ref: taskRefs.get(t.id),
+        title: t.title,
+        due: t.due ?? null,
+        time: t.dueTime ?? null,
+        assignee: who(t.assigneeId, t.assigneeName),
+      })),
     events: ctx.events
       .filter((e) => eventRefs.has(e.id))
-      .map((e) => ({ ref: eventRefs.get(e.id), title: e.title, start: e.start, end: e.end, allDay: e.allDay, repeats: e.recurrence?.freq ?? null, person: who(e.personId) })),
+      .map((e) => ({
+        ref: eventRefs.get(e.id),
+        title: e.title,
+        start: e.start,
+        end: e.end,
+        allDay: e.allDay,
+        repeats: e.recurrence?.freq ?? null,
+        person: who(e.personId),
+      })),
     shoppingLists: ctx.lists.map((l) => l.name),
-    conversation: ctx.proposals.map((p) => ({ ref: propRefs.get(p.id), kind: p.kind, title: p.title, status: p.status, date: p.date ?? null, person: p.assignee?.name ?? null })),
+    conversation: ctx.proposals.map((p) => ({
+      ref: propRefs.get(p.id),
+      kind: p.kind,
+      title: p.title,
+      status: p.status,
+      date: p.date ?? null,
+      person: p.assignee?.name ?? null,
+    })),
   };
 }
