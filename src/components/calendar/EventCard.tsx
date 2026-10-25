@@ -3,9 +3,9 @@ import { router } from 'expo-router';
 import { View } from 'react-native';
 
 import { useCalendar } from '@/features/calendar/store';
-import { TASKS_CALENDAR_ID } from '@/features/calendar/tasks';
+import { eventAccents } from '@/features/people/logic';
 import { useSpace } from '@/features/space/store';
-import type { EventOccurrence } from '@/features/types';
+import type { CalendarEvent, EventOccurrence } from '@/features/types';
 import { formatTime, timeKeyOf } from '@/lib/dates';
 import { fonts, radius, space, useTheme, type AccentKey } from '@/theme';
 
@@ -13,8 +13,11 @@ import { AvatarStack } from '../ui/primitives';
 import { PressableScale } from '../ui/PressableScale';
 import { Text } from '../ui/Text';
 
-export function useCalendarAccent(calendarId: string): AccentKey {
-  return useCalendar((s) => (calendarId === TASKS_CALENDAR_ID ? 'mint' : (s.calendars.find((c) => c.id === calendarId)?.color ?? 'sky')));
+/** An entry's colour: the person it's for, else its calendar's (see eventAccents). */
+export function useEventAccent(event: CalendarEvent): AccentKey {
+  const calendars = useCalendar((s) => s.calendars);
+  const people = useSpace((s) => s.people);
+  return eventAccents(event, calendars, people)[0];
 }
 
 /** Open what a calendar entry stands for: the task for a dated task, otherwise the event. */
@@ -26,7 +29,7 @@ export function openOccurrence(o: EventOccurrence) {
 /** Colour-coded event card used on Home, Day and Agenda views. */
 export function EventCard({ occurrence, compact, now }: { occurrence: EventOccurrence; compact?: boolean; now?: string }) {
   const { palette } = useTheme();
-  const accent = useCalendarAccent(occurrence.event.calendarId);
+  const accent = useEventAccent(occurrence.event);
   const tone = palette.accents[accent];
   const { event } = occurrence;
   const start = timeKeyOf(occurrence.start);

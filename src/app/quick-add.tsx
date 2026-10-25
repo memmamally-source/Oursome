@@ -1,5 +1,5 @@
 import { Icon } from '@/components/ui/Icon';
-import { router, type Href } from 'expo-router';
+import { router, useLocalSearchParams, type Href } from 'expo-router';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -17,6 +17,9 @@ export default function QuickAdd() {
   const { palette } = useTheme();
   const insets = useSafeAreaInsets();
   const hasSpace = useSpace((s) => !!s.space);
+  // Opened from the Calendar tab: add on the day picked there.
+  const { date } = useLocalSearchParams<{ date?: string }>();
+  const on = date ? { date } : {};
 
   const go = (href: Href) => {
     haptic.tap();
@@ -31,21 +34,21 @@ export default function QuickAdd() {
       hint: 'Something to do',
       icon: 'checkmark-circle',
       accent: 'mint',
-      href: () => ({ pathname: '/task/[id]', params: { id: 'new' } }),
+      href: () => ({ pathname: '/task/[id]', params: { id: 'new', ...on } }),
     },
     {
       label: 'Appointment',
       hint: 'Add to calendar',
       icon: 'calendar',
       accent: 'sky',
-      href: () => ({ pathname: '/event/[id]', params: { id: 'new' } }),
+      href: () => ({ pathname: '/event/[id]', params: { id: 'new', ...on } }),
     },
     {
       label: 'Reminder',
       hint: 'Get a nudge',
       icon: 'notifications',
       accent: 'sunshine',
-      href: () => ({ pathname: '/task/[id]', params: { id: 'new', reminder: '1' } }),
+      href: () => ({ pathname: '/task/[id]', params: { id: 'new', reminder: '1', ...on } }),
     },
     {
       label: 'Shopping item',

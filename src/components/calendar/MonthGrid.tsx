@@ -12,8 +12,12 @@ type Props = {
   onSelect: (date: DateKey) => void;
   /** Accent dots to show under each date (max 3 rendered). */
   dots?: Record<DateKey, AccentKey[]>;
+  /** Event names to show in each day instead of dots (the Calendar's month view). */
+  labels?: Record<DateKey, { title: string; accent: AccentKey }[]>;
   compact?: boolean;
 };
+
+const LABELS_SHOWN = 2;
 
 export function WeekdayHeader() {
   const { palette } = useTheme();
@@ -34,7 +38,7 @@ export function WeekdayHeader() {
 }
 
 /** Month grid used by the calendar and by date pickers. */
-export function MonthGrid({ anchor, selected, today, onSelect, dots, compact }: Props) {
+export function MonthGrid({ anchor, selected, today, onSelect, dots, labels, compact }: Props) {
   const { palette } = useTheme();
   const days = monthGrid(anchor);
   const month = anchor.getMonth();
@@ -51,6 +55,60 @@ export function MonthGrid({ anchor, selected, today, onSelect, dots, compact }: 
             const isSelected = key === selected;
             const isToday = key === today;
             const dayDots = dots?.[key] ?? [];
+            if (labels) {
+              const items = labels[key] ?? [];
+              return (
+                <Pressable
+                  key={key}
+                  onPress={() => onSelect(key)}
+                  accessibilityRole="button"
+                  aria-selected={isSelected}
+                  accessibilityLabel={`${format(d, 'EEEE d MMMM')}${items.length ? `, ${items.map((i) => i.title).join(', ')}` : ''}`}
+                  style={{
+                    flex: 1,
+                    minHeight: 66,
+                    margin: 1,
+                    paddingTop: 3,
+                    paddingHorizontal: 2,
+                    gap: 2,
+                    borderRadius: radius.sm,
+                    backgroundColor: isSelected ? palette.accents.coral.soft : 'transparent',
+                    borderWidth: isSelected ? 1.5 : 0,
+                    borderColor: palette.accents.coral.base,
+                    opacity: inMonth ? 1 : 0.45,
+                  }}>
+                  <View
+                    style={{
+                      alignSelf: 'center',
+                      minWidth: 24,
+                      height: 24,
+                      borderRadius: 12,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: isToday ? palette.accents.coral.base : 'transparent',
+                    }}>
+                    <Text
+                      variant="callout"
+                      style={{ fontFamily: isToday || isSelected ? fonts.bodyBold : fonts.bodyMedium, fontSize: 14 }}
+                      color={isToday ? palette.accents.coral.on : isSelected ? palette.accents.coral.ink : palette.text}>
+                      {d.getDate()}
+                    </Text>
+                  </View>
+                  {items.slice(0, LABELS_SHOWN).map((item, i) => (
+                    <View key={i} style={{ borderRadius: 4, paddingHorizontal: 3, backgroundColor: palette.accents[item.accent].soft }}>
+                      <Text numberOfLines={1} style={{ fontFamily: fonts.bodyBold, fontSize: 9, lineHeight: 13, color: palette.accents[item.accent].ink }}>
+                        {item.title}
+                      </Text>
+                    </View>
+                  ))}
+                  {items.length > LABELS_SHOWN ? (
+                    <Text style={{ fontFamily: fonts.bodyBold, fontSize: 9, lineHeight: 12, color: palette.textSecondary, textAlign: 'center' }}>
+                      +{items.length - LABELS_SHOWN}
+                    </Text>
+                  ) : null}
+                </Pressable>
+              );
+            }
             return (
               <Pressable
                 key={key}

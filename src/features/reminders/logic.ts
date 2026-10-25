@@ -161,3 +161,33 @@ export function coalesce(due: Reminder[], max = 3): { single: Reminder[]; summar
     },
   };
 }
+
+/** When quiet hours that cover `at` end (the next "to" time). */
+export function quietHoursEnd(at: Date, quiet: NotificationPrefs['quietHours']): Date {
+  const [h, m] = quiet.to.split(':').map(Number);
+  const end = new Date(at.getFullYear(), at.getMonth(), at.getDate(), h, m);
+  return end <= at ? addDays(end, 1) : end;
+}
+
+/** iOS keeps at most 64 scheduled notifications per app. */
+export const MAX_SCHEDULED = 60;
+
+/**
+ * Reminders to hand to the phone ahead of time, so they arrive with Oursome
+ * closed: everything due in the next `days`, with quiet-hours ones moved to
+ * when quiet hours end (several landing together become one summary).
+ */
+export function phoneSchedule({ tasks, events, prefs, now, days = 14 }: Omit<Input, 'from' | 'to'> & { now: Date; days?: number }): Reminder[] {
+  const due = remindersDue({ tasks, events, prefs, from: now, to: addDays(now, days) }).map((r) =>
+    inQuietHours(r.at, prefs.quietHours) ? { ...r, at: quietHoursEnd(r.at, prefs.quietHours) } : r,
+  );
+  const byTime = new Map<number, Reminder[]>();
+  for (const r of due) byTime.set(r.at.getTime(), [...(byTime.get(r.at.getTime()) ?? []), r]);
+  const out: Reminder[] = [];
+  for (const [time, group] of [...byTime].sort((a, b) => a[0] - b[0])) {
+    const { single, summary } = coalesce(group);
+    if (summary) out.push({ id: `sum:${time}`, kind: 'briefing', title: summary.title, body: summary.body, at: new Date(time), href: '/' });
+    else out.push(...single);
+  }
+  return out.slice(0, MAX_SCHEDULED);
+}

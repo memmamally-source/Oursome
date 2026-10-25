@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Platform, View } from 'react-native';
 
 import { TimePicker } from '@/components/forms/Fields';
 import { Button, Divider, SettingRow, Text } from '@/components/ui';
@@ -7,10 +7,19 @@ import { toast } from '@/components/ui/Toast';
 import { useReminders } from '@/features/reminders/engine';
 import { useSettings } from '@/features/settings/store';
 import { formatTime } from '@/lib/dates';
-import { notifyPermission, requestNotifyPermission, showSystemNotification, type NotifyPermission } from '@/lib/notify';
+import { notifyPermission, refreshNotifyPermission, requestNotifyPermission, showSystemNotification, type NotifyPermission } from '@/lib/notify';
 import { radius, space, useTheme } from '@/theme';
 
-const status: Record<NotifyPermission, string> = {
+const phone = Platform.OS !== 'web';
+
+const phoneStatus: Record<NotifyPermission, string> = {
+  granted: 'On. Reminders arrive as notifications on this phone, even when Oursome is closed.',
+  default: 'Allow notifications to get reminders on this phone, even when Oursome is closed.',
+  denied: 'Notifications are off for Oursome. Turn them on in your phone’s Settings → Oursome → Notifications.',
+  unsupported: 'Reminders appear inside Oursome while it’s open.',
+};
+
+const browserStatus: Record<NotifyPermission, string> = {
   granted: 'On. Reminders pop up while Oursome is open in a tab or installed as an app.',
   default: 'Reminders appear inside Oursome while it’s open. Allow notifications to get them when you’re in another tab or app.',
   denied: 'Notifications are blocked in your browser’s site settings. Reminders still appear inside Oursome while it’s open.',
@@ -24,6 +33,10 @@ export function NotificationSettings() {
   const n = settings.notifications;
   const history = useReminders((s) => s.history);
   const [permission, setPermission] = useState<NotifyPermission>(notifyPermission);
+  const status = phone ? phoneStatus : browserStatus;
+  useEffect(() => {
+    void refreshNotifyPermission().then(setPermission);
+  }, []);
 
   const allow = async () => {
     const result = await requestNotifyPermission();
@@ -33,7 +46,7 @@ export function NotificationSettings() {
 
   const test = async () => {
     const ok = await showSystemNotification('Oursome', 'Notifications are working. Reminders will look like this.', '/settings', 'test');
-    if (!ok) toast({ message: 'That notification couldn’t be shown. Check your browser’s site settings.', tone: 'error' });
+    if (!ok) toast({ message: phone ? 'That notification couldn’t be shown. Check Settings → Oursome → Notifications.' : 'That notification couldn’t be shown. Check your browser’s site settings.', tone: 'error' });
   };
 
   return (
@@ -154,9 +167,11 @@ export function NotificationSettings() {
           </View>
         </>
       ) : null}
-      <Text variant="caption" tone="tertiary" style={{ paddingBottom: space.md }}>
-        Notifications with Oursome fully closed need a push service, which isn’t set up in this version.
-      </Text>
+      {phone ? null : (
+        <Text variant="caption" tone="tertiary" style={{ paddingBottom: space.md }}>
+          In the browser, reminders arrive while Oursome is open. The iPhone app sends them even when it’s closed.
+        </Text>
+      )}
     </>
   );
 }

@@ -5,7 +5,8 @@ import type { ScrollViewInstance } from 'react-native';
 
 import { layoutDay } from '@/features/calendar/layout';
 import { useCalendar } from '@/features/calendar/store';
-import { TASKS_CALENDAR_ID } from '@/features/calendar/tasks';
+import { eventAccents } from '@/features/people/logic';
+import { useSpace } from '@/features/space/store';
 import type { EventOccurrence } from '@/features/types';
 import { format, formatTime, fromDateKey, minutesOfDay, timeFromMinutes, timeKeyOf, type DateKey } from '@/lib/dates';
 import { fonts, radius, useTheme } from '@/theme';
@@ -36,6 +37,7 @@ type Props = {
 export function TimeGrid({ days, occurrences, today, nowTime, height, onSelectDay }: Props) {
   const { palette } = useTheme();
   const calendars = useCalendar((s) => s.calendars);
+  const people = useSpace((s) => s.people);
   const [width, setWidth] = useState(0);
   const scrollRef = useRef<ScrollViewInstance>(null);
   const columnWidth = width ? (width - GUTTER) / days.length : 0;
@@ -54,8 +56,8 @@ export function TimeGrid({ days, occurrences, today, nowTime, height, onSelectDa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [days.join()]);
 
-  const colour = (calendarId: string) =>
-    calendarId === TASKS_CALENDAR_ID ? 'mint' : (calendars.find((c) => c.id === calendarId)?.color ?? 'sky');
+  // The colour of the person it's for (see eventAccents).
+  const colour = (event: EventOccurrence['event']) => eventAccents(event, calendars, people)[0];
 
   return (
     <View
@@ -103,7 +105,7 @@ export function TimeGrid({ days, occurrences, today, nowTime, height, onSelectDa
                   </Pressable>
                 ) : null}
                 {allDay[col].slice(0, 2).map((o) => {
-                  const tone = palette.accents[colour(o.event.calendarId)];
+                  const tone = palette.accents[colour(o.event)];
                   return (
                     <Pressable
                       key={o.key}
@@ -179,7 +181,7 @@ export function TimeGrid({ days, occurrences, today, nowTime, height, onSelectDa
                     </View>
                   ) : null}
                   {placed.map((p) => {
-                    const tone = palette.accents[colour(p.occurrence.event.calendarId)];
+                    const tone = palette.accents[colour(p.occurrence.event)];
                     const w = columnWidth / p.columns;
                     const h = Math.max(((p.endMin - p.startMin) / 60) * HOUR - 2, 20);
                     return (

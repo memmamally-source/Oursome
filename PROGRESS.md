@@ -22,6 +22,18 @@
 | 7. Polish & testing | In progress (no physical-device testing yet) |
 | 8. Store release | App configured, listing pack and screenshots ready (`docs/app-store`); `ios.yml` builds on GitHub's Macs and uploads with the owner's existing App Store Connect key (same as Crossword Hub / Research Tracker). Needs the 4 secrets, a first build, and TestFlight testing on a real iPhone |
 
+## TestFlight round 1 fixes (25 Oct 2026)
+
+From the owner's first TestFlight session:
+1. **Month view showed no appointments** (only a 5 px dot, white on the selected day). Month cells now show up to two coloured name labels and "+n".
+2. **"Me" view missed my own appointments.** Events on My calendar (or any without a named owner) belong to the person who made them, i.e. `me` on this device (`eventOwner` falls back to `ME_ID`).
+3. **3-day view didn't swipe.** `hooks/useSwipe` (PanResponder, horizontal only) on the day/3-day grid and the month grid.
+4. **Colours by person.** `eventAccents`: owner first, then who's going, in each member's colour; entries with nobody named keep the calendar colour. Used by the month labels/dots, time grid, event cards and Home.
+5. **The big + opened today.** The Calendar tab keeps its picked day in `features/calendar/focus`; the + button passes it to quick-add, which pre-fills task, appointment and reminder dates.
+6. **Reminders on the phone.** `expo-notifications` local notifications (free, no server): `phoneSchedule` (pure, tested) hands the next 14 days to the phone (max 60, quiet-hours ones moved to their end, simultaneous ones coalesced); rescheduled on task/event/settings changes and on foreground; permission asked the first time a reminder exists; tapping opens the item. `lib/notify.native.ts` + `features/reminders/phone.native.ts`; the web keeps browser notifications. The push entitlement expo-notifications adds is stripped in `app.config.js` (local notifications don't need it). Build numbers come from the workflow run (`IOS_BUILD_NUMBER`).
+
+Verified in the browser build (month labels, Me/Jordan views, colours, swipe, + date, web reminders) and by exporting the iOS bundle; **not yet verified on a phone** (needs the next TestFlight build).
+
 ## Owner decision (25 Oct 2026): launch on-device; cloud and AI later, for Premium
 
 - **AI assistant (Smart mode / server):** paused. The app ships with Basic mode (on-device) only; `EXPO_PUBLIC_AI_ENDPOINT` stays unset.

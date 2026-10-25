@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
  * System notifications in the browser (and the installed web app). They
  * appear while Oursome is open in a tab or running as an installed app;
  * delivery with everything closed needs a push server, which isn't set up.
- * Phones running the native app use in-app reminders for now.
+ * The phone app uses local notifications instead (notify.native.ts).
  */
 
 export type NotifyPermission = 'unsupported' | 'default' | 'granted' | 'denied';
@@ -14,6 +14,11 @@ const supported = () => Platform.OS === 'web' && typeof window !== 'undefined' &
 
 export function notifyPermission(): NotifyPermission {
   return supported() ? (Notification.permission as NotifyPermission) : 'unsupported';
+}
+
+/** Same as notifyPermission() in the browser (the phone app reads it asynchronously; see notify.native.ts). */
+export async function refreshNotifyPermission(): Promise<NotifyPermission> {
+  return notifyPermission();
 }
 
 /** Ask once, only after the person taps a button. */

@@ -1,6 +1,6 @@
 import { Icon } from '@/components/ui/Icon';
-import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -8,16 +8,19 @@ import { EventCard } from '@/components/calendar/EventCard';
 import { MonthGrid } from '@/components/calendar/MonthGrid';
 import { TimeGrid } from '@/components/calendar/TimeGrid';
 import { Avatar, Card, Chip, EmptyState, IconButton, Segmented, Text, useTabBarClearance } from '@/components/ui';
+import { useCalendarFocus } from '@/features/calendar/focus';
 import { expandOccurrences } from '@/features/calendar/recurrence';
 import { useCalendar, visibleEvents } from '@/features/calendar/store';
 import { taskOccurrences } from '@/features/calendar/tasks';
 import { columnsFor, onlyPerson, rangeFor, stepFor, type CalendarView } from '@/features/calendar/views';
+import { eventAccents } from '@/features/people/logic';
 import { useSettings } from '@/features/settings/store';
 import { useSpace } from '@/features/space/store';
 import { useTasks } from '@/features/tasks/store';
 import type { EventOccurrence, Member } from '@/features/types';
 import { useLayout } from '@/hooks/useLayout';
 import { useNow } from '@/hooks/useNow';
+import { useSwipe } from '@/hooks/useSwipe';
 import { addDays, format, fromDateKey, relativeDayLabel, toDateKey, type DateKey } from '@/lib/dates';
 import { fonts, layout, paperProps, radius, space, useTheme, type AccentKey } from '@/theme';
 
@@ -58,25 +61,42 @@ export default function CalendarScreen() {
     setPerson(params.person ?? null);
   }
 
+  // The big + button adds on the day picked here (see TabBar).
+  const setFocus = useCalendarFocus((s) => s.setDate);
+  useFocusEffect(
+    useCallback(() => {
+      setFocus(selected);
+    }, [selected, setFocus]),
+  );
+
+  // Swipe left or right to move by a day, three days, a week or a month.
+  const swipe = useSwipe(
+    () => setSelected(stepFor(view, selected, 1, isWide)),
+    () => setSelected(stepFor(view, selected, -1, isWide)),
+  );
+
   const range = rangeFor(view, selected, isWide);
-  const { byDay, dots } = useMemo(() => {
+  const { byDay, dots, labels } = useMemo(() => {
     const shown = [...expandOccurrences(visibleEvents(events, calendars), range[0], range[1]), ...(tasksOn ? taskOccurrences(tasks, range[0], range[1]) : [])];
     const occ = onlyPerson(shown, person, calendars).sort((a, b) => a.start.localeCompare(b.start));
-    const colour = new Map(calendars.map((c) => [c.id, c.color]));
     const byDay: Record<DateKey, EventOccurrence[]> = {};
     const dots: Record<DateKey, AccentKey[]> = {};
+    const labels: Record<DateKey, { title: string; accent: AccentKey }[]> = {};
     for (const o of occ) {
+      // In the colour of each person it's for (or its calendar's).
+      const accents = eventAccents(o.event, calendars, members);
       // Multi-day events appear on every day they touch.
       let d = o.date;
       const last = o.end.slice(0, 10);
       while (d <= last && d <= range[1]) {
         (byDay[d] ??= []).push(o);
-        (dots[d] ??= []).push(o.event.taskId ? 'mint' : (colour.get(o.event.calendarId) ?? 'sky'));
+        (dots[d] ??= []).push(...accents);
+        (labels[d] ??= []).push({ title: o.event.title, accent: accents[0] });
         d = toDateKey(addDays(fromDateKey(d), 1));
       }
     }
-    return { byDay, dots };
-  }, [events, calendars, tasks, tasksOn, range[0], range[1], person]); // eslint-disable-line react-hooks/exhaustive-deps
+    return { byDay, dots, labels };
+  }, [events, calendars, members, tasks, tasksOn, range[0], range[1], person]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const anchor = fromDateKey(selected);
   const columns = columnsFor(view, selected, isWide);
@@ -203,6 +223,7 @@ export default function CalendarScreen() {
 
       {view === 'day' || view === 'days' ? (
         <View
+          {...swipe}
           style={{
             flex: 1,
             paddingHorizontal: layout.screenPadding,
@@ -238,9 +259,11 @@ export default function CalendarScreen() {
           }}>
           {view === 'month' ? (
             <View style={isWide ? { flexDirection: 'row', gap: space.xl, alignItems: 'flex-start' } : { gap: space.lg }}>
-              <Card style={isWide ? { flex: 3 } : undefined}>
-                <MonthGrid anchor={anchor} selected={selected} today={today} onSelect={setSelected} dots={dots} />
-              </Card>
+              <View {...swipe} style={isWide ? { flex: 3 } : undefined}>
+                <Card>
+                  <MonthGrid anchor={anchor} selected={selected} today={today} onSelect={setSelected} dots={dots} labels={labels} />
+                </Card>
+              </View>
               <View style={isWide ? { flex: 2 } : undefined}>
                 <DayList date={selected} items={selectedDay} nowTime={selected === today ? nowTime : undefined} />
               </View>
