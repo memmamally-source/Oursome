@@ -446,7 +446,7 @@ export function QuickActions() {
       accent: 'sunshine',
       go: () => router.navigate({ pathname: '/tasks', params: { view: 'lists' } }),
     },
-    { label: 'Memory', icon: 'book-outline', accent: 'coral', go: () => router.push({ pathname: '/memory/[id]', params: { id: 'new' } }) },
+    { label: 'Album', icon: 'images-outline', accent: 'coral', go: () => router.push('/album/new') },
   ];
   return (
     <View style={{ flexDirection: 'row', gap: space.sm }}>
