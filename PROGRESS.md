@@ -22,6 +22,12 @@
 | 7. Polish & testing | In progress (no physical-device testing yet) |
 | 8. Store release | App configured, listing pack and screenshots ready (`docs/app-store`); `ios.yml` builds on GitHub's Macs and uploads with the owner's existing App Store Connect key (same as Crossword Hub / Research Tracker). Needs the 4 secrets, a first build, and TestFlight testing on a real iPhone |
 
+## Owner decision (25 Oct 2026): launch on-device; cloud and AI later, for Premium
+
+- **AI assistant (Smart mode / server):** paused. The app ships with Basic mode (on-device) only; `EXPO_PUBLIC_AI_ENDPOINT` stays unset.
+- **Storage:** on the phone (or browser) only for launch. Firebase stays unconfigured, so no accounts in the cloud, no sync, and the App Privacy answer stays "Data not collected".
+- **Later:** paid plans get cloud sync/family sharing and the AI assistant. The code for both is built and tested (`features/cloud`, `server/ai`); turning them on needs subscriptions (Stage 6), updated privacy policy, App Privacy label and privacy manifest first.
+
 ## App Store readiness (25 Oct 2026)
 
 - Support email `oursomeapp@outlook.com` and site `https://oursome.org` in `Brand` (`supportEmail`, `siteUrl`, `privacyUrl`, `supportUrl`), the support and privacy pages, and the legal drafts.
