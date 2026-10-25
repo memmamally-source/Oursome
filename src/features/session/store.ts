@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 
 import { cloudConfigured } from '@/features/cloud/config';
 import { deviceTimeZone } from '@/lib/dates';
+import { checkPassword, makeCredential, type Credential } from '@/lib/password';
 import { persistStorage, STORE_VERSION } from '@/lib/storage';
 import type { AccentKey } from '@/theme/tokens';
 
@@ -16,8 +17,8 @@ export type UserProfile = {
 };
 
 /**
- * Stage 1 auth is a *local preview only*: profiles live on this device and
- * passwords are validated for strength but never stored or verified.
+ * Stage 1 auth is device-only: profiles live on this device. Passwords are
+ * checked against a salted, stretched hash kept here (never the password).
  * Stage 2 replaces `localAuth` with Firebase Authentication behind the same
  * interface, so screens don't change.
  */
@@ -33,6 +34,8 @@ export interface AuthService {
 type SessionState = {
   /** The account registered on this device (kept after sign-out). */
   profile: UserProfile | null;
+  /** Salted hash of the device account's password (kept out of the profile, so exports never include it). */
+  credential: Credential | null;
   signedIn: boolean;
   setProfile: (profile: UserProfile | null) => void;
   updateProfile: (patch: Partial<UserProfile>) => void;
@@ -43,6 +46,7 @@ export const useSession = create<SessionState>()(
   persist(
     (set) => ({
       profile: null,
+      credential: null,
       signedIn: false,
       setProfile: (profile) => set({ profile }),
       updateProfile: (patch) => set((s) => (s.profile ? { profile: { ...s.profile, ...patch } } : s)),
@@ -79,6 +83,7 @@ export const localAuth: AuthService = {
       timeZone: deviceTimeZone(),
       createdAt: new Date().toISOString(),
     });
+    useSession.setState({ credential: makeCredential(password) });
     useSession.getState().setSignedIn(true);
     return { ok: true };
   },
@@ -90,13 +95,20 @@ export const localAuth: AuthService = {
     if (!profile || profile.email !== email.trim().toLowerCase()) {
       return { ok: false, error: 'No account with that email on this device yet. Create one to get started.' };
     }
+    const { credential } = useSession.getState();
+    if (credential && !checkPassword(password, credential)) return { ok: false, error: 'That password doesn’t match. Please try again.' };
+    // Accounts made before passwords were checked adopt the one used now.
+    if (!credential) useSession.setState({ credential: makeCredential(password) });
     useSession.getState().setSignedIn(true);
     return { ok: true };
   },
   async sendPasswordReset(email) {
     const emailError = validateEmail(email);
     if (emailError) return { ok: false, error: emailError };
-    return { ok: false, error: 'Password reset emails arrive with cloud accounts in the next update.' };
+    return {
+      ok: false,
+      error: 'Your account is only on this device, so there’s no reset email. To start again, delete the app (or this site’s data); that also removes what you added.',
+    };
   },
   async signOut() {
     useSession.getState().setSignedIn(false);
