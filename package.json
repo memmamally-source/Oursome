@@ -20,6 +20,7 @@
     "expo-splash-screen": "~58.0.11",
     "expo-status-bar": "~58.0.4",
     "expo-system-ui": "~58.0.6",
+    "firebase": "^13.1.0",
     "jest-expo": "~58.0.12",
     "react": "19.3.0",
     "react-dom": "19.3.0",
@@ -34,6 +35,7 @@
     "zustand": "^5.0.16"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^6.0.0",
     "@types/jest": "^30.0.0",
     "@types/react": "~19.3.0",
     "eslint": "^9.39.5",
@@ -54,7 +56,8 @@
     "build:web": "node scripts/build-web.js",
     "icons": "node scripts/generate-icons.js",
     "eval:ai": "jest src/features/assistant/__tests__/scenarios.test.ts",
-    "check:server": "npm --prefix server/ai run typecheck && npm --prefix server/ai test"
+    "check:server": "npm --prefix server/ai run typecheck && npm --prefix server/ai test",
+    "test:cloud": "cd firebase && npx --yes firebase-tools@15 emulators:exec --only firestore,auth --project demo-oursome \"cd .. && npx jest -c firebase/jest.config.js\""
   },
   "private": true,
   "jest": {
@@ -68,7 +71,8 @@
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "<rootDir>/server/"
+      "<rootDir>/server/",
+      "<rootDir>/firebase/"
     ]
   }
 }

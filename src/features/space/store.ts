@@ -42,6 +42,12 @@ type SpaceState = {
   /** null clears every family (account deletion); a space is added or replaced and made active. */
   replace: (space: Space | null) => void;
   clearDemo: () => void;
+  /** Cloud sync: replace families as they now are (keeps the active one). */
+  setSpaces: (spaces: Space[]) => void;
+  /** Mark a family as shared through the cloud (or no longer). */
+  linkCloud: (id: string, cloudId: string | undefined) => void;
+  /** A family joined with an invite code. */
+  addCloudSpace: (space: Space) => void;
 };
 
 /** Recompute the derived fields whenever families change. */
@@ -120,6 +126,9 @@ export const useSpace = create<SpaceState>()(
         replace: (space) =>
           set((st) => (space ? derive([...st.spaces.filter((s) => s.id !== space.id), space], space.id) : derive([], null))),
         clearDemo: () => set((st) => derive(st.spaces.filter((s) => !s.isDemo), st.activeId)),
+        setSpaces: (spaces) => set((st) => derive(spaces, st.activeId)),
+        linkCloud: (id, cloudId) => set((st) => derive(st.spaces.map((s) => (s.id === id ? { ...s, cloudId } : s)), st.activeId)),
+        addCloudSpace: (space) => set((st) => derive([...st.spaces.filter((s) => s.id !== space.id), space], space.id)),
       };
     },
     {

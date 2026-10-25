@@ -194,6 +194,8 @@ export type Space = {
   photo?: string;
   members: Member[];
   announcements: Announcement[];
+  /** Set when this family is shared through the cloud: its household id there. */
+  cloudId?: string;
   createdAt: string;
   isDemo?: boolean;
 };

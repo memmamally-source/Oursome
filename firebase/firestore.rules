@@ -1,0 +1,129 @@
+rules_version = '2';
+
+// Oursome cloud sharing. Nothing is public: every read and write needs a
+// signed-in person, and household data is visible only to its members.
+//
+//   households/{hid}                 name, motto, cover (members read; members edit)
+//   households/{hid}/members/{uid}   one per account in the household
+//   households/{hid}/items/{id}      shared tasks, events, lists, memories…
+//   invites/{code}                   short-lived join codes (read one by its code only)
+//   users/{uid}/...                  private to that account
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+    function memberPath(hid, uid) {
+      return /databases/$(database)/documents/households/$(hid)/members/$(uid);
+    }
+    function isMember(hid) {
+      return signedIn() && exists(memberPath(hid, request.auth.uid));
+    }
+    function isAdmin(hid) {
+      return isMember(hid) && get(memberPath(hid, request.auth.uid)).data.role == 'admin';
+    }
+    function text(v, min, max) {
+      return v is string && v.size() >= min && v.size() <= max;
+    }
+    function optionalText(data, key, max) {
+      return !(key in data) || text(data[key], 0, max);
+    }
+    function validHousehold(d) {
+      return d.keys().hasOnly(['name', 'motto', 'cover', 'createdBy', 'createdAt'])
+        && text(d.name, 1, 60)
+        && optionalText(d, 'motto', 80)
+        && optionalText(d, 'cover', 20)
+        && d.createdBy is string
+        && d.createdAt is timestamp;
+    }
+    function validMember(d) {
+      return d.keys().hasOnly(['name', 'color', 'role', 'joinedAt', 'inviteCode'])
+        && text(d.name, 1, 60)
+        && text(d.color, 1, 20)
+        && d.role in ['admin', 'member']
+        && d.joinedAt is timestamp;
+    }
+    function validInvite(code, hid) {
+      let invite = get(/databases/$(database)/documents/invites/$(code));
+      return invite != null && invite.data.householdId == hid && invite.data.expiresAt > request.time;
+    }
+
+    match /households/{hid} {
+      allow read: if isMember(hid);
+      allow create: if signedIn()
+        && validHousehold(request.resource.data)
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time;
+      allow update: if isMember(hid)
+        && validHousehold(request.resource.data)
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAdmin(hid);
+
+      match /members/{uid} {
+        allow read: if isMember(hid);
+        // You can only add yourself: as the admin of a household you are creating
+        // in the same write, or as a member with a valid, unexpired invite code.
+        allow create: if signedIn()
+          && uid == request.auth.uid
+          && validMember(request.resource.data)
+          && request.resource.data.joinedAt == request.time
+          && (
+            (request.resource.data.role == 'admin'
+              && !exists(/databases/$(database)/documents/households/$(hid))
+              && getAfter(/databases/$(database)/documents/households/$(hid)).data.createdBy == request.auth.uid)
+            || (request.resource.data.role == 'member'
+              && request.resource.data.inviteCode is string
+              && validInvite(request.resource.data.inviteCode, hid))
+          );
+        // Your own name and colour; only an admin changes roles.
+        allow update: if validMember(request.resource.data)
+          && request.resource.data.joinedAt == resource.data.joinedAt
+          && (
+            (uid == request.auth.uid && isMember(hid) && request.resource.data.role == resource.data.role)
+            || (isAdmin(hid) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role']))
+          );
+        // Leave, or an admin removes someone.
+        allow delete: if (signedIn() && uid == request.auth.uid) || isAdmin(hid);
+      }
+
+      match /items/{id} {
+        allow read: if isMember(hid);
+        allow create, update: if isMember(hid)
+          && request.resource.data.keys().hasOnly(['kind', 'data', 'updatedAt', 'updatedBy'])
+          && request.resource.data.kind in ['task', 'event', 'list', 'listItem', 'memory', 'announcement', 'person']
+          && request.resource.data.data is map
+          && request.resource.data.data.size() <= 40
+          && request.resource.data.updatedBy == request.auth.uid
+          && request.resource.data.updatedAt == request.time
+          && (resource == null || request.resource.data.kind == resource.data.kind);
+        allow delete: if isMember(hid);
+      }
+    }
+
+    match /invites/{code} {
+      // Readable one at a time by someone who has the code; never listable.
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['householdId', 'createdBy', 'createdAt', 'expiresAt'])
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.expiresAt is timestamp
+        && request.resource.data.expiresAt <= request.time + duration.value(7, 'd')
+        && code.size() >= 10
+        && isAdmin(request.resource.data.householdId);
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.createdBy == request.auth.uid;
+    }
+
+    match /users/{uid}/{document=**} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

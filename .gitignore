@@ -44,3 +44,8 @@ example
 .env
 .env.*
 !.env.example
+
+# Firebase emulator logs
+firebase-debug.log
+firestore-debug.log
+ui-debug.log

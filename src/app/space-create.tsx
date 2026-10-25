@@ -7,6 +7,7 @@ import { Chip, ModalHeader, ModalScreen, Text, TextField } from '@/components/ui
 import { useSession } from '@/features/session/store';
 import { useSpace } from '@/features/space/store';
 import { space } from '@/theme';
+import { cloudConfigured } from '@/features/cloud';
 
 const ideas = ['Our Home', 'Mum & Dad', 'The Kids', 'Grandparents', 'Housemates'];
 
@@ -22,14 +23,24 @@ export default function CreateSpace() {
   };
 
   return (
-    <ModalScreen header={<ModalHeader title={hasFamily ? 'Add a family' : 'Create a family'} action="Create" onAction={create} actionDisabled={!name.trim()} />}>
+    <ModalScreen
+      header={
+        <ModalHeader
+          title={hasFamily ? 'Add a family' : 'Create a family'}
+          action="Create"
+          onAction={create}
+          actionDisabled={!name.trim()}
+        />
+      }>
       <View style={{ alignItems: 'center' }}>
         <Illustration name="together" width={200} />
       </View>
       <Text variant="body" tone="secondary" align="center">
         {hasFamily
           ? 'Another group you organise with, like your parents, a co-parenting arrangement or housemates. Each family has its own people, noticeboard and shared items.'
-          : 'A shared home for your calendars, chores and lists. You’ll be the admin and can invite others once cloud sync arrives.'}
+          : cloudConfigured
+            ? 'A shared home for your calendars, chores and lists. You’ll be the admin and can invite others with a code.'
+            : 'A shared home for your calendars, chores and lists. You’ll be the admin. Inviting others needs cloud sharing, which isn’t switched on here yet.'}
       </Text>
       <TextField
         label="Name this family"

@@ -7,9 +7,11 @@ import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { EventCard } from '@/components/calendar/EventCard';
 import { JournalSection } from '@/components/journal/JournalSection';
+import { FamilySharing } from '@/components/space/FamilySharing';
 import { TaskRow } from '@/components/tasks/TaskRow';
 import { Avatar, AvatarStack, Button, Card, EmptyState, IconBubble, IconButton, Screen, SectionHeader, Text } from '@/components/ui';
 import { expandOccurrences } from '@/features/calendar/recurrence';
+import { cloudConfigured } from '@/features/cloud';
 import { useCalendar } from '@/features/calendar/store';
 import { eventOwner, openTasksFor } from '@/features/people/logic';
 import { useShopping } from '@/features/shopping/store';
@@ -66,6 +68,16 @@ export default function SpaceScreen() {
           onPress={() => router.push({ pathname: '/person/[id]', params: { id: 'new' } })}
           style={{ marginBottom: space.xl }}
         />
+        {cloudConfigured ? (
+          <Button
+            label="Join a family with an invite code"
+            variant="ghost"
+            accent="sunshine"
+            icon="key-outline"
+            onPress={() => router.push('/join')}
+            style={{ marginBottom: space.xl, marginTop: -space.md }}
+          />
+        ) : null}
         <JournalSection />
         <PrivacyNote />
       </Screen>
@@ -140,37 +152,17 @@ export default function SpaceScreen() {
           <Text variant="callout" tone="secondary" style={{ flex: 1 }}>
             {s.members.length} {s.members.length === 1 ? 'member' : 'members'}
           </Text>
-          {isAdmin ? (
-            <Button label="Invite" icon="person-add-outline" size="sm" accent="sunshine" onPress={() => setShowInvite(!showInvite)} />
+          {isAdmin || s.cloudId ? (
+            <Button
+              label={s.cloudId ? 'Sharing' : 'Invite'}
+              icon={s.cloudId ? 'cloud-done-outline' : 'person-add-outline'}
+              size="sm"
+              accent="sunshine"
+              onPress={() => setShowInvite(!showInvite)}
+            />
           ) : null}
         </View>
-        {showInvite ? (
-          <View style={{ backgroundColor: palette.surface, borderRadius: radius.lg, padding: space.lg, gap: space.sm }}>
-            <Text variant="subheading">Invite someone</Text>
-            <Text variant="callout" tone="secondary">
-              Secure invite links and codes arrive with cloud accounts in the next update. Invites will expire, and you’ll approve who
-              joins.
-            </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: space.sm,
-                backgroundColor: palette.surfaceSunken,
-                borderRadius: radius.md,
-                padding: space.md,
-                opacity: 0.6,
-              }}>
-              <Icon name="link-outline" size={18} color={palette.textSecondary} />
-              <Text variant="callout" tone="secondary" style={{ letterSpacing: 2 }}>
-                ••••-••••
-              </Text>
-              <Text variant="caption" tone="tertiary" style={{ marginLeft: 'auto' }}>
-                Coming soon
-              </Text>
-            </View>
-          </View>
-        ) : null}
+        {showInvite ? <FamilySharing family={s} isAdmin={isAdmin} /> : null}
         {s.isDemo ? (
           <Text variant="caption" tone="sunshine">
             Sample household — Jordan is a demo member.
@@ -555,6 +547,29 @@ function FamilySwitcher() {
             Add a family
           </Text>
         </Pressable>
+        {cloudConfigured ? (
+          <Pressable
+            onPress={() => router.push('/join')}
+            accessibilityRole="button"
+            accessibilityLabel="Join a family with a code"
+            style={({ pressed }) => ({
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 6,
+              paddingHorizontal: space.lg,
+              height: 52,
+              borderRadius: radius.pill,
+              borderWidth: 1.5,
+              borderStyle: 'dashed',
+              borderColor: palette.textTertiary,
+              opacity: pressed ? 0.7 : 1,
+            })}>
+            <Icon name="key-outline" size={18} color={palette.textSecondary} />
+            <Text variant="callout" tone="secondary" style={{ fontFamily: fonts.bodyBold }}>
+              Join with a code
+            </Text>
+          </Pressable>
+        ) : null}
       </ScrollView>
     </View>
   );

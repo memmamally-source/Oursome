@@ -41,7 +41,9 @@ const isCore = (f) => {
   return indexHtml.includes(name) || /^_layout-.*\.js$/.test(name) || /\.woff2$/.test(name);
 };
 const core = built.filter(isCore).map(toUrl);
-const warm = built.filter((f) => !isCore(f) && !/\/icons\//.test(f)).map(toUrl);
+// The cloud runtime (Firebase) is only ever needed when cloud sharing is configured.
+const cloudOn = !!(process.env.EXPO_PUBLIC_FIREBASE_API_KEY && process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID);
+const warm = built.filter((f) => !isCore(f) && !/\/icons\//.test(f) && (cloudOn || !/\/runtime-[^/]*\.js$/.test(f))).map(toUrl);
 
 const fill = (file) => {
   const p = path.join(dist, file);

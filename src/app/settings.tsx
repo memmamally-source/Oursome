@@ -9,6 +9,7 @@ import { LogoMark } from '@/components/brand/Logo';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { Avatar, Card, Divider, IconButton, Screen, Segmented, SettingRow, Text, TextField } from '@/components/ui';
 import { Brand } from '@/config/brand';
+import { cloudConfigured } from '@/features/cloud';
 import { clearDemoContent, hasDemoContent } from '@/features/demo/seed';
 import { deleteAllLocalData, exportData } from '@/features/settings/account';
 import { useSettings } from '@/features/settings/store';
@@ -208,7 +209,11 @@ export default function SettingsScreen() {
           icon="shield-checkmark-outline"
           accent="mint"
           label="Where your data lives"
-          detail="This preview keeps everything on this device. Nothing is sent to a server."
+          detail={
+            cloudConfigured
+              ? 'Private things stay on this device. Families you choose to share sync through Firebase, visible only to their members.'
+              : 'Everything stays on this device. Nothing is sent to a server.'
+          }
         />
       </Section>
 

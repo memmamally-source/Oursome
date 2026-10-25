@@ -8,6 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { OrbStage } from '@/components/brand/Orb';
 import { ConfirmHost } from '@/components/ui/ConfirmDialog';
 import { ToastHost } from '@/components/ui/Toast';
+import { CloudBoot } from '@/features/cloud';
 import { ReminderEngine } from '@/features/reminders/engine';
 import { useSession } from '@/features/session/store';
 import { useSettings } from '@/features/settings/store';
@@ -102,6 +103,7 @@ function AppNavigator() {
           <Stack.Screen name="memory/[id]" options={{ presentation: 'modal' }} />
           <Stack.Screen name="journal" />
           <Stack.Screen name="calendar-files" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="join" options={{ presentation: 'modal' }} />
           <Stack.Screen name="premium" options={{ presentation: 'modal' }} />
         </Stack.Protected>
         <Stack.Protected guard={!signedIn}>
@@ -110,6 +112,7 @@ function AppNavigator() {
         </Stack.Protected>
       </Stack>
       {/* Overlays: never take taps outside their own content. */}
+      <CloudBoot />
       <ReminderEngine />
       <OrbStage />
       <ToastHost />
