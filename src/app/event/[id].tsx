@@ -32,6 +32,7 @@ export default function EventEditor() {
   const calendars = useCalendar((s) => s.calendars);
   const { addEvent, updateEvent, removeEvent } = useCalendar.getState();
   const hasSpace = useSpace((s) => !!s.space);
+  const people = useSpace((s) => s.people);
 
   const initialStart = existing ? timeKeyOf(existing.start) : params.time || '09:00';
   const initialEnd = existing ? timeKeyOf(existing.end) : params.endTime || timeFromMinutes(minutesOfDay(initialStart) + 60);
@@ -48,6 +49,7 @@ export default function EventEditor() {
   const [reminderMinutes, setReminderMinutes] = useState<number | null>(existing?.reminderMinutes ?? 30);
   const [visibility, setVisibility] = useState(existing?.visibility ?? 'private');
   const [important, setImportant] = useState(existing ? !!existing.isImportantDate : !!params.important);
+  const [going, setGoing] = useState<string[]>(existing?.participantIds ?? []);
 
   const endMinutes = Math.min(minutesOfDay(start) + duration, 23 * 60 + 59);
   const end = timeFromMinutes(endMinutes);
@@ -70,6 +72,7 @@ export default function EventEditor() {
       reminderMinutes,
       visibility: hasSpace ? visibility : ('private' as const),
       isImportantDate: important,
+      participantIds: going.length ? going : undefined,
       isDemo: existing?.isDemo,
     };
     if (existing) updateEvent(existing.id, data);
@@ -131,6 +134,24 @@ export default function EventEditor() {
             Times shown in {timeZone.replace(/_/g, ' ')}
           </Text>
         </>
+      ) : null}
+
+      {people.length > 1 ? (
+        <Field icon="people-circle-outline" label="Who’s going" accent="lavender">
+          <ChipRow>
+            {people.map((p) => (
+              <Chip
+                key={p.id}
+                label={p.isMe ? 'Me' : p.name}
+                small
+                dot={p.color}
+                accent={p.color}
+                selected={going.includes(p.id)}
+                onPress={() => setGoing((g) => (g.includes(p.id) ? g.filter((id) => id !== p.id) : [...g, p.id]))}
+              />
+            ))}
+          </ChipRow>
+        </Field>
       ) : null}
 
       <Field icon="albums-outline" label="Calendar" accent={accent}>

@@ -88,6 +88,8 @@ export type CalendarEvent = {
   spaceId?: string;
   /** Whose event this is, when it belongs to one household member ("Sarah's dentist"). */
   personId?: string;
+  /** Who's going: household members taking part (besides the owner). */
+  participantIds?: string[];
   /** Set only on the calendar's read-only view of a dated task (never saved as an event). */
   taskId?: string;
   /** Identifier from a calendar file this event was imported from (re-importing updates it). */
@@ -127,6 +129,8 @@ export type ShoppingList = {
   visibility: Visibility;
   /** The family a shared list belongs to (see Task.spaceId). */
   spaceId?: string;
+  /** Aisle order groups items by shop section; "manual" keeps the household's own order. */
+  sortMode?: 'aisle' | 'manual';
   createdAt: string;
   isDemo?: boolean;
 };
@@ -140,6 +144,8 @@ export type ShoppingItem = {
   notes?: string;
   purchased: boolean;
   purchasedAt?: string;
+  /** Position in the list's own order (lower first). */
+  order?: number;
   addedBy?: string;
   createdAt: string;
 };

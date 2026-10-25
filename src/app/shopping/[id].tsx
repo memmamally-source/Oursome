@@ -7,8 +7,8 @@ import { Icon } from '@/components/ui/Icon';
 import { toast } from '@/components/ui/Toast';
 import { useFoldAway } from '@/components/ui/useFoldAway';
 
-import { Button, Card, Checkbox, EmptyState, IconButton, Screen, Text } from '@/components/ui';
-import { groupItems, shoppingCategoryMeta } from '@/features/shopping/logic';
+import { Button, Card, Checkbox, EmptyState, IconButton, Screen, Segmented, Text } from '@/components/ui';
+import { frequentItems, groupItems, manualOrder, shoppingCategoryMeta } from '@/features/shopping/logic';
 import { useShopping } from '@/features/shopping/store';
 import { memberById, ME_ID, useSpace } from '@/features/space/store';
 import type { ShoppingItem } from '@/features/types';
@@ -21,7 +21,9 @@ export default function ShoppingListScreen() {
   const list = useShopping((s) => s.lists.find((l) => l.id === id));
   const allItems = useShopping((s) => s.items);
   const favourites = useShopping((s) => s.favourites);
-  const { addItem, togglePurchased, removeItem, clearPurchased, toggleFavourite, removeList, updateList } = useShopping.getState();
+  const history = useShopping((s) => s.bought);
+  const { addItem, togglePurchased, removeItem, clearPurchased, toggleFavourite, removeList, updateList, moveItem } =
+    useShopping.getState();
   const hasSpace = useSpace((s) => !!s.space);
   const [draft, setDraft] = useState('');
 
@@ -43,7 +45,12 @@ export default function ShoppingListScreen() {
   const items = allItems.filter((i) => i.listId === list.id);
   const open = items.filter((i) => !i.purchased);
   const bought = items.filter((i) => i.purchased);
-  const suggestions = favourites.filter((f) => !open.some((i) => i.name.toLowerCase() === f.toLowerCase())).slice(0, 8);
+  const onList = (name: string) => open.some((i) => i.name.toLowerCase() === name.toLowerCase());
+  const starred = favourites.filter((f) => !onList(f));
+  const often = frequentItems(history, [...open.map((i) => i.name), ...starred], Math.max(0, 8 - starred.length));
+  const suggestions = [...starred.slice(0, 8).map((name) => ({ name, starred: true })), ...often.map((name) => ({ name, starred: false }))];
+  const manual = list.sortMode === 'manual';
+  const ordered = manualOrder(open);
 
   const add = (value = draft) => {
     if (!value.trim()) return;
@@ -141,12 +148,12 @@ export default function ShoppingListScreen() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ gap: space.sm }}
           style={{ marginBottom: space.lg }}>
-          {suggestions.map((f) => (
+          {suggestions.map(({ name: f, starred: isStar }) => (
             <Pressable
               key={f}
               onPress={() => add(f)}
               accessibilityRole="button"
-              accessibilityLabel={`Add ${f}`}
+              accessibilityLabel={`Add ${f}${isStar ? '' : ', often bought'}`}
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -154,15 +161,33 @@ export default function ShoppingListScreen() {
                 paddingHorizontal: 12,
                 height: 32,
                 borderRadius: radius.pill,
-                backgroundColor: palette.accents.sunshine.soft,
+                backgroundColor: isStar ? palette.accents.sunshine.soft : palette.surfaceSunken,
               }}>
-              <Icon name="star" size={12} color={palette.accents.sunshine.ink} />
-              <Text variant="callout" tone="sunshine">
+              <Icon
+                name={isStar ? 'star' : 'time-outline'}
+                size={12}
+                color={isStar ? palette.accents.sunshine.ink : palette.textSecondary}
+              />
+              <Text variant="callout" tone={isStar ? 'sunshine' : 'secondary'}>
                 {f}
               </Text>
             </Pressable>
           ))}
         </ScrollView>
+      ) : null}
+
+      {open.length > 1 ? (
+        <View style={{ marginBottom: space.lg }}>
+          <Segmented
+            value={manual ? 'manual' : 'aisle'}
+            onChange={(v) => updateList(list.id, { sortMode: v })}
+            accent={list.color}
+            options={[
+              { value: 'aisle', label: 'By aisle', icon: 'grid-outline' },
+              { value: 'manual', label: 'My order', icon: 'reorder-four-outline' },
+            ]}
+          />
+        </View>
       ) : null}
 
       {open.length === 0 ? (
@@ -173,6 +198,22 @@ export default function ShoppingListScreen() {
             title={bought.length ? 'All done!' : 'Nothing on the list'}
             body={bought.length ? 'Everything’s in the basket.' : 'Add the first item above.'}
           />
+        </Card>
+      ) : manual ? (
+        <Card padded={false} style={{ paddingHorizontal: space.md, marginBottom: space.lg }}>
+          {ordered.map((i, idx) => (
+            <ItemRow
+              key={i.id}
+              item={i}
+              first={idx === 0}
+              favourite={favourites.includes(i.name)}
+              onToggle={() => togglePurchased(i.id)}
+              onFavourite={() => toggleFavourite(i.name)}
+              onRemove={() => removeWithUndo(i)}
+              onMove={(dir) => moveItem(ordered, i.id, dir)}
+              canMove={[idx > 0, idx < ordered.length - 1]}
+            />
+          ))}
         </Card>
       ) : (
         groupItems(open).map((g) => {
@@ -253,6 +294,8 @@ function ItemRow({
   onToggle,
   onFavourite,
   onRemove,
+  onMove,
+  canMove,
 }: {
   item: ShoppingItem;
   first: boolean;
@@ -260,6 +303,9 @@ function ItemRow({
   onToggle: () => void;
   onFavourite: () => void;
   onRemove: () => void;
+  /** "My order": move up (-1) or down (1). */
+  onMove?: (dir: -1 | 1) => void;
+  canMove?: [boolean, boolean];
 }) {
   const { palette } = useTheme();
   const adder = useSpace((s) => memberById(s.people, item.addedBy));
@@ -300,6 +346,28 @@ function ItemRow({
             </Text>
           ) : null}
         </Pressable>
+        {onMove ? (
+          <View style={{ flexDirection: 'row', gap: 2 }}>
+            <Pressable
+              onPress={() => onMove(-1)}
+              disabled={!canMove?.[0]}
+              hitSlop={6}
+              accessibilityRole="button"
+              accessibilityLabel={`Move ${item.name} up`}
+              style={{ opacity: canMove?.[0] ? 1 : 0.3, padding: 2 }}>
+              <Icon name="chevron-up" size={18} color={palette.textSecondary} />
+            </Pressable>
+            <Pressable
+              onPress={() => onMove(1)}
+              disabled={!canMove?.[1]}
+              hitSlop={6}
+              accessibilityRole="button"
+              accessibilityLabel={`Move ${item.name} down`}
+              style={{ opacity: canMove?.[1] ? 1 : 0.3, padding: 2 }}>
+              <Icon name="chevron-down" size={18} color={palette.textSecondary} />
+            </Pressable>
+          </View>
+        ) : null}
         <Pressable
           onPress={onFavourite}
           hitSlop={8}

@@ -72,7 +72,13 @@ export function MonthGrid({ anchor, selected, today, onSelect, dots, compact }: 
                     variant="callout"
                     style={{ fontFamily: isToday || isSelected ? fonts.bodyBold : fonts.bodyMedium }}
                     color={
-                      isSelected ? palette.accents.coral.on : isToday ? palette.accents.coral.ink : inMonth ? palette.text : palette.textTertiary
+                      isSelected
+                        ? palette.accents.coral.on
+                        : isToday
+                          ? palette.accents.coral.ink
+                          : inMonth
+                            ? palette.text
+                            : palette.textTertiary
                     }>
                     {d.getDate()}
                   </Text>
@@ -138,7 +144,12 @@ export function WeekStrip({ anchor, selected, today, onSelect, dots }: Omit<Prop
               {dayDots.slice(0, 3).map((a, i) => (
                 <View
                   key={i}
-                  style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: isSelected ? palette.accents.coral.on : palette.accents[a].base }}
+                  style={{
+                    width: 5,
+                    height: 5,
+                    borderRadius: 3,
+                    backgroundColor: isSelected ? palette.accents.coral.on : palette.accents[a].base,
+                  }}
                 />
               ))}
             </View>

@@ -4,10 +4,12 @@ import { View } from 'react-native';
 
 import { useCalendar } from '@/features/calendar/store';
 import { TASKS_CALENDAR_ID } from '@/features/calendar/tasks';
+import { useSpace } from '@/features/space/store';
 import type { EventOccurrence } from '@/features/types';
 import { formatTime, timeKeyOf } from '@/lib/dates';
 import { fonts, radius, space, useTheme, type AccentKey } from '@/theme';
 
+import { AvatarStack } from '../ui/primitives';
 import { PressableScale } from '../ui/PressableScale';
 import { Text } from '../ui/Text';
 
@@ -31,11 +33,13 @@ export function EventCard({ occurrence, compact, now }: { occurrence: EventOccur
   const end = timeKeyOf(occurrence.end);
   const isNow = !!now && !event.allDay && start <= now && end > now;
   const isPast = !!now && !event.allDay && end <= now;
+  const people = useSpace((s) => s.people);
+  const going = event.participantIds?.length ? people.filter((p) => event.participantIds!.includes(p.id)) : [];
 
   return (
     <PressableScale
       onPress={() => openOccurrence(occurrence)}
-      accessibilityLabel={`${event.taskId ? 'Task: ' : ''}${event.title}, ${event.allDay ? 'all day' : `${formatTime(start)} to ${formatTime(end)}`}${event.location ? `, at ${event.location}` : ''}`}
+      accessibilityLabel={`${event.taskId ? 'Task: ' : ''}${event.title}, ${event.allDay ? 'all day' : `${formatTime(start)} to ${formatTime(end)}`}${event.location ? `, at ${event.location}` : ''}${going.length ? `, with ${going.map((p) => p.name).join(', ')}` : ''}`}
       style={{
         flexDirection: 'row',
         backgroundColor: tone.soft,
@@ -51,7 +55,13 @@ export function EventCard({ occurrence, compact, now }: { occurrence: EventOccur
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           {event.taskId ? <Icon name="checkmark-circle-outline" size={14} color={tone.ink} /> : null}
           <Text variant="caption" color={tone.ink} style={{ fontFamily: fonts.bodyBold }}>
-            {event.taskId ? (event.allDay ? 'Task' : `Task · ${formatTime(start)}`) : event.allDay ? 'All day' : `${formatTime(start)} – ${formatTime(end)}`}
+            {event.taskId
+              ? event.allDay
+                ? 'Task'
+                : `Task · ${formatTime(start)}`
+              : event.allDay
+                ? 'All day'
+                : `${formatTime(start)} – ${formatTime(end)}`}
           </Text>
           {isNow ? (
             <View style={{ backgroundColor: tone.base, borderRadius: radius.pill, paddingHorizontal: 6, paddingVertical: 1 }}>
@@ -86,6 +96,11 @@ export function EventCard({ occurrence, compact, now }: { occurrence: EventOccur
           </View>
         ) : null}
       </View>
+      {going.length ? (
+        <View style={{ justifyContent: 'center' }}>
+          <AvatarStack people={going} size={compact ? 22 : 26} />
+        </View>
+      ) : null}
     </PressableScale>
   );
 }

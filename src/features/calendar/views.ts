@@ -3,7 +3,7 @@ import { addMonths } from 'date-fns/addMonths';
 import type { CalendarSource, EventOccurrence } from '@/features/types';
 import { addDays, fromDateKey, monthGrid, toDateKey, weekDays, type DateKey } from '@/lib/dates';
 
-import { eventOwner } from '../people/logic';
+import { eventInvolves } from '../people/logic';
 
 /** "days" is three days on phones and a full week on wide screens. */
 export type CalendarView = 'day' | 'days' | 'month' | 'list';
@@ -38,5 +38,5 @@ export function stepFor(view: CalendarView, selected: DateKey, dir: 1 | -1, wide
 /** Keep only one person's events (their own, or on their member calendar). */
 export function onlyPerson(occurrences: EventOccurrence[], personId: string | null, calendars: CalendarSource[]): EventOccurrence[] {
   if (!personId) return occurrences;
-  return occurrences.filter((o) => eventOwner(o.event, calendars) === personId);
+  return occurrences.filter((o) => eventInvolves(o.event, personId, calendars));
 }

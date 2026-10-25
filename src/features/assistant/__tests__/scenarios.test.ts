@@ -240,7 +240,14 @@ describe.each(engines)('%s interpreter', (_name, interp) => {
     it('after saving, the same words propose an update to the saved item', async () => {
       const first = await run({}, 'Rufaida needs to take the kids to the park Saturday.');
       const conv = saveAll(first.conv);
-      const ctx = makeCtx({ tasks: [task({ id: `saved_${conv.proposals[0].id}`, title: 'Take the kids to the park', due: '2026-10-24', assigneeId: 'm_ruf' })] }, conv);
+      const ctx = makeCtx(
+        {
+          tasks: [
+            task({ id: `saved_${conv.proposals[0].id}`, title: 'Take the kids to the park', due: '2026-10-24', assigneeId: 'm_ruf' }),
+          ],
+        },
+        conv,
+      );
       const r = await processMessage('Actually, make that Friday.', ctx, [], interp);
       expect(only(r)).toMatchObject({ kind: 'update', update: { changes: { date: '2026-10-23' } } });
     });
@@ -336,7 +343,10 @@ describe.each(engines)('%s interpreter', (_name, interp) => {
 
   describe('more', () => {
     it('several actions in one sentence, each for the right person', async () => {
-      const { last } = await run({}, 'Rufaida needs to collect the kids at 3, buy milk and remind me to pay the electricity bill tomorrow.');
+      const { last } = await run(
+        {},
+        'Rufaida needs to collect the kids at 3, buy milk and remind me to pay the electricity bill tomorrow.',
+      );
       const [collect, milk, bill] = last.resolution.proposals;
       expect(last.resolution.proposals).toHaveLength(3);
       expect(collect).toMatchObject({ kind: 'task', time: '15:00', date: TODAY });
@@ -413,14 +423,100 @@ describe.each(engines)('%s interpreter', (_name, interp) => {
       if (who) expect(a && 'memberId' in a ? a.memberId : undefined).toBe(who);
     });
   });
+
+  describe('the redesign brief’s examples', () => {
+    it('“Add dinner with my parents on Friday at 7 PM”', async () => {
+      const p = only((await run({}, 'Add dinner with my parents on Friday at 7 PM')).last);
+      expect(p).toMatchObject({ kind: 'event', title: 'Dinner with my parents', date: '2026-10-23', time: '19:00' });
+    });
+
+    it('“Remind us to buy milk tomorrow”', async () => {
+      const p = only((await run({}, 'Remind us to buy milk tomorrow')).last);
+      expect(p).toMatchObject({ kind: 'reminder', title: 'Buy milk', date: '2026-10-22', visibility: 'shared' });
+      expect(assignee(p)?.status).toBe('household');
+    });
+
+    it('“What are our plans for the weekend?”', async () => {
+      const events = [
+        event({ id: 'e1', title: 'Swim class', start: '2026-10-24T09:00', end: '2026-10-24T10:00', visibility: 'shared' }),
+        event({ id: 'e2', title: 'Dinner at Gran’s', start: '2026-10-25T18:00', end: '2026-10-25T20:00', visibility: 'shared' }),
+        event({ id: 'e3', title: 'Dentist', start: '2026-10-26T10:00', end: '2026-10-26T11:00' }),
+      ];
+      const { last } = await run({ events }, 'What are our plans for the weekend?');
+      expect(last.resolution.proposals).toHaveLength(0);
+      expect(last.answer?.lines.map((l) => l.title)).toEqual(['Swim class', 'Dinner at Gran’s']);
+    });
+
+    it('“Assign the electricity bill to me”', async () => {
+      const tasks = [task({ id: 'tb', title: 'Pay the electricity bill', due: '2026-10-28', assigneeId: 'm_ruf' })];
+      const p = only((await run({ tasks }, 'Assign the electricity bill to me')).last);
+      expect(p).toMatchObject({ kind: 'update', update: { target: { kind: 'task', id: 'tb' }, changes: { assignee: { status: 'me' } } } });
+    });
+
+    it('“What do we still need to do today?”', async () => {
+      const tasks = [
+        task({ id: 't1', title: 'Take the bins out', due: TODAY }),
+        task({ id: 't2', title: 'Book the plumber', due: '2026-10-20' }),
+        task({ id: 't3', title: 'Already done', due: TODAY, completedAt: '2026-10-21T08:00:00Z' }),
+        task({ id: 't4', title: 'Next week', due: '2026-10-28' }),
+      ];
+      const { last } = await run({ tasks }, 'What do we still need to do today?');
+      expect(last.resolution.proposals).toHaveLength(0);
+      expect(last.answer?.lines.map((l) => l.title).sort()).toEqual(['Book the plumber', 'Take the bins out']);
+    });
+
+    it('“Add these ingredients: …” adds each one to the shopping list', async () => {
+      const p = only((await run({}, 'Add these ingredients: flour, 6 eggs, caster sugar and butter')).last);
+      expect(p.kind).toBe('shopping');
+      expect(p.items?.map((i) => i.toLowerCase())).toEqual(['flour', '6 eggs', 'caster sugar', 'butter']);
+    });
+
+    it('an ingredients list on several lines', async () => {
+      const p = only((await run({}, 'Add these ingredients:\n- 200g flour\n- 2 eggs\n- milk')).last);
+      expect(p.kind).toBe('shopping');
+      expect(p.items).toHaveLength(3);
+    });
+
+    it('“Remind us about our anniversary” uses the date already saved', async () => {
+      const events = [
+        event({
+          id: 'an',
+          title: 'Our anniversary',
+          start: '2019-06-12T00:00',
+          end: '2019-06-12T23:59',
+          allDay: true,
+          isImportantDate: true,
+          recurrence: { freq: 'yearly' },
+        }),
+      ];
+      const p = only((await run({ events }, 'Remind us about our anniversary')).last);
+      expect(p).toMatchObject({ kind: 'reminder', date: '2027-06-11' });
+      expect(p.title.toLowerCase()).toContain('anniversary');
+      expect(assignee(p)?.status).toBe('household');
+    });
+
+    it('“Remind us about our anniversary” asks when, if it isn’t saved yet', async () => {
+      const { last } = await run({}, 'Remind us about our anniversary');
+      expect(last.resolution.proposals).toHaveLength(0);
+      expect(last.resolution.clarify).toMatch(/When is your anniversary/);
+    });
+  });
 });
 
 describe('model output is never trusted blindly', () => {
   const ctx = makeCtx({ tasks: [task({ id: 'real', title: 'Buy groceries' })] }, emptyConversation);
-  const fake = (interpretation: unknown): Interpreter => async () => sanitizeInterpretation(interpretation)!;
+  const fake =
+    (interpretation: unknown): Interpreter =>
+    async () =>
+      sanitizeInterpretation(interpretation)!;
 
   it('rejects edits to refs that were not in the context', async () => {
-    const r = await processMessage('x', ctx, [], fake({ reply: '', actions: [{ type: 'update_item', target: 't99', person: { name: 'Sarah' } }] }));
+    const r = await processMessage(
+      'x',
+      ctx,
+      [],
+      fake({ reply: '', actions: [{ type: 'update_item', target: 't99', person: { name: 'Sarah' } }] }),
+    );
     expect(r.resolution.proposals).toHaveLength(0);
     expect(r.resolution.clarify).toMatch(/couldn’t find/);
   });
@@ -430,14 +526,25 @@ describe('model output is never trusted blindly', () => {
       'x',
       ctx,
       [],
-      fake({ reply: '', actions: [{ type: 'create_task', title: 'Pay rent', person: { name: 'Mallory', memberId: 'm_ruf' }, deleteAll: true }, { type: 'delete_everything' }] }),
+      fake({
+        reply: '',
+        actions: [
+          { type: 'create_task', title: 'Pay rent', person: { name: 'Mallory', memberId: 'm_ruf' }, deleteAll: true },
+          { type: 'delete_everything' },
+        ],
+      }),
     );
     expect(r.resolution.proposals).toHaveLength(1);
     expect(assignee(r.resolution.proposals[0])).toEqual({ status: 'unknown', name: 'Mallory' });
   });
 
   it('drops malformed dates and times', async () => {
-    const r = await processMessage('x', ctx, [], fake({ reply: '', actions: [{ type: 'create_event', title: 'Party', date: 'next week', time: '25:99' }] }));
+    const r = await processMessage(
+      'x',
+      ctx,
+      [],
+      fake({ reply: '', actions: [{ type: 'create_event', title: 'Party', date: 'next week', time: '25:99' }] }),
+    );
     const p = r.resolution.proposals[0];
     expect(p.date).toBeUndefined();
     expect(blockingIssue(p)).toMatch(/Choose a date/);

@@ -54,7 +54,8 @@ export function TimeGrid({ days, occurrences, today, nowTime, height, onSelectDa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [days.join()]);
 
-  const colour = (calendarId: string) => (calendarId === TASKS_CALENDAR_ID ? 'mint' : (calendars.find((c) => c.id === calendarId)?.color ?? 'sky'));
+  const colour = (calendarId: string) =>
+    calendarId === TASKS_CALENDAR_ID ? 'mint' : (calendars.find((c) => c.id === calendarId)?.color ?? 'sky');
 
   return (
     <View
