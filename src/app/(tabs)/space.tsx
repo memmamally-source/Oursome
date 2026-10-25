@@ -1,8 +1,9 @@
+import { confirmAction } from '@/components/ui/ConfirmDialog';
 import { Icon } from '@/components/ui/Icon';
 import { formatDistanceToNowStrict } from 'date-fns/formatDistanceToNowStrict';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { EventCard } from '@/components/calendar/EventCard';
 import { TaskRow } from '@/components/tasks/TaskRow';
@@ -83,14 +84,7 @@ export default function SpaceScreen() {
 
   const confirmLeave = () => {
     const msg = 'Your private items stay with you. Items shared with this family stay with it.';
-    if (Platform.OS === 'web') {
-      if (window.confirm(`Leave ${s.name}? ${msg}`)) leaveSpace();
-      return;
-    }
-    Alert.alert(`Leave ${s.name}?`, msg, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Leave', style: 'destructive', onPress: leaveSpace },
-    ]);
+    confirmAction({ title: `Leave ${s.name}?`, message: msg, confirmLabel: 'Leave', destructive: true }).then((ok) => ok && leaveSpace());
   };
 
   return (

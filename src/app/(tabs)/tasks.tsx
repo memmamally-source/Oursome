@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { TaskRow } from '@/components/tasks/TaskRow';
-import { Avatar, Button, Card, Celebration, Chip, EmptyState, IconButton, PressableScale, Screen, Segmented, Text } from '@/components/ui';
+import { Avatar, Button, Card, Chip, EmptyState, IconButton, PressableScale, Screen, Segmented, Text } from '@/components/ui';
 import { parseCapture } from '@/features/assistant/parser';
 import { isTaskFor } from '@/features/people/logic';
 import { useSettings } from '@/features/settings/store';
@@ -12,7 +12,7 @@ import { useShopping } from '@/features/shopping/store';
 import { useSpace } from '@/features/space/store';
 import { groupOpenTasks, taskGroupLabels } from '@/features/tasks/logic';
 import { useTasks } from '@/features/tasks/store';
-import type { IconName, Task } from '@/features/types';
+import type { IconName } from '@/features/types';
 import { haptic } from '@/lib/haptics';
 import { format, todayKey } from '@/lib/dates';
 import { accentKeys, elevation, fonts, layout, radius, space, useTheme, type AccentKey } from '@/theme';
@@ -64,7 +64,6 @@ function TasksView() {
   const [filter, setFilter] = useState<Filter>('all');
   const [draft, setDraft] = useState('');
   const [showDone, setShowDone] = useState(false);
-  const [burst, setBurst] = useState(0);
   const today = todayKey();
 
   const filtered = useMemo(
@@ -114,10 +113,6 @@ function TasksView() {
     });
   };
 
-  const onCompleted = (t: Task) => {
-    const remainingToday = tasks.filter((x) => !x.completedAt && x.due && x.due <= today && x.id !== t.id && !x.isReminder).length;
-    if (t.priority === 'high' || (t.due && t.due <= today && remainingToday === 0)) setBurst(Date.now());
-  };
 
   return (
     <View style={{ gap: space.lg }}>
@@ -221,11 +216,15 @@ function TasksView() {
       <View>
         {groups.length === 0 ? (
           <Card>
-            <EmptyState
-              illustration="checklist"
-              title={filter === 'all' ? 'A clean slate' : 'Nothing here'}
-              body={filter === 'all' ? 'Add your first task above, or tap + to capture anything.' : 'No open tasks match this filter.'}
-            />
+            {filter === 'all' && completed.length ? (
+              <EmptyState illustration="orb" title="All caught up" body="Enjoy your day." />
+            ) : (
+              <EmptyState
+                illustration="checklist"
+                title={filter === 'all' ? 'A clean slate' : 'Nothing here'}
+                body={filter === 'all' ? 'Add your first task above, or tap + to capture anything.' : 'No open tasks match this filter.'}
+              />
+            )}
           </Card>
         ) : (
           groups.map((g) => (
@@ -247,7 +246,6 @@ function TasksView() {
                     <TaskRow
                       task={t}
                       showDate={g.key === 'upcoming' || g.key === 'overdue'}
-                      onCompleted={onCompleted}
                       reorder={
                         sortMode === 'manual'
                           ? {
@@ -279,7 +277,6 @@ function TasksView() {
             </View>
           ))
         )}
-        <Celebration burstKey={burst} />
       </View>
 
       {completed.length ? (

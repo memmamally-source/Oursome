@@ -21,6 +21,8 @@ type ShoppingState = {
   togglePurchased: (id: string) => void;
   removeItem: (id: string) => void;
   clearPurchased: (listId: string) => void;
+  /** Put items back exactly as they were (undo for delete and clear). */
+  restoreItems: (items: ShoppingItem[]) => void;
   toggleFavourite: (name: string) => void;
   replaceAll: (lists: ShoppingList[], items: ShoppingItem[]) => void;
   clearDemo: () => void;
@@ -75,6 +77,11 @@ export const useShopping = create<ShoppingState>()(
         })),
       removeItem: (id) => set((s) => ({ items: s.items.filter((i) => i.id !== id) })),
       clearPurchased: (listId) => set((s) => ({ items: s.items.filter((i) => !(i.listId === listId && i.purchased)) })),
+      restoreItems: (restored) =>
+        set((s) => {
+          const ids = new Set(s.items.map((i) => i.id));
+          return { items: [...s.items, ...restored.filter((i) => !ids.has(i.id))] };
+        }),
       toggleFavourite: (name) =>
         set((s) => ({
           favourites: s.favourites.includes(name) ? s.favourites.filter((f) => f !== name) : [...s.favourites, name],

@@ -1,5 +1,6 @@
 import { View } from 'react-native';
 
+import { OrbIdle } from '@/components/brand/Orb';
 import { space } from '@/theme';
 
 import { Illustration, type IllustrationName } from '../illustrations/Illustration';
@@ -14,7 +15,8 @@ export function EmptyState({
   onAction,
   compact,
 }: {
-  illustration: IllustrationName;
+  /** An illustration, or 'orb' for the companion resting with a slow breath. */
+  illustration: IllustrationName | 'orb';
   title: string;
   body?: string;
   action?: string;
@@ -23,7 +25,13 @@ export function EmptyState({
 }) {
   return (
     <View style={{ alignItems: 'center', paddingVertical: compact ? space.md : space.xxl, gap: space.sm }}>
-      <Illustration name={illustration} width={compact ? 120 : 180} />
+      {illustration === 'orb' ? (
+        <View style={{ paddingVertical: space.md }}>
+          <OrbIdle size={compact ? 44 : 56} />
+        </View>
+      ) : (
+        <Illustration name={illustration} width={compact ? 120 : 180} />
+      )}
       <Text variant="subheading" align="center" style={{ marginTop: space.sm }}>
         {title}
       </Text>

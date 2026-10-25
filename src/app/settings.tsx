@@ -1,8 +1,9 @@
+import { confirmAction } from '@/components/ui/ConfirmDialog';
 import { Icon } from '@/components/ui/Icon';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
-import { Alert, Platform, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { LogoMark } from '@/components/brand/Logo';
 import { Avatar, Card, Divider, IconButton, Screen, Segmented, SettingRow, Text, TextField } from '@/components/ui';
@@ -29,14 +30,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function confirm(title: string, message: string, action: string, run: () => void) {
-  if (Platform.OS === 'web') {
-    if (window.confirm(`${title}\n\n${message}`)) run();
-    return;
-  }
-  Alert.alert(title, message, [
-    { text: 'Cancel', style: 'cancel' },
-    { text: action, style: 'destructive', onPress: run },
-  ]);
+  confirmAction({ title, message, confirmLabel: action, destructive: true }).then((ok) => ok && run());
 }
 
 export default function SettingsScreen() {
@@ -150,6 +144,26 @@ export default function SettingsScreen() {
           ]}
         />
       </View>
+
+      <Section title="Motion & celebrations">
+        <SettingRow
+          icon="leaf-outline"
+          accent="mint"
+          label="Reduce motion"
+          detail="Things appear in place instead of moving. Oursome also follows your device setting."
+          value={settings.motion === 'reduced'}
+          onValueChange={(v) => settings.setMotion(v ? 'reduced' : 'system')}
+        />
+        <Divider />
+        <SettingRow
+          icon="sparkles-outline"
+          accent="sunshine"
+          label="Celebrations"
+          detail="The orb's little bounces and decorations for birthdays and anniversaries."
+          value={settings.celebrations}
+          onValueChange={settings.setCelebrations}
+        />
+      </Section>
 
       <Section title="Notifications">
         <View style={{ backgroundColor: palette.accents.sunshine.soft, borderRadius: radius.md, padding: space.md, marginTop: space.md }}>

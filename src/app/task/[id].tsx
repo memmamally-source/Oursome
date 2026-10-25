@@ -1,7 +1,8 @@
+import { confirmAction } from '@/components/ui/ConfirmDialog';
 import { Icon } from '@/components/ui/Icon';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Platform, Pressable, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 
 import { ChipRow, DatePicker, Field, RepeatPicker, ReminderPicker, TimePicker } from '@/components/forms/Fields';
 import { Avatar, Button, Chip, ModalHeader, ModalScreen, Segmented, SettingRow, Text } from '@/components/ui';
@@ -111,14 +112,7 @@ export default function TaskEditor() {
       removeTask(existing.id);
       router.back();
     };
-    if (Platform.OS === 'web') {
-      if (window.confirm('Delete this task?')) run();
-      return;
-    }
-    Alert.alert('Delete task?', 'This can’t be undone.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: run },
-    ]);
+    confirmAction({ title: 'Delete this task?', message: 'This can’t be undone.', confirmLabel: 'Delete', destructive: true }).then((ok) => ok && run());
   };
 
   const addSub = () => {

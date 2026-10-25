@@ -1,7 +1,11 @@
-import { Icon } from '@/components/ui/Icon';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Animated, Pressable, ScrollView, TextInput, View } from 'react-native';
+
+import { confirmAction } from '@/components/ui/ConfirmDialog';
+import { Icon } from '@/components/ui/Icon';
+import { toast } from '@/components/ui/Toast';
+import { useFoldAway } from '@/components/ui/useFoldAway';
 
 import { Button, Card, Checkbox, EmptyState, IconButton, Screen, Text } from '@/components/ui';
 import { groupItems, shoppingCategoryMeta } from '@/features/shopping/logic';
@@ -48,19 +52,22 @@ export default function ShoppingListScreen() {
     setDraft('');
   };
 
+  const removeWithUndo = (item: ShoppingItem) => {
+    removeItem(item.id);
+    toast({ message: `Removed ${item.name}`, action: { label: 'Undo', onPress: () => useShopping.getState().restoreItems([item]) } });
+  };
+
   const confirmDelete = () => {
     const run = () => {
       removeList(list.id);
       router.back();
     };
-    if (Platform.OS === 'web') {
-      if (window.confirm(`Delete “${list.name}” and all its items?`)) run();
-      return;
-    }
-    Alert.alert('Delete list?', `“${list.name}” and all its items will be removed.`, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: run },
-    ]);
+    confirmAction({
+      title: 'Delete this list?',
+      message: `“${list.name}” and all its items will be removed.`,
+      confirmLabel: 'Delete',
+      destructive: true,
+    }).then((ok) => ok && run());
   };
 
   return (
@@ -187,7 +194,7 @@ export default function ShoppingListScreen() {
                     favourite={favourites.includes(i.name)}
                     onToggle={() => togglePurchased(i.id)}
                     onFavourite={() => toggleFavourite(i.name)}
-                    onRemove={() => removeItem(i.id)}
+                    onRemove={() => removeWithUndo(i)}
                   />
                 ))}
               </Card>
@@ -202,7 +209,20 @@ export default function ShoppingListScreen() {
             <Text variant="overline" tone="mint">
               In the basket · {bought.length}
             </Text>
-            <Button label="Clear" size="sm" variant="ghost" accent="coral" onPress={() => clearPurchased(list.id)} />
+            <Button
+              label="Clear"
+              size="sm"
+              variant="ghost"
+              accent="coral"
+              onPress={() => {
+                const cleared = bought;
+                clearPurchased(list.id);
+                toast({
+                  message: `Cleared ${cleared.length} from the basket`,
+                  action: { label: 'Undo', onPress: () => useShopping.getState().restoreItems(cleared) },
+                });
+              }}
+            />
           </View>
           <Card padded={false} style={{ paddingHorizontal: space.md, opacity: 0.85 }}>
             {bought.map((i, idx) => (
@@ -213,7 +233,7 @@ export default function ShoppingListScreen() {
                 favourite={favourites.includes(i.name)}
                 onToggle={() => togglePurchased(i.id)}
                 onFavourite={() => toggleFavourite(i.name)}
-                onRemove={() => removeItem(i.id)}
+                onRemove={() => removeWithUndo(i)}
               />
             ))}
           </Card>
@@ -243,53 +263,58 @@ function ItemRow({
 }) {
   const { palette } = useTheme();
   const adder = useSpace((s) => memberById(s.people, item.addedBy));
+  const { style: foldStyle, onLayout, run, folding } = useFoldAway();
+  // Buying slides the item into the basket; putting it back is instant.
+  const toggle = () => (item.purchased ? onToggle() : run(onToggle));
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: space.md,
-        paddingVertical: space.md,
-        borderTopWidth: first ? 0 : 1,
-        borderTopColor: palette.border,
-      }}>
-      <Checkbox
-        checked={item.purchased}
-        onToggle={onToggle}
-        label={item.purchased ? `Put ${item.name} back on the list` : `Mark ${item.name} as bought`}
-      />
-      <Pressable onPress={onToggle} style={{ flex: 1 }} accessibilityElementsHidden importantForAccessibility="no">
-        <Text
-          variant="body"
-          tone={item.purchased ? 'tertiary' : 'primary'}
-          style={{ textDecorationLine: item.purchased ? 'line-through' : 'none' }}>
-          {item.name}
-          {item.quantity ? (
-            <Text variant="callout" tone="secondary">
-              {'  '}× {item.quantity}
+    <Animated.View onLayout={onLayout} style={foldStyle}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: space.md,
+          paddingVertical: space.md,
+          borderTopWidth: first ? 0 : 1,
+          borderTopColor: palette.border,
+        }}>
+        <Checkbox
+          checked={item.purchased || folding}
+          onToggle={toggle}
+          label={item.purchased ? `Put ${item.name} back on the list` : `Mark ${item.name} as bought`}
+        />
+        <Pressable onPress={toggle} style={{ flex: 1 }} accessibilityElementsHidden importantForAccessibility="no">
+          <Text
+            variant="body"
+            tone={item.purchased ? 'tertiary' : 'primary'}
+            style={{ textDecorationLine: item.purchased ? 'line-through' : 'none' }}>
+            {item.name}
+            {item.quantity ? (
+              <Text variant="callout" tone="secondary">
+                {'  '}× {item.quantity}
+              </Text>
+            ) : null}
+          </Text>
+          {adder && !adder.isMe ? (
+            <Text variant="caption" tone="tertiary">
+              Added by {adder.name}
             </Text>
           ) : null}
-        </Text>
-        {adder && !adder.isMe ? (
-          <Text variant="caption" tone="tertiary">
-            Added by {adder.name}
-          </Text>
-        ) : null}
-      </Pressable>
-      <Pressable
-        onPress={onFavourite}
-        hitSlop={8}
-        accessibilityRole="button"
-        accessibilityLabel={favourite ? `Remove ${item.name} from favourites` : `Add ${item.name} to favourites`}>
-        <Icon
-          name={favourite ? 'star' : 'star-outline'}
-          size={18}
-          color={favourite ? palette.accents.sunshine.base : palette.textTertiary}
-        />
-      </Pressable>
-      <Pressable onPress={onRemove} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Delete ${item.name}`}>
-        <Icon name="close" size={18} color={palette.textTertiary} />
-      </Pressable>
-    </View>
+        </Pressable>
+        <Pressable
+          onPress={onFavourite}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={favourite ? `Remove ${item.name} from favourites` : `Add ${item.name} to favourites`}>
+          <Icon
+            name={favourite ? 'star' : 'star-outline'}
+            size={18}
+            color={favourite ? palette.accents.sunshine.base : palette.textTertiary}
+          />
+        </Pressable>
+        <Pressable onPress={onRemove} hitSlop={8} accessibilityRole="button" accessibilityLabel={`Delete ${item.name}`}>
+          <Icon name="close" size={18} color={palette.textTertiary} />
+        </Pressable>
+      </View>
+    </Animated.View>
   );
 }

@@ -1,6 +1,10 @@
 import { Icon } from '@/components/ui/Icon';
 import { router } from 'expo-router';
-import { Pressable, View } from 'react-native';
+import { Animated, Pressable, View } from 'react-native';
+
+import { useOrb } from '@/components/brand/Orb';
+import { toast } from '@/components/ui/Toast';
+import { useFoldAway } from '@/components/ui/useFoldAway';
 
 import { memberById, useSpace } from '@/features/space/store';
 import { useTasks } from '@/features/tasks/store';
@@ -21,9 +25,30 @@ type Props = {
   reorder?: { onUp?: () => void; onDown?: () => void };
 };
 
+let completedThisSession = 0;
+
+/** The orb celebrates now and then: important tasks, clearing today, or every fourth tick. */
+function shouldCelebrate(task: Task): boolean {
+  completedThisSession += 1;
+  if (task.priority === 'high' || completedThisSession % 4 === 0) return true;
+  const today = todayKey();
+  return !useTasks.getState().tasks.some((t) => !t.completedAt && t.id !== task.id && t.due && t.due <= today);
+}
+
 export function TaskRow({ task, onCompleted, showDate = true, card, reorder }: Props) {
   const { palette } = useTheme();
   const toggle = useTasks((s) => s.toggleComplete);
+  const { style: foldStyle, onLayout, run, folding } = useFoldAway();
+
+  /** Tick: the checkbox springs, the row folds away, and a toast offers Undo. */
+  const completeNow = () =>
+    run(() => {
+      const celebrate = shouldCelebrate(task);
+      const undo = useTasks.getState().complete(task.id);
+      onCompleted?.(task);
+      if (celebrate) useOrb.getState().celebrate();
+      if (undo) toast({ message: `Done: ${task.title}`, action: { label: 'Undo', onPress: undo } });
+    });
   const category = useTasks((s) => s.categories.find((c) => c.id === task.categoryId));
   const people = useSpace((s) => s.people);
   const assignee = memberById(people, task.assigneeId);
@@ -38,7 +63,7 @@ export function TaskRow({ task, onCompleted, showDate = true, card, reorder }: P
   if (task.subtasks.length) meta.push(`${subDone}/${task.subtasks.length}`);
 
   return (
-    <View>
+    <Animated.View onLayout={onLayout} style={foldStyle}>
       <Pressable
         onPress={() => router.push({ pathname: '/task/[id]', params: { id: task.id } })}
         accessibilityRole="button"
@@ -55,12 +80,9 @@ export function TaskRow({ task, onCompleted, showDate = true, card, reorder }: P
           opacity: pressed ? 0.75 : 1,
         })}>
         <Checkbox
-          checked={done}
+          checked={done || folding}
           label={done ? `Mark ${task.title} as not done` : `Complete ${task.title}`}
-          onToggle={() => {
-            toggle(task.id);
-            if (!done) onCompleted?.(task);
-          }}
+          onToggle={() => (done ? toggle(task.id) : completeNow())}
         />
         <View style={{ flex: 1, gap: 2 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -99,7 +121,15 @@ export function TaskRow({ task, onCompleted, showDate = true, card, reorder }: P
         ) : task.assigneeName ? (
           <View
             accessibilityLabel={`Suggested for ${task.assigneeName}`}
-            style={{ borderWidth: 1, borderStyle: 'dashed', borderColor: palette.textTertiary, borderRadius: 13, paddingHorizontal: 8, height: 26, justifyContent: 'center' }}>
+            style={{
+              borderWidth: 1,
+              borderStyle: 'dashed',
+              borderColor: palette.textTertiary,
+              borderRadius: 13,
+              paddingHorizontal: 8,
+              height: 26,
+              justifyContent: 'center',
+            }}>
             <Text variant="caption" tone="secondary" numberOfLines={1}>
               {task.assigneeName}
             </Text>
@@ -126,6 +156,6 @@ export function TaskRow({ task, onCompleted, showDate = true, card, reorder }: P
           </View>
         ) : null}
       </Pressable>
-    </View>
+    </Animated.View>
   );
 }

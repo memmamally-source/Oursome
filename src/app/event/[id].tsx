@@ -1,7 +1,8 @@
+import { confirmAction } from '@/components/ui/ConfirmDialog';
 import { Icon } from '@/components/ui/Icon';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Platform, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 
 import { ChipRow, DatePicker, Field, RepeatPicker, ReminderPicker, TimePicker } from '@/components/forms/Fields';
 import { Button, Chip, ModalHeader, ModalScreen, Segmented, SettingRow, Text } from '@/components/ui';
@@ -82,14 +83,7 @@ export default function EventEditor() {
       router.back();
     };
     const msg = existing.recurrence ? 'This deletes every occurrence of the series.' : 'This can’t be undone.';
-    if (Platform.OS === 'web') {
-      if (window.confirm(`Delete this event? ${msg}`)) run();
-      return;
-    }
-    Alert.alert('Delete event?', msg, [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: run },
-    ]);
+    confirmAction({ title: 'Delete this event?', message: msg, confirmLabel: 'Delete', destructive: true }).then((ok) => ok && run());
   };
 
   return (

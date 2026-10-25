@@ -21,6 +21,11 @@ type TasksState = {
   updateTask: (id: string, patch: Partial<Task>) => void;
   removeTask: (id: string) => void;
   toggleComplete: (id: string) => void;
+  /**
+   * Complete a task and return an undo that restores it exactly (including a
+   * repeating task's schedule) and removes the next occurrence it created.
+   */
+  complete: (id: string) => (() => void) | null;
   toggleSubtask: (taskId: string, subtaskId: string) => void;
   move: (id: string, direction: -1 | 1, scopeIds: string[]) => void;
   addCategory: (category: Omit<Category, 'id'>) => Category;
@@ -64,6 +69,18 @@ export const useTasks = create<TasksState>()(
           if (next) tasks.push({ ...next, order: nextOrder(tasks) });
           return { tasks, lastCompletedId: id };
         }),
+      complete: (id) => {
+        const before = get().tasks.find((t) => t.id === id);
+        if (!before || before.completedAt) return null;
+        const { completed, next } = completeTask(before);
+        const nextTask = next ? { ...next, order: nextOrder(get().tasks) } : undefined;
+        set((s) => ({ tasks: [...s.tasks.map((t) => (t.id === id ? completed : t)), ...(nextTask ? [nextTask] : [])], lastCompletedId: id }));
+        return () =>
+          set((s) => ({
+            tasks: s.tasks.filter((t) => t.id !== nextTask?.id).map((t) => (t.id === id ? before : t)),
+            lastCompletedId: undefined,
+          }));
+      },
       toggleSubtask: (taskId, subtaskId) =>
         set((s) => ({
           tasks: s.tasks.map((t) =>

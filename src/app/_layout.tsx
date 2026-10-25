@@ -5,6 +5,9 @@ import { useEffect } from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { OrbStage } from '@/components/brand/Orb';
+import { ConfirmHost } from '@/components/ui/ConfirmDialog';
+import { ToastHost } from '@/components/ui/Toast';
 import { useSession } from '@/features/session/store';
 import { useSettings } from '@/features/settings/store';
 import { useAppFonts } from '@/hooks/useAppFonts';
@@ -101,6 +104,10 @@ function AppNavigator() {
           <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />
         </Stack.Protected>
       </Stack>
+      {/* Overlays: never take taps outside their own content. */}
+      <OrbStage />
+      <ToastHost />
+      <ConfirmHost />
     </NavigationThemeProvider>
   );
 }
