@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { CaptureBox } from '@/components/assistant/CaptureBox';
 import { HomeHeader } from '@/components/home/HomeHeader';
@@ -16,8 +16,7 @@ import {
   WeeklyCard,
   GettingStarted,
 } from '@/components/home/HomeSections';
-import { Screen, Text } from '@/components/ui';
-import { Icon } from '@/components/ui/Icon';
+import { Screen } from '@/components/ui';
 import { Reveal } from '@/components/ui/Reveal';
 import { useActivity } from '@/features/activity/store';
 import { useCalendar } from '@/features/calendar/store';
@@ -35,7 +34,7 @@ import { useTasks } from '@/features/tasks/store';
 import { useLayout } from '@/hooks/useLayout';
 import { useNow } from '@/hooks/useNow';
 import { addDays, toDateKey } from '@/lib/dates';
-import { fonts, radius, space, useTheme } from '@/theme';
+import { space } from '@/theme';
 
 /**
  * Home: the household's own space. A warm greeting over their cover, the
@@ -43,7 +42,6 @@ import { fonts, radius, space, useTheme } from '@/theme';
  */
 export default function HomeScreen() {
   const now = useNow();
-  const { palette } = useTheme();
   const { isWide } = useLayout();
   const profile = useSession((s) => s.profile);
   const dismiss = useSettings((s) => s.dismissSuggestion);

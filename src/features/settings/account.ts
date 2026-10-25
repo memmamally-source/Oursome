@@ -69,7 +69,7 @@ export async function deleteAllLocalData(): Promise<void> {
   useActivity.getState().clear();
   useReminders.setState({ delivered: [], history: [], lastCheck: null });
   await Promise.all([deleteAllPhotoFiles(), deleteAllPhotos()]).catch(() => {});
-  useSession.setState({ profile: null, signedIn: false });
+  useSession.setState({ profile: null, credential: null, signedIn: false });
   const keys = (await AsyncStorage.getAllKeys()).filter((k) => k.startsWith('oursome.'));
   // Stores re-persist their reset state; clearing keys removes any stale extras.
   await AsyncStorage.multiRemove(keys);
