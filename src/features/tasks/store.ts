@@ -31,7 +31,6 @@ type TasksState = {
   move: (id: string, direction: -1 | 1, scopeIds: string[]) => void;
   addCategory: (category: Omit<Category, 'id'>) => Category;
   replaceAll: (tasks: Task[]) => void;
-  clearDemo: () => void;
   reset: () => void;
 };
 
@@ -107,7 +106,6 @@ export const useTasks = create<TasksState>()(
         return created;
       },
       replaceAll: (tasks) => set({ tasks }),
-      clearDemo: () => set((s) => ({ tasks: s.tasks.filter((t) => !t.isDemo) })),
       reset: () => set({ tasks: [], categories: defaultCategories, lastCompletedId: undefined }),
     }),
     {

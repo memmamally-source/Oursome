@@ -10,7 +10,6 @@ import { NotificationSettings } from '@/components/settings/NotificationSettings
 import { Avatar, Card, Divider, IconButton, Screen, Segmented, SettingRow, Text, TextField } from '@/components/ui';
 import { Brand } from '@/config/brand';
 import { cloudConfigured } from '@/features/cloud';
-import { clearDemoContent, hasDemoContent } from '@/features/demo/seed';
 import { deleteAllLocalData, exportData } from '@/features/settings/account';
 import { useSettings } from '@/features/settings/store';
 import { auth, useSession } from '@/features/session/store';
@@ -40,7 +39,6 @@ export default function SettingsScreen() {
   const updateProfile = useSession((s) => s.updateProfile);
   const settings = useSettings();
   const [name, setName] = useState(profile?.name ?? '');
-  const [demo, setDemo] = useState(hasDemoContent());
 
   const saveName = () => {
     if (!name.trim()) return;
@@ -179,22 +177,6 @@ export default function SettingsScreen() {
       <Section title="Notifications">
         <NotificationSettings />
       </Section>
-
-      {/* Only for accounts that loaded sample content before it was retired. */}
-      {demo ? (
-        <Section title="Sample content">
-          <SettingRow
-            icon="color-palette-outline"
-            accent="sunshine"
-            label="Clear sample content"
-            detail="Removes the demonstration items. Your own items stay."
-            onPress={() => {
-              clearDemoContent();
-              setDemo(false);
-            }}
-          />
-        </Section>
-      ) : null}
 
       <Section title="Privacy & data">
         <SettingRow

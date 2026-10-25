@@ -9,6 +9,7 @@ import { OrbStage } from '@/components/brand/Orb';
 import { ConfirmHost } from '@/components/ui/ConfirmDialog';
 import { ToastHost } from '@/components/ui/Toast';
 import { CloudBoot } from '@/features/cloud';
+import { removeSampleContent } from '@/features/demo/cleanup';
 import { ReminderEngine } from '@/features/reminders/engine';
 import { useSession } from '@/features/session/store';
 import { useSettings } from '@/features/settings/store';
@@ -48,6 +49,11 @@ export default function RootLayout() {
   useEffect(() => {
     if (ready) SplashScreen.hideAsync().catch(() => {});
   }, [ready]);
+
+  // Sample content is retired: clear any left on this device once it has loaded.
+  useEffect(() => {
+    if (hydrated) removeSampleContent();
+  }, [hydrated]);
 
   if (!ready) return null;
 

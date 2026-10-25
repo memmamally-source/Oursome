@@ -165,11 +165,6 @@ export default function SpaceScreen() {
           ) : null}
         </View>
         {showInvite ? <FamilySharing family={s} isAdmin={isAdmin} /> : null}
-        {s.isDemo ? (
-          <Text variant="caption" tone="sunshine">
-            Sample household — Jordan is a demo member.
-          </Text>
-        ) : null}
       </View>
 
       <AlbumsSection />

@@ -29,7 +29,6 @@ type CalendarState = {
   replaceAll: (events: CalendarEvent[], calendars: CalendarSource[]) => void;
   /** Import a calendar file's events into their own calendar (re-importing the same file updates it). */
   importEvents: (imported: ImportedEvent[], calendarName: string) => { added: number; updated: number; calendarId: string };
-  clearDemo: () => void;
   reset: () => void;
 };
 
@@ -69,11 +68,6 @@ export const useCalendar = create<CalendarState>()(
         if (result.added) recordActivity('event', `imported ${result.added} ${result.added === 1 ? 'event' : 'events'} from ${name}`);
         return { added: result.added, updated: result.updated, calendarId };
       },
-      clearDemo: () =>
-        set((s) => ({
-          events: s.events.filter((e) => !e.isDemo),
-          calendars: s.calendars.filter((c) => c.kind === 'personal' || s.events.some((e) => !e.isDemo && e.calendarId === c.id)),
-        })),
       reset: () => set({ events: [], calendars: defaultCalendars }),
     }),
     { name: 'oursome.calendar', version: STORE_VERSION, storage: persistStorage },

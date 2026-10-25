@@ -57,7 +57,7 @@ Merging to `main` deploys the website, so merge only with the owner's approval.
   - Not done: real-device (iPhone) testing, and any live AI evaluation (no key; not deployed).
 - **Loading fix (after the overhaul went live):** on a patchy signal a returning visit could hang forever, because the service worker waited on the network for pages with no limit (reproduced: "not loaded after 60 s"). Pages now wait at most 3 s, then open the shell saved at install (4.2 s in the same test). The loading screen offers "Try again" after 10 s, and font preloads are low priority. First visits are still 3–8 s on 4G to 3G, and most of that is the framework (expo-router 439 KB, react-native-web 310 KB, react-dom 204 KB raw), which is a follow-up.
 - **Clean start and multiple families (Oct 24):**
-  - No sample content for new accounts, and no example prompts in the organiser. Accounts that already have sample content can still clear it.
+  - No sample content for new accounts, and no example prompts in the organiser. Leftover sample content from older accounts is now removed automatically at launch (`features/demo/cleanup.ts`); anything the person added stays.
   - The space store holds `spaces[]` and `activeId`, with derived `space` (the family being viewed) and `people` (everyone, deduped). It is persisted as v2; `migrateSpaces` turns the old single `space` into the first family, without loss.
   - Shared tasks, events and lists carry `spaceId`, stamped by the stores (`withFamily`). Items without it belong to the first family (`belongsTo`).
   - Our Space has a Families switcher and shows the chosen family's people, noticeboard and shared items. Today, Tasks and Calendar show everything.
@@ -85,7 +85,7 @@ Everything used runs in **Expo Go** — no dev build needed yet.
 - **Privacy model:** every item has `visibility: 'private' | 'shared'`. Must be enforced by Firestore rules in Stage 3, not just in the client.
 - **AI contract:** `features/assistant/parser.ts` returns `ParseResult` (`proposals` | `clarify` | `query` | `unsupported`). Stage 1 uses a deterministic on-device parser; Stage 4's server AI must return the same shape (schema-validated) so the UI is unchanged. Nothing is saved without user approval. The parser asks when the recipient, a numeric date (US vs UK) or a reminder time is ambiguous, and flags assumed dates/times.
 - **Auth:** `AuthService` interface in `features/session/store.ts`. Stage 1 `localAuth` is a device-only preview (passwords validated, never stored). Swap for Firebase behind the same interface.
-- **Demo content:** `features/demo/seed.ts`, generated relative to today, every record `isDemo`/`demo_` id; cleared from Home banner or Settings.
+- **Demo content (retired):** the old generator is kept only as a test fixture (`features/demo/legacySample.fixture.ts`). `removeSampleContent()` runs once after stores hydrate and drops every `isDemo`/`demo_` record, keeping sample lists, calendars or the sample household only if the person added their own things to them.
 - **Plans/limits:** `src/config/plans.ts` (display only). Real entitlements must be server-verified (Stage 6). No purchase UI exists.
 - **Navigation:** `src/app` routes. Root `Stack.Protected` guards: signed-out → onboarding/auth; signed-in → tabs + modals.
 
@@ -109,7 +109,7 @@ Decision (23 Oct 2026): launch as a website first, like Crossword Hub. We reuse 
 - **Assistant:** chat UI, proposals with inline edit / Edit details / Dismiss, clarifying questions, summaries ("What's on tomorrow?", "Organise my tasks for tomorrow").
 - **Import:** paste text → event + checklist + evening-before reminder (on-device). Screenshot picker UI (image reading deferred to Stage 5).
 - **Our Space:** create space, noticeboard (post/pin/delete), shared events/tasks/lists, members, privacy note, leave.
-- **Settings:** profile name/colour, theme (auto/light/dark), Home sections, notification preferences + quiet hours (stored only), sample content, JSON data export, sign out, delete all local data.
+- **Settings:** profile name/colour, theme (auto/light/dark), Home sections, notification preferences + quiet hours (stored only), JSON data export, sign out, delete all local data.
 - Checks: `npm run check` → typecheck + lint + 94 unit tests (parser, importer, recurrence, layout, tasks, shopping, suggestions). Native iOS/Android bundles export cleanly. Every screen visually reviewed in light and dark via web screenshots (not on a physical device).
 
 ## Known gaps / outstanding

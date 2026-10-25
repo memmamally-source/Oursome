@@ -1,17 +1,11 @@
 /**
- * DEMONSTRATION CONTENT.
- * Sample data that shows what Oursome looks like in use. Every record is
- * flagged `isDemo` and can be removed from Settings → "Clear sample content"
- * or the banner on Home. Dates are generated relative to today so the
- * preview always looks current.
+ * The sample content older versions put in new accounts (retired in PR #4).
+ * Kept only as a test fixture, so the automatic cleanup is tested against
+ * exactly what those accounts hold. The app never creates it.
  */
-import { useCalendar, PERSONAL_CALENDAR_ID } from '@/features/calendar/store';
-import { useSettings } from '@/features/settings/store';
-import { useShopping } from '@/features/shopping/store';
+import { PERSONAL_CALENDAR_ID } from '@/features/calendar/store';
 import { guessCategory } from '@/features/shopping/logic';
-import { ME_ID, useSpace } from '@/features/space/store';
-import { useSession } from '@/features/session/store';
-import { useTasks } from '@/features/tasks/store';
+import { ME_ID } from '@/features/space/store';
 import type { CalendarEvent, CalendarSource, ShoppingItem, ShoppingList, Space, Task } from '@/features/types';
 import { addDays, combine, deviceTimeZone, toDateKey } from '@/lib/dates';
 
@@ -265,39 +259,4 @@ export function buildDemo(myName: string, now = new Date()) {
   };
 
   return { calendars, events, tasks, lists, items, space };
-}
-
-export function loadDemoContent() {
-  const name = useSession.getState().profile?.name ?? 'You';
-  const demo = buildDemo(name);
-  const cal = useCalendar.getState();
-  cal.replaceAll(
-    [...cal.events.filter((e) => !e.isDemo), ...demo.events],
-    [...demo.calendars, ...cal.calendars.filter((c) => !demo.calendars.some((d) => d.id === c.id))],
-  );
-  const tasks = useTasks.getState();
-  tasks.replaceAll([...tasks.tasks.filter((x) => !x.isDemo), ...demo.tasks]);
-  const shop = useShopping.getState();
-  shop.replaceAll(
-    [...shop.lists.filter((l) => !l.isDemo), ...demo.lists],
-    [...shop.items.filter((i) => !i.id.startsWith('demo_')), ...demo.items],
-  );
-  if (!useSpace.getState().space) useSpace.getState().replace(demo.space);
-}
-
-export function clearDemoContent() {
-  useCalendar.getState().clearDemo();
-  useTasks.getState().clearDemo();
-  useShopping.getState().clearDemo();
-  useSpace.getState().clearDemo();
-  useSettings.setState({ dismissedSuggestions: [] });
-}
-
-export function hasDemoContent(): boolean {
-  return (
-    useTasks.getState().tasks.some((t) => t.isDemo) ||
-    useCalendar.getState().events.some((e) => e.isDemo) ||
-    useShopping.getState().lists.some((l) => l.isDemo) ||
-    !!useSpace.getState().space?.isDemo
-  );
 }

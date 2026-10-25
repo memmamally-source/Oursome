@@ -23,7 +23,9 @@ const CURRENT = new Set([...CORE, ...WARM].map((p) => new URL(p, self.location.o
 self.addEventListener('install', (event) => {
   event.waitUntil(
     Promise.all([
-      caches.open(SHELL_CACHE).then((cache) => cache.add(SHELL)),
+      // Straight from the server: GitHub Pages lets browsers keep pages for 10 minutes, and an
+      // old copy here would keep opening the previous version.
+      caches.open(SHELL_CACHE).then((cache) => cache.add(new Request(SHELL, { cache: 'reload' }))),
       caches.open(ASSET_CACHE).then((cache) => cache.addAll(CORE)),
     ]).then(() => self.skipWaiting()),
   );
@@ -81,7 +83,8 @@ self.addEventListener('fetch', (event) => {
 
 /** Network first for pages, falling back to the saved shell when the network is slow or down. */
 async function openPage(request) {
-  const network = fetch(request);
+  // Ask the server each time (a quick check when nothing changed) rather than the browser's 10-minute copy.
+  const network = fetch(new Request(request.url, { cache: 'no-cache', credentials: 'same-origin' }));
   network.catch(() => {}); // A late failure after we've served the shell is fine.
   const shell = await caches.match(SHELL);
   if (!shell) return network; // First visit: nothing saved yet.
