@@ -97,6 +97,9 @@ function AppNavigator() {
           <Stack.Screen name="settings" />
           <Stack.Screen name="import" options={{ presentation: 'modal' }} />
           <Stack.Screen name="space-create" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="household" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="memory/[id]" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="journal" />
           <Stack.Screen name="premium" options={{ presentation: 'modal' }} />
         </Stack.Protected>
         <Stack.Protected guard={!signedIn}>

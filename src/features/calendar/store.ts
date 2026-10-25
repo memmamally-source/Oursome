@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import type { CalendarEvent, CalendarSource } from '@/features/types';
+import { recordActivity } from '@/features/activity/store';
 import { withFamily } from '@/features/space/store';
 import { createId } from '@/lib/id';
 import { persistStorage, STORE_VERSION } from '@/lib/storage';
@@ -35,6 +36,7 @@ export const useCalendar = create<CalendarState>()(
       addEvent: (draft) => {
         const event: CalendarEvent = withFamily({ ...draft, id: createId('e_'), createdAt: new Date().toISOString() });
         set((s) => ({ events: [...s.events, event] }));
+        if (!event.isDemo) recordActivity('event', `added “${event.title}” to the calendar`);
         return event;
       },
       updateEvent: (id, patch) => set((s) => ({ events: s.events.map((e) => (e.id === id ? withFamily({ ...e, ...patch }) : e)) })),

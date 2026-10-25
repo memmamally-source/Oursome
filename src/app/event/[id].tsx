@@ -24,6 +24,8 @@ export default function EventEditor() {
     endTime?: string;
     location?: string;
     allDay?: string;
+    /** '1' starts a yearly, all-day important date (birthday, anniversary). */
+    important?: string;
   }>();
   const { palette } = useTheme();
   const existing = useCalendar((s) => s.events.find((e) => e.id === params.id));
@@ -35,17 +37,17 @@ export default function EventEditor() {
   const initialEnd = existing ? timeKeyOf(existing.end) : params.endTime || timeFromMinutes(minutesOfDay(initialStart) + 60);
 
   const [title, setTitle] = useState(existing?.title ?? params.title ?? '');
-  const [allDay, setAllDay] = useState(existing?.allDay ?? !!params.allDay);
+  const [allDay, setAllDay] = useState(existing?.allDay ?? (!!params.allDay || !!params.important));
   const [date, setDate] = useState(existing ? dateKeyOf(existing.start) : params.date || todayKey());
   const [start, setStart] = useState(initialStart);
   const [duration, setDuration] = useState(Math.max(15, minutesOfDay(initialEnd) - minutesOfDay(initialStart)));
   const [calendarId, setCalendarId] = useState(existing?.calendarId ?? PERSONAL_CALENDAR_ID);
   const [location, setLocation] = useState(existing?.location ?? params.location ?? '');
   const [notes, setNotes] = useState(existing?.notes ?? '');
-  const [recurrence, setRecurrence] = useState(existing?.recurrence ?? null);
+  const [recurrence, setRecurrence] = useState(existing?.recurrence ?? (params.important ? { freq: 'yearly' as const } : null));
   const [reminderMinutes, setReminderMinutes] = useState<number | null>(existing?.reminderMinutes ?? 30);
   const [visibility, setVisibility] = useState(existing?.visibility ?? 'private');
-  const [important, setImportant] = useState(!!existing?.isImportantDate);
+  const [important, setImportant] = useState(existing ? !!existing.isImportantDate : !!params.important);
 
   const endMinutes = Math.min(minutesOfDay(start) + duration, 23 * 60 + 59);
   const end = timeFromMinutes(endMinutes);

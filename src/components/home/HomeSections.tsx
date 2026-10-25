@@ -3,10 +3,11 @@ import { Pressable, ScrollView, View } from 'react-native';
 
 import { useCalendarAccent } from '@/components/calendar/EventCard';
 import { TaskRow } from '@/components/tasks/TaskRow';
+import type { Activity } from '@/features/activity/store';
 import type { Suggestion } from '@/features/dashboard/suggestions';
-import type { EventOccurrence, Member, ShoppingList, Task } from '@/features/types';
+import type { EventOccurrence, IconName, Member, ShoppingList, Task } from '@/features/types';
 import { formatTime, relativeDayLabel, timeKeyOf } from '@/lib/dates';
-import { fonts, radius, space, useTheme } from '@/theme';
+import { fonts, radius, space, useTheme, type AccentKey } from '@/theme';
 
 import { Avatar } from '../ui/primitives';
 import { Icon } from '../ui/Icon';
@@ -287,25 +288,169 @@ export function ListsRow({ lists }: { lists: { list: ShoppingList; remaining: nu
   );
 }
 
-export function ComingUp({ dates }: { dates: EventOccurrence[] }) {
+/** Birthdays, anniversaries and reminders coming up, soonest first. */
+export function ComingUp({ dates, reminders }: { dates: EventOccurrence[]; reminders: Task[] }) {
   const { palette } = useTheme();
+  const rows = [
+    ...dates.map((o) => ({
+      key: o.key,
+      date: o.date,
+      title: o.event.title,
+      icon: (/birthday/i.test(o.event.title) ? 'gift-outline' : /anniversary/i.test(o.event.title) ? 'heart-outline' : 'star-outline') as IconName,
+      accent: 'sunshine' as AccentKey,
+      open: () => router.push({ pathname: '/event/[id]', params: { id: o.event.id } }),
+    })),
+    ...reminders.map((t) => ({
+      key: t.id,
+      date: t.due!,
+      title: t.title,
+      icon: 'notifications-outline' as IconName,
+      accent: 'lavender' as AccentKey,
+      open: () => router.push({ pathname: '/task/[id]', params: { id: t.id } }),
+    })),
+  ]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 5);
   return (
-    <View style={{ gap: space.md }}>
-      {dates.slice(0, 3).map((o) => (
+    <View style={{ backgroundColor: palette.surface, borderRadius: radius.xl, borderWidth: 1, borderColor: palette.border, paddingHorizontal: space.lg }}>
+      {rows.map((r, i) => (
         <Pressable
-          key={o.key}
-          onPress={() => router.push({ pathname: '/event/[id]', params: { id: o.event.id } })}
+          key={r.key}
+          onPress={r.open}
           accessibilityRole="button"
-          style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-          <Icon name={/birthday/i.test(o.event.title) ? 'gift-outline' : 'star-outline'} size={18} color={palette.accents.sunshine.ink} />
+          accessibilityLabel={`${r.title}, ${relativeDayLabel(r.date)}`}
+          style={({ pressed }) => ({
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: space.md,
+            paddingVertical: space.md,
+            borderTopWidth: i ? 1 : 0,
+            borderTopColor: palette.border,
+            opacity: pressed ? 0.7 : 1,
+          })}>
+          <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: palette.accents[r.accent].soft, alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name={r.icon} size={16} color={palette.accents[r.accent].ink} />
+          </View>
           <Text variant="body" style={{ flex: 1 }} numberOfLines={1}>
-            {o.event.title}
+            {r.title}
           </Text>
           <Text variant="callout" tone="secondary">
-            {relativeDayLabel(o.date)}
+            {relativeDayLabel(r.date)}
           </Text>
         </Pressable>
       ))}
     </View>
   );
+}
+
+/** One-tap ways to add the common things. */
+export function QuickActions() {
+  const { palette } = useTheme();
+  const actions: { label: string; icon: IconName; accent: AccentKey; go: () => void }[] = [
+    { label: 'Task', icon: 'checkmark-circle-outline', accent: 'mint', go: () => router.push({ pathname: '/task/[id]', params: { id: 'new' } }) },
+    { label: 'Event', icon: 'calendar-outline', accent: 'sky', go: () => router.push({ pathname: '/event/[id]', params: { id: 'new' } }) },
+    { label: 'List item', icon: 'basket-outline', accent: 'sunshine', go: () => router.navigate({ pathname: '/tasks', params: { view: 'lists' } }) },
+    { label: 'Memory', icon: 'book-outline', accent: 'coral', go: () => router.push({ pathname: '/memory/[id]', params: { id: 'new' } }) },
+  ];
+  return (
+    <View style={{ flexDirection: 'row', gap: space.sm }}>
+      {actions.map((a) => {
+        const tone = palette.accents[a.accent];
+        return (
+          <PressableScale
+            key={a.label}
+            onPress={a.go}
+            accessibilityLabel={`New ${a.label.toLowerCase()}`}
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              gap: 6,
+              paddingVertical: space.md,
+              borderRadius: radius.lg,
+              backgroundColor: palette.surface,
+              borderWidth: 1,
+              borderColor: palette.border,
+            }}>
+            <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: tone.soft, alignItems: 'center', justifyContent: 'center' }}>
+              <Icon name={a.icon} size={18} color={tone.ink} />
+            </View>
+            <Text variant="caption" style={{ fontFamily: fonts.bodyBold }} numberOfLines={1}>
+              {a.label}
+            </Text>
+          </PressableScale>
+        );
+      })}
+    </View>
+  );
+}
+
+/** The first list with things to get, as a quick glance. */
+export function ShoppingPreview({ lists }: { lists: { list: ShoppingList; remaining: number; preview: string[] }[] }) {
+  const { palette } = useTheme();
+  const first = lists.find((l) => l.remaining > 0) ?? lists[0];
+  if (!first) return null;
+  const tone = palette.accents[first.list.color];
+  return (
+    <PressableScale
+      onPress={() => router.push({ pathname: '/shopping/[id]', params: { id: first.list.id } })}
+      accessibilityLabel={`${first.list.name}: ${first.remaining} to get`}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: palette.surface, borderRadius: radius.xl, borderWidth: 1, borderColor: palette.border, padding: space.lg }}>
+      <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: tone.soft, alignItems: 'center', justifyContent: 'center' }}>
+        <Icon name={first.list.icon} size={22} color={tone.ink} />
+      </View>
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text variant="bodyStrong">
+          {first.list.name} · {first.remaining ? `${first.remaining} to get` : 'all done'}
+        </Text>
+        <Text variant="callout" tone="secondary" numberOfLines={1}>
+          {first.preview.length ? first.preview.join(', ') : 'Nothing needed right now.'}
+        </Text>
+      </View>
+      <Icon name="chevron-forward" size={18} color={palette.textTertiary} />
+    </PressableScale>
+  );
+}
+
+/** What's been happening at home lately. */
+export function RecentActivity({ items, people }: { items: Activity[]; people: Member[] }) {
+  const { palette } = useTheme();
+  const icon: Record<Activity['kind'], IconName> = {
+    task: 'add-circle-outline',
+    done: 'checkmark-circle-outline',
+    event: 'calendar-outline',
+    shopping: 'basket-outline',
+    person: 'person-add-outline',
+    memory: 'book-outline',
+  };
+  return (
+    <View style={{ gap: space.sm }}>
+      {items.slice(0, 4).map((a) => {
+        const who = people.find((p) => p.id === a.actorId);
+        const name = !who || who.isMe ? 'You' : who.name.split(' ')[0];
+        return (
+          <View key={a.id} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+            <Icon name={icon[a.kind]} size={16} color={palette.textSecondary} />
+            <Text variant="callout" style={{ flex: 1 }} numberOfLines={1}>
+              <Text variant="callout" style={{ fontFamily: fonts.bodyBold }}>
+                {name}
+              </Text>{' '}
+              {a.text}
+            </Text>
+            <Text variant="caption" tone="tertiary">
+              {timeAgo(a.at)}
+            </Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+function timeAgo(iso: string): string {
+  const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (mins < 1) return 'now';
+  if (mins < 60) return `${mins}m`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours}h`;
+  return `${Math.round(hours / 24)}d`;
 }

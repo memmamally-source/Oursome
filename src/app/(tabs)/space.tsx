@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { EventCard } from '@/components/calendar/EventCard';
+import { JournalSection } from '@/components/journal/JournalSection';
 import { TaskRow } from '@/components/tasks/TaskRow';
 import { Avatar, AvatarStack, Button, Card, EmptyState, IconBubble, IconButton, Screen, SectionHeader, Text } from '@/components/ui';
 import { expandOccurrences } from '@/features/calendar/recurrence';
@@ -65,6 +66,7 @@ export default function SpaceScreen() {
           onPress={() => router.push({ pathname: '/person/[id]', params: { id: 'new' } })}
           style={{ marginBottom: space.xl }}
         />
+        <JournalSection />
         <PrivacyNote />
       </Screen>
     );
@@ -175,6 +177,8 @@ export default function SpaceScreen() {
           </Text>
         ) : null}
       </View>
+
+      <JournalSection />
 
       <PeopleSection members={s.members} />
 

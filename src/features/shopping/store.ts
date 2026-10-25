@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import type { ShoppingItem, ShoppingList } from '@/features/types';
+import { recordActivity } from '@/features/activity/store';
 import { withFamily } from '@/features/space/store';
 import { createId } from '@/lib/id';
 import { persistStorage, STORE_VERSION } from '@/lib/storage';
@@ -66,6 +67,8 @@ export const useShopping = create<ShoppingState>()(
           createdAt: new Date().toISOString(),
         };
         set((s) => ({ items: [...s.items, item] }));
+        const list = get().lists.find((l) => l.id === listId);
+        recordActivity('shopping', `added ${name} to ${list?.name ?? 'the list'}`);
         return item;
       },
       updateItem: (id, patch) => set((s) => ({ items: s.items.map((i) => (i.id === id ? { ...i, ...patch } : i)) })),

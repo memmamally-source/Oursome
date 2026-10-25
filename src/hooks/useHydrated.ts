@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 
+import { useActivity } from '@/features/activity/store';
 import { useCalendar } from '@/features/calendar/store';
+import { useMemories } from '@/features/memories/store';
 import { useSession } from '@/features/session/store';
 import { useSettings } from '@/features/settings/store';
 import { useShopping } from '@/features/shopping/store';
 import { useSpace } from '@/features/space/store';
 import { useTasks } from '@/features/tasks/store';
 
-const stores = [useSession, useSettings, useTasks, useCalendar, useShopping, useSpace];
+const stores = [useSession, useSettings, useTasks, useCalendar, useShopping, useSpace, useActivity, useMemories];
 
 /** True once every persisted store has loaded from device storage. */
 export function useHydrated(): boolean {

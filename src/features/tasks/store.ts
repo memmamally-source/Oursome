@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import type { Category, Task } from '@/features/types';
+import { recordActivity } from '@/features/activity/store';
 import { withFamily } from '@/features/space/store';
 import { createId } from '@/lib/id';
 import { persistStorage, STORE_VERSION } from '@/lib/storage';
@@ -50,6 +51,7 @@ export const useTasks = create<TasksState>()(
           order: nextOrder(get().tasks),
         });
         set((s) => ({ tasks: [...s.tasks, task] }));
+        if (!task.isDemo) recordActivity('task', `added “${task.title}”`);
         return task;
       },
       updateTask: (id, patch) => set((s) => ({ tasks: s.tasks.map((t) => (t.id === id ? withFamily({ ...t, ...patch }) : t)) })),
@@ -75,6 +77,7 @@ export const useTasks = create<TasksState>()(
         const { completed, next } = completeTask(before);
         const nextTask = next ? { ...next, order: nextOrder(get().tasks) } : undefined;
         set((s) => ({ tasks: [...s.tasks.map((t) => (t.id === id ? completed : t)), ...(nextTask ? [nextTask] : [])], lastCompletedId: id }));
+        recordActivity('done', `finished “${before.title}”`);
         return () =>
           set((s) => ({
             tasks: s.tasks.filter((t) => t.id !== nextTask?.id).map((t) => (t.id === id ? before : t)),

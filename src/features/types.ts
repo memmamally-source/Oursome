@@ -178,6 +178,12 @@ export type Announcement = {
 export type Space = {
   id: string;
   name: string;
+  /** An optional short motto or description ("Coffee first, then chaos"). */
+  motto?: string;
+  /** One of the illustrated covers (components/home/HouseholdCover). */
+  cover?: string;
+  /** The household's own cover photo, a small JPEG data URI kept on this device. */
+  photo?: string;
   members: Member[];
   announcements: Announcement[];
   createdAt: string;
