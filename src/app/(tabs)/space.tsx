@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { EventCard } from '@/components/calendar/EventCard';
+import { AlbumsSection } from '@/components/albums/AlbumsSection';
 import { JournalSection } from '@/components/journal/JournalSection';
 import { FamilySharing } from '@/components/space/FamilySharing';
 import { TaskRow } from '@/components/tasks/TaskRow';
@@ -78,6 +79,7 @@ export default function SpaceScreen() {
             style={{ marginBottom: space.xl, marginTop: -space.md }}
           />
         ) : null}
+        <AlbumsSection />
         <JournalSection />
         <PrivacyNote />
       </Screen>
@@ -169,6 +171,8 @@ export default function SpaceScreen() {
           </Text>
         ) : null}
       </View>
+
+      <AlbumsSection />
 
       <JournalSection />
 

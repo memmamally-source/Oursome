@@ -104,6 +104,10 @@ function AppNavigator() {
           <Stack.Screen name="journal" />
           <Stack.Screen name="calendar-files" options={{ presentation: 'modal' }} />
           <Stack.Screen name="join" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="albums" />
+          <Stack.Screen name="album/new" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="album/[id]/index" />
+          <Stack.Screen name="album/[id]/edit" />
           <Stack.Screen name="premium" options={{ presentation: 'modal' }} />
         </Stack.Protected>
         <Stack.Protected guard={!signedIn}>
