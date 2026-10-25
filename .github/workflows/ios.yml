@@ -47,6 +47,9 @@ jobs:
       - name: Make the Xcode project
         # Generated from app.json each time (ios/ isn't committed); installs the CocoaPods too.
         run: npx expo prebuild --platform ios --clean
+        env:
+          # Apple refuses an upload whose build number isn't higher than the last one.
+          IOS_BUILD_NUMBER: ${{ github.run_number }}
 
       - name: Check it builds (unsigned)
         if: github.event_name == 'pull_request'
