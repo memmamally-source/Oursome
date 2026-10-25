@@ -93,7 +93,10 @@ export const useAlbums = create<AlbumsState>()(
             ? album.cover
             : { ...album.cover, photoId: pickCover(ready) };
         // Dates come from the photos unless set by hand.
-        const dated = ready.map((p) => p.takenAt).filter(Boolean).sort() as string[];
+        const dated = ready
+          .map((p) => p.takenAt)
+          .filter(Boolean)
+          .sort() as string[];
         const dates = !album.date && dated.length ? { date: dated[0].slice(0, 10), endDate: dated[dated.length - 1].slice(0, 10) } : {};
         set((s) => ({ albums: s.albums.map((a) => (a.id === id ? touch({ ...a, ...dates, pages, cover }) : a)) }));
       },

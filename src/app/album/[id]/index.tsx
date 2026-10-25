@@ -1,16 +1,20 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Text as RNText, View } from 'react-native';
+import { Platform, Text as RNText, View } from 'react-native';
 
 import { AlbumCover, AlbumPageView } from '@/components/albums/AlbumPageView';
 import { OrbIdle } from '@/components/brand/Orb';
 import { PageTurn } from '@/components/journal/PageTurn';
-import { Button, EmptyState, IconButton, Screen, Text } from '@/components/ui';
+import { Button, EmptyState, IconButton, Screen, Segmented, Text } from '@/components/ui';
 import { unplaced } from '@/features/albums/auto';
 import { resumeAlbum, retryFailed, useImports, whenSettled } from '@/features/albums/importer';
 import { themeOf } from '@/features/albums/templates';
+import { PRINT_SPEC, printChecks, SCREEN_SPEC } from '@/features/albums/print';
 import { useAlbum, useAlbums } from '@/features/albums/store';
-import type { PhotoMeta } from '@/features/albums/types';
+import type { Album, PhotoMeta } from '@/features/albums/types';
+import { saveBlob } from '@/lib/files';
+import { toast } from '@/components/ui/Toast';
+import { Icon } from '@/components/ui/Icon';
 import { useLayout } from '@/hooks/useLayout';
 import { fonts, layout, radius, space, useTheme } from '@/theme';
 
@@ -26,6 +30,7 @@ export default function AlbumReader() {
   const albumPhotos = album ? allPhotos.filter((p) => p.albumId === album.id) : NO_PHOTOS;
   const progress = useImports((s) => s.progress[id]);
   const [index, setIndex] = useState(0);
+  const [exporting, setExporting] = useState(false);
 
   // Carry on preparing photos, then design whatever isn't on a page yet.
   useEffect(() => {
@@ -113,6 +118,16 @@ export default function AlbumReader() {
             {album.visibility === 'shared' ? ' · Shared with family' : ' · Private'}
           </Text>
         </View>
+        {Platform.OS === 'web' ? (
+          <Button
+            label="PDF"
+            icon="download-outline"
+            size="sm"
+            variant="secondary"
+            disabled={preparing || !album.pages.length}
+            onPress={() => setExporting(!exporting)}
+          />
+        ) : null}
         <Button
           label="Edit"
           icon="create-outline"
@@ -153,6 +168,8 @@ export default function AlbumReader() {
         </View>
       ) : null}
 
+      {exporting ? <ExportPanel album={album} photos={photos} onClose={() => setExporting(false)} /> : null}
+
       {failed && !preparing ? (
         <View
           style={{
@@ -184,5 +201,102 @@ export default function AlbumReader() {
         />
       ) : null}
     </Screen>
+  );
+}
+
+/** Download the album as a PDF photo book. */
+function ExportPanel({ album, photos, onClose }: { album: Album; photos: Map<string, PhotoMeta>; onClose: () => void }) {
+  const { palette } = useTheme();
+  const [quality, setQuality] = useState<'print' | 'screen'>('print');
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const checks = printChecks(album, photos);
+
+  const run = async () => {
+    setProgress({ done: 0, total: album.pages.length + 2 });
+    try {
+      const { albumPdf } = await import('@/features/albums/pdf');
+      const blob = await albumPdf(album, photos, quality === 'print' ? PRINT_SPEC : SCREEN_SPEC, (done, total) =>
+        setProgress({ done, total }),
+      );
+      await saveBlob(`${album.title.replace(/[^\w ,.-]/g, '').trim() || 'Album'}.pdf`, blob);
+      toast({ message: `PDF ready (${Math.max(1, Math.round(blob.size / 1e6))} MB)` });
+      onClose();
+    } catch {
+      toast({ message: 'The PDF couldn’t be made. Try the smaller screen version.', tone: 'error' });
+    } finally {
+      setProgress(null);
+    }
+  };
+
+  return (
+    <View
+      style={{
+        backgroundColor: palette.surface,
+        borderRadius: radius.xl,
+        padding: space.lg,
+        gap: space.md,
+        marginBottom: space.lg,
+        borderWidth: 1,
+        borderColor: palette.border,
+      }}>
+      <Text variant="heading">Download as a photo book</Text>
+      <Segmented
+        value={quality}
+        onChange={setQuality}
+        accent="coral"
+        options={[
+          { value: 'print', label: 'For printing', icon: 'print-outline' },
+          { value: 'screen', label: 'For sharing', icon: 'phone-portrait-outline' },
+        ]}
+      />
+      <Text variant="caption" tone="secondary">
+        {quality === 'print'
+          ? '8 × 10 in pages at 300 dpi with 1/8 in bleed, using your original photos where kept. Larger file, ready for a print shop.'
+          : 'Smaller file (150 dpi, no bleed) for viewing on screens and sending to family.'}
+      </Text>
+      {quality === 'print'
+        ? checks.map((c, i) => (
+            <View key={i} style={{ flexDirection: 'row', gap: space.sm, alignItems: 'flex-start' }}>
+              <Icon
+                name={c.level === 'ok' ? 'checkmark-circle' : 'alert-circle-outline'}
+                size={16}
+                color={c.level === 'ok' ? palette.accents.mint.base : palette.accents.sunshine.ink}
+              />
+              <Text variant="caption" style={{ flex: 1 }}>
+                {c.text}
+              </Text>
+            </View>
+          ))
+        : null}
+      {progress ? (
+        <View style={{ gap: 4 }}>
+          <Text variant="caption" tone="secondary">
+            Making page {Math.min(progress.done + 1, progress.total)} of {progress.total}…
+          </Text>
+          <View style={{ height: 6, backgroundColor: palette.surfaceSunken, borderRadius: 3, overflow: 'hidden' }}>
+            <View
+              style={{
+                height: 6,
+                width: `${Math.round((progress.done / progress.total) * 100)}%`,
+                backgroundColor: palette.accents.coral.base,
+              }}
+            />
+          </View>
+        </View>
+      ) : null}
+      <View style={{ flexDirection: 'row', gap: space.sm, flexWrap: 'wrap' }}>
+        <Button
+          label={progress ? 'Making PDF…' : 'Download PDF'}
+          icon="download-outline"
+          size="sm"
+          disabled={!!progress}
+          onPress={() => void run()}
+        />
+        <Button label="Close" size="sm" variant="ghost" onPress={onClose} />
+      </View>
+      <Text variant="caption" tone="tertiary">
+        Made on this device; nothing is uploaded. Ordering printed books from inside Oursome may come later.
+      </Text>
+    </View>
   );
 }

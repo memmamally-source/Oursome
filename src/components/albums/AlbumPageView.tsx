@@ -32,7 +32,20 @@ export function useAlbumPhoto(id: string | undefined, version: Version): string 
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const LONG_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const LONG_MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
 export const longDate = (iso: string) => {
   const d = new Date(`${iso.slice(0, 10)}T12:00:00`);
   return `${DAYS[d.getDay()]}\n${d.getDate()} ${LONG_MONTHS[d.getMonth()]}`;
@@ -165,6 +178,7 @@ export function AlbumPageView({ page, album, photos, width: W, version = 'displa
   const serif: TextStyle = { fontFamily: fonts.display, color: theme.ink };
   const body: TextStyle = { fontFamily: fonts.body, color: theme.muted };
   const isTimeline = layout.family === 'timeline' && page.kind === 'photos';
+  const dateBox = layout.note ?? (layout.caption && layout.caption.h >= 0.1 ? layout.caption : undefined);
 
   return (
     <View {...paperProps} style={{ width: W, height: H, backgroundColor: theme.page, overflow: 'hidden' }}>
@@ -255,9 +269,9 @@ export function AlbumPageView({ page, album, photos, width: W, version = 'displa
         </>
       ) : null}
 
-      {/* Scrapbook corners hold the day when there's no caption. */}
-      {page.kind === 'photos' && !page.caption && layout.note && page.date ? (
-        <Words box={layout.note} W={W} H={H} style={{ ...serif, fontSize: unit * 1.15, color: theme.accent }}>
+      {/* Roomy caption corners hold the day when there's no caption, so pages never look unfinished. */}
+      {page.kind === 'photos' && !page.caption && dateBox && page.date ? (
+        <Words box={dateBox} W={W} H={H} style={{ ...serif, fontSize: unit * 1.15, color: theme.accent }}>
           {longDate(page.date)}
         </Words>
       ) : null}
