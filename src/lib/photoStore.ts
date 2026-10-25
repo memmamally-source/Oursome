@@ -51,6 +51,13 @@ export async function deletePhoto(id: string): Promise<void> {
   else await AsyncStorage.removeItem(`oursome.photo.${id}`);
 }
 
+/** Every journal and household photo on this device (phones keep them under `oursome.photo.*`). */
+export async function deleteAllPhotos(): Promise<void> {
+  cache.clear();
+  if (hasIdb()) await idb('readwrite', (s) => s.clear());
+  else await AsyncStorage.multiRemove((await AsyncStorage.getAllKeys()).filter((k) => k.startsWith('oursome.photo.')));
+}
+
 const cache = new Map<string, string>();
 
 /** Load a stored photo for display; null while loading or if missing. */

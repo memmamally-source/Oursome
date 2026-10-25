@@ -83,6 +83,24 @@ export async function deletePhotoFiles(id: string, only?: Version[]): Promise<vo
   }
 }
 
+/** Every album photo on this device, for "Delete account and data". */
+export async function deleteAllPhotoFiles(): Promise<void> {
+  if (web) urls.forEach((u) => URL.revokeObjectURL(u));
+  urls.clear();
+  if (web) {
+    if (typeof indexedDB === 'undefined') return;
+    if (dbPromise) (await dbPromise.catch(() => null))?.close();
+    dbPromise = null;
+    await new Promise<void>((resolve) => {
+      const req = indexedDB.deleteDatabase(DB);
+      req.onsuccess = req.onerror = req.onblocked = () => resolve();
+    });
+  } else {
+    const dir = new Directory(Paths.document, 'albums');
+    if (dir.exists) dir.delete();
+  }
+}
+
 /** Object URLs (web) or file uris (phones), made once and reused while the app is open. */
 const urls = new Map<string, string>();
 

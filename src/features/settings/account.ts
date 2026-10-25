@@ -1,11 +1,17 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform, Share } from 'react-native';
 
+import { useActivity } from '@/features/activity/store';
+import { deleteAllPhotoFiles } from '@/features/albums/storage';
+import { useAlbums } from '@/features/albums/store';
 import { useCalendar } from '@/features/calendar/store';
+import { useMemories } from '@/features/memories/store';
+import { useReminders } from '@/features/reminders/engine';
 import { useSession } from '@/features/session/store';
 import { useShopping } from '@/features/shopping/store';
 import { useSpace } from '@/features/space/store';
 import { useTasks } from '@/features/tasks/store';
+import { deleteAllPhotos } from '@/lib/photoStore';
 
 import { useSettings } from './store';
 
@@ -49,7 +55,7 @@ export async function exportData(): Promise<void> {
 }
 
 /**
- * Stage 1: erases all local data on this device. Stage 2 will also delete
+ * Stage 1: erases all local data on this device, photos included. Stage 2 will also delete
  * the Firebase account and server data via a Cloud Function.
  */
 export async function deleteAllLocalData(): Promise<void> {
@@ -58,6 +64,11 @@ export async function deleteAllLocalData(): Promise<void> {
   useShopping.getState().reset();
   useSpace.getState().replace(null);
   useSettings.getState().reset();
+  useAlbums.setState({ albums: [], photos: [] });
+  useMemories.setState({ memories: [] });
+  useActivity.getState().clear();
+  useReminders.setState({ delivered: [], history: [], lastCheck: null });
+  await Promise.all([deleteAllPhotoFiles(), deleteAllPhotos()]).catch(() => {});
   useSession.setState({ profile: null, signedIn: false });
   const keys = (await AsyncStorage.getAllKeys()).filter((k) => k.startsWith('oursome.'));
   // Stores re-persist their reset state; clearing keys removes any stale extras.

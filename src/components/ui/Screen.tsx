@@ -89,6 +89,13 @@ export function Screen({ children, title, subtitle, right, tabBar, scroll = true
           {children}
         </View>
       )}
+      {/* Keeps scrolled content from showing through the status bar (clock, battery). */}
+      {scroll && insets.top > 0 ? (
+        <View
+          pointerEvents="none"
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, height: insets.top, backgroundColor: background ?? palette.background }}
+        />
+      ) : null}
     </KeyboardAvoidingView>
   );
 }
@@ -178,7 +185,8 @@ export function ModalScreen({ children, header }: { children: ReactNode; header:
       <View
         style={{
           paddingHorizontal: layout.screenPadding,
-          paddingTop: Platform.OS === 'android' ? insets.top + space.sm : space.sm,
+          // iOS shows these as sheets below the status bar; elsewhere they fill the screen.
+          paddingTop: Platform.OS === 'ios' ? space.sm : insets.top + space.sm,
           width: '100%',
           maxWidth: layout.maxContentWidth,
           alignSelf: 'center',

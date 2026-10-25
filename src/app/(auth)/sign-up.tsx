@@ -1,8 +1,10 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
+import { Linking } from 'react-native';
 
 import { AuthShell, PreviewNotice } from '@/components/auth/AuthShell';
 import { Button, Text, TextField } from '@/components/ui';
+import { privacyUrl } from '@/config/brand';
 import { auth } from '@/features/session/store';
 
 export default function SignUp() {
@@ -68,7 +70,10 @@ export default function SignUp() {
       <Button label="Create account" size="lg" fullWidth loading={busy} onPress={submit} />
       <PreviewNotice />
       <Text variant="caption" tone="tertiary" align="center">
-        By continuing you agree to the Terms of Service and Privacy Policy (drafts pending review).
+        How Oursome looks after your information:{' '}
+        <Text variant="caption" tone="coral" accessibilityRole="link" onPress={() => Linking.openURL(privacyUrl)}>
+          Privacy policy
+        </Text>
       </Text>
     </AuthShell>
   );
