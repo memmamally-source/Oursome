@@ -23,7 +23,6 @@ import { useActivity } from '@/features/activity/store';
 import { useCalendar } from '@/features/calendar/store';
 import { useDashboard } from '@/features/dashboard/useDashboard';
 import type { Suggestion } from '@/features/dashboard/suggestions';
-import { clearDemoContent } from '@/features/demo/seed';
 import { upcomingOccasions } from '@/features/home/occasions';
 import { START_ID, startSteps } from '@/features/home/start';
 import { showsWeekly, weekLines, weekSummary } from '@/features/home/weekly';
@@ -53,7 +52,6 @@ export default function HomeScreen() {
   const memories = useMemories((s) => s.memories);
   const tasks = useTasks((s) => s.tasks);
   const calendars = useCalendar((s) => s.calendars);
-  const hasDemo = tasks.some((t) => t.isDemo);
   const d = useDashboard(now);
   const people = useSpace((s) => s.people);
   const household = useSpace((s) => s.space);
@@ -123,29 +121,6 @@ export default function HomeScreen() {
       showLogo={!isWide}
     />
   );
-
-  const demoNote = hasDemo ? (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: space.sm,
-        backgroundColor: palette.surfaceSunken,
-        borderRadius: radius.pill,
-        paddingVertical: 8,
-        paddingHorizontal: space.md,
-      }}>
-      <Icon name="color-palette-outline" size={16} color={palette.textSecondary} />
-      <Text variant="caption" tone="secondary" style={{ flex: 1 }}>
-        You’re viewing sample content.
-      </Text>
-      <Pressable onPress={clearDemoContent} hitSlop={8} accessibilityRole="button" accessibilityLabel="Clear sample content">
-        <Text variant="caption" tone="coral" style={{ fontFamily: fonts.bodyBold }}>
-          Clear it
-        </Text>
-      </Pressable>
-    </View>
-  ) : null;
 
   const day = (
     <View>
@@ -218,7 +193,7 @@ export default function HomeScreen() {
           <View style={{ flex: 3, gap: space.xxl }}>
             {stagger([firstSteps, <CaptureBox key="c" />, <QuickActions key="q" />, weeklyCard, suggestion, day])}
           </View>
-          <View style={{ flex: 2, gap: space.xxl }}>{stagger([demoNote, peopleSection, shopping, coming, recent])}</View>
+          <View style={{ flex: 2, gap: space.xxl }}>{stagger([peopleSection, shopping, coming, recent])}</View>
         </View>
       </Screen>
     );
@@ -232,7 +207,6 @@ export default function HomeScreen() {
           firstSteps,
           <CaptureBox key="c" />,
           <QuickActions key="q" />,
-          demoNote,
           weeklyCard,
           suggestion,
           day,

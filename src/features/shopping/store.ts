@@ -30,7 +30,6 @@ type ShoppingState = {
   restoreItems: (items: ShoppingItem[]) => void;
   toggleFavourite: (name: string) => void;
   replaceAll: (lists: ShoppingList[], items: ShoppingItem[]) => void;
-  clearDemo: () => void;
   reset: () => void;
 };
 
@@ -102,11 +101,6 @@ export const useShopping = create<ShoppingState>()(
           favourites: s.favourites.includes(name) ? s.favourites.filter((f) => f !== name) : [...s.favourites, name],
         })),
       replaceAll: (lists, items) => set({ lists, items }),
-      clearDemo: () =>
-        set((s) => {
-          const demoIds = new Set(s.lists.filter((l) => l.isDemo).map((l) => l.id));
-          return { lists: s.lists.filter((l) => !l.isDemo), items: s.items.filter((i) => !demoIds.has(i.listId)) };
-        }),
       reset: () => set({ lists: [], items: [], favourites: [], bought: {} }),
     }),
     { name: 'oursome.shopping', version: STORE_VERSION, storage: persistStorage },
