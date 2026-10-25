@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { Pressable, ScrollView, View } from 'react-native';
 
 import { useCalendarAccent } from '@/components/calendar/EventCard';
@@ -14,7 +14,17 @@ import { Icon } from '../ui/Icon';
 import { PressableScale } from '../ui/PressableScale';
 import { Text } from '../ui/Text';
 
-export function SectionTitle({ title, detail, action, onAction }: { title: string; detail?: string; action?: string; onAction?: () => void }) {
+export function SectionTitle({
+  title,
+  detail,
+  action,
+  onAction,
+}: {
+  title: string;
+  detail?: string;
+  action?: string;
+  onAction?: () => void;
+}) {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: space.md, gap: space.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: space.sm, flexShrink: 1 }}>
@@ -51,7 +61,13 @@ function AgendaRow({ o, nowTime, person }: { o: EventOccurrence; nowTime: string
       onPress={() => router.push({ pathname: '/event/[id]', params: { id: o.event.id } })}
       accessibilityRole="button"
       accessibilityLabel={`${o.event.title}, ${o.event.allDay ? 'all day' : formatTime(start)}`}
-      style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.md, opacity: past ? 0.5 : pressed ? 0.7 : 1 })}>
+      style={({ pressed }) => ({
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: space.md,
+        paddingVertical: space.md,
+        opacity: past ? 0.5 : pressed ? 0.7 : 1,
+      })}>
       <View style={{ width: 46, alignItems: 'flex-end' }}>
         <Text variant="bodyStrong" style={{ lineHeight: 20 }}>
           {hm}
@@ -67,7 +83,8 @@ function AgendaRow({ o, nowTime, person }: { o: EventOccurrence; nowTime: string
             {o.event.title}
           </Text>
           {now ? (
-            <View style={{ backgroundColor: palette.accents.coral.base, borderRadius: radius.pill, paddingHorizontal: 7, paddingVertical: 1 }}>
+            <View
+              style={{ backgroundColor: palette.accents.coral.base, borderRadius: radius.pill, paddingHorizontal: 7, paddingVertical: 1 }}>
               <Text variant="caption" color={palette.accents.coral.on} style={{ fontFamily: fonts.bodyBold, fontSize: 11 }}>
                 Now
               </Text>
@@ -106,7 +123,15 @@ export function TodayCard({
     return people.find((p) => p.id === id && !p.isMe);
   };
   return (
-    <View style={{ backgroundColor: palette.surface, borderRadius: radius.xl, borderWidth: 1, borderColor: palette.border, paddingHorizontal: space.lg, paddingVertical: space.sm }}>
+    <View
+      style={{
+        backgroundColor: palette.surface,
+        borderRadius: radius.xl,
+        borderWidth: 1,
+        borderColor: palette.border,
+        paddingHorizontal: space.lg,
+        paddingVertical: space.sm,
+      }}>
       {events.length === 0 && tasks.length === 0 ? (
         <View style={{ paddingVertical: space.xl, alignItems: 'center', gap: space.xs }}>
           <Icon name="sunny-outline" size={28} color={palette.accents.sunshine.base} />
@@ -143,11 +168,27 @@ export function TodayCard({
 }
 
 /** A slim, dismissible nudge — never more than one at a time. */
-export function SuggestionLine({ suggestion, onAction, onDismiss }: { suggestion: Suggestion; onAction: () => void; onDismiss: () => void }) {
+export function SuggestionLine({
+  suggestion,
+  onAction,
+  onDismiss,
+}: {
+  suggestion: Suggestion;
+  onAction: () => void;
+  onDismiss: () => void;
+}) {
   const { palette } = useTheme();
   const tone = palette.accents[suggestion.accent];
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.md, backgroundColor: tone.soft, borderRadius: radius.lg, padding: space.md }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: space.md,
+        backgroundColor: tone.soft,
+        borderRadius: radius.lg,
+        padding: space.md,
+      }}>
       <Icon name={suggestion.icon} size={20} color={tone.ink} />
       <View style={{ flex: 1, gap: space.xs }}>
         <Text variant="callout">{suggestion.text}</Text>
@@ -172,8 +213,23 @@ export function PeopleRow({ people, counts }: { people: Member[]; counts: Record
       <PressableScale
         onPress={() => router.push({ pathname: '/person/[id]', params: { id: 'new' } })}
         accessibilityLabel="Add a person"
-        style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: palette.accents.sunshine.soft, borderRadius: radius.xl, padding: space.lg }}>
-        <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: palette.accents.sunshine.base, alignItems: 'center', justifyContent: 'center' }}>
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: space.md,
+          backgroundColor: palette.accents.sunshine.soft,
+          borderRadius: radius.xl,
+          padding: space.lg,
+        }}>
+        <View
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: palette.accents.sunshine.base,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
           <Icon name="person-add" size={22} color={palette.accents.sunshine.on} />
         </View>
         <View style={{ flex: 1 }}>
@@ -186,7 +242,10 @@ export function PeopleRow({ people, counts }: { people: Member[]; counts: Record
     );
   }
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.lg, paddingRight: space.lg, paddingTop: 4 }}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{ gap: space.lg, paddingRight: space.lg, paddingTop: 4 }}>
       {people.map((p) => (
         <Pressable
           key={p.id}
@@ -274,7 +333,15 @@ export function ListsRow({ lists }: { lists: { list: ShoppingList; remaining: nu
               height: 48,
               opacity: pressed ? 0.7 : 1,
             })}>
-            <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: tone.soft, alignItems: 'center', justifyContent: 'center' }}>
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: tone.soft,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
               <Icon name={list.icon} size={18} color={tone.ink} />
             </View>
             <Text variant="bodyStrong">{list.name}</Text>
@@ -296,7 +363,11 @@ export function ComingUp({ dates, reminders }: { dates: EventOccurrence[]; remin
       key: o.key,
       date: o.date,
       title: o.event.title,
-      icon: (/birthday/i.test(o.event.title) ? 'gift-outline' : /anniversary/i.test(o.event.title) ? 'heart-outline' : 'star-outline') as IconName,
+      icon: (/birthday/i.test(o.event.title)
+        ? 'gift-outline'
+        : /anniversary/i.test(o.event.title)
+          ? 'heart-outline'
+          : 'star-outline') as IconName,
       accent: 'sunshine' as AccentKey,
       open: () => router.push({ pathname: '/event/[id]', params: { id: o.event.id } }),
     })),
@@ -312,7 +383,14 @@ export function ComingUp({ dates, reminders }: { dates: EventOccurrence[]; remin
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, 5);
   return (
-    <View style={{ backgroundColor: palette.surface, borderRadius: radius.xl, borderWidth: 1, borderColor: palette.border, paddingHorizontal: space.lg }}>
+    <View
+      style={{
+        backgroundColor: palette.surface,
+        borderRadius: radius.xl,
+        borderWidth: 1,
+        borderColor: palette.border,
+        paddingHorizontal: space.lg,
+      }}>
       {rows.map((r, i) => (
         <Pressable
           key={r.key}
@@ -328,7 +406,15 @@ export function ComingUp({ dates, reminders }: { dates: EventOccurrence[]; remin
             borderTopColor: palette.border,
             opacity: pressed ? 0.7 : 1,
           })}>
-          <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: palette.accents[r.accent].soft, alignItems: 'center', justifyContent: 'center' }}>
+          <View
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 16,
+              backgroundColor: palette.accents[r.accent].soft,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
             <Icon name={r.icon} size={16} color={palette.accents[r.accent].ink} />
           </View>
           <Text variant="body" style={{ flex: 1 }} numberOfLines={1}>
@@ -347,9 +433,19 @@ export function ComingUp({ dates, reminders }: { dates: EventOccurrence[]; remin
 export function QuickActions() {
   const { palette } = useTheme();
   const actions: { label: string; icon: IconName; accent: AccentKey; go: () => void }[] = [
-    { label: 'Task', icon: 'checkmark-circle-outline', accent: 'mint', go: () => router.push({ pathname: '/task/[id]', params: { id: 'new' } }) },
+    {
+      label: 'Task',
+      icon: 'checkmark-circle-outline',
+      accent: 'mint',
+      go: () => router.push({ pathname: '/task/[id]', params: { id: 'new' } }),
+    },
     { label: 'Event', icon: 'calendar-outline', accent: 'sky', go: () => router.push({ pathname: '/event/[id]', params: { id: 'new' } }) },
-    { label: 'List item', icon: 'basket-outline', accent: 'sunshine', go: () => router.navigate({ pathname: '/tasks', params: { view: 'lists' } }) },
+    {
+      label: 'List item',
+      icon: 'basket-outline',
+      accent: 'sunshine',
+      go: () => router.navigate({ pathname: '/tasks', params: { view: 'lists' } }),
+    },
     { label: 'Memory', icon: 'book-outline', accent: 'coral', go: () => router.push({ pathname: '/memory/[id]', params: { id: 'new' } }) },
   ];
   return (
@@ -371,7 +467,15 @@ export function QuickActions() {
               borderWidth: 1,
               borderColor: palette.border,
             }}>
-            <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: tone.soft, alignItems: 'center', justifyContent: 'center' }}>
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: tone.soft,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
               <Icon name={a.icon} size={18} color={tone.ink} />
             </View>
             <Text variant="caption" style={{ fontFamily: fonts.bodyBold }} numberOfLines={1}>
@@ -394,7 +498,16 @@ export function ShoppingPreview({ lists }: { lists: { list: ShoppingList; remain
     <PressableScale
       onPress={() => router.push({ pathname: '/shopping/[id]', params: { id: first.list.id } })}
       accessibilityLabel={`${first.list.name}: ${first.remaining} to get`}
-      style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, backgroundColor: palette.surface, borderRadius: radius.xl, borderWidth: 1, borderColor: palette.border, padding: space.lg }}>
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: space.md,
+        backgroundColor: palette.surface,
+        borderRadius: radius.xl,
+        borderWidth: 1,
+        borderColor: palette.border,
+        padding: space.lg,
+      }}>
       <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: tone.soft, alignItems: 'center', justifyContent: 'center' }}>
         <Icon name={first.list.icon} size={22} color={tone.ink} />
       </View>
@@ -453,4 +566,99 @@ function timeAgo(iso: string): string {
   const hours = Math.round(mins / 60);
   if (hours < 24) return `${hours}h`;
   return `${Math.round(hours / 24)}d`;
+}
+
+/** The optional weekly look back (Sundays and Mondays). */
+export function WeeklyCard({ back, ahead, onDismiss }: { back: string; ahead: string; onDismiss: () => void }) {
+  const { palette } = useTheme();
+  const tone = palette.accents.sky;
+  return (
+    <View
+      role="note"
+      style={{
+        backgroundColor: tone.soft,
+        borderRadius: radius.xl,
+        padding: space.lg,
+        gap: space.xs,
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+      }}>
+      <View style={{ flex: 1, gap: space.xs }}>
+        <Text variant="overline" color={tone.ink}>
+          Your week at home
+        </Text>
+        <Text variant="body">{back}</Text>
+        <Text variant="callout" tone="secondary">
+          {ahead}
+        </Text>
+      </View>
+      <Pressable onPress={onDismiss} hitSlop={10} accessibilityRole="button" accessibilityLabel="Hide this week’s summary">
+        <Icon name="close" size={18} color={palette.textSecondary} />
+      </Pressable>
+    </View>
+  );
+}
+
+/** First steps for a new household, ticked off from real state. */
+export function GettingStarted({
+  steps,
+  onHide,
+}: {
+  steps: { key: string; label: string; icon: IconName; done: boolean; href: string }[];
+  onHide: () => void;
+}) {
+  const { palette } = useTheme();
+  const left = steps.filter((s) => !s.done).length;
+  return (
+    <View
+      style={{
+        backgroundColor: palette.surface,
+        borderRadius: radius.xl,
+        borderWidth: 1,
+        borderColor: palette.border,
+        padding: space.lg,
+        gap: space.sm,
+      }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ flex: 1 }}>
+          <Text variant="heading">Make yourselves at home</Text>
+          <Text variant="caption" tone="secondary">
+            {left === 1 ? 'One small step left' : `${left} small steps`}, whenever you like.
+          </Text>
+        </View>
+        <Pressable onPress={onHide} hitSlop={10} accessibilityRole="button" accessibilityLabel="Hide first steps">
+          <Text variant="callout" tone="secondary">
+            Hide
+          </Text>
+        </Pressable>
+      </View>
+      {steps.map((s) => (
+        <Pressable
+          key={s.key}
+          onPress={() => router.push(s.href as Href)}
+          accessibilityRole="button"
+          accessibilityLabel={`${s.label}${s.done ? ', done' : ''}`}
+          style={({ pressed }) => ({
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: space.md,
+            paddingVertical: 6,
+            opacity: pressed ? 0.7 : 1,
+          })}>
+          <Icon
+            name={s.done ? 'checkmark-circle' : s.icon}
+            size={22}
+            color={s.done ? palette.accents.mint.base : palette.accents.coral.ink}
+          />
+          <Text
+            variant="body"
+            tone={s.done ? 'tertiary' : 'primary'}
+            style={{ flex: 1, textDecorationLine: s.done ? 'line-through' : 'none' }}>
+            {s.label}
+          </Text>
+          {!s.done ? <Icon name="chevron-forward" size={16} color={palette.textTertiary} /> : null}
+        </Pressable>
+      ))}
+    </View>
+  );
 }

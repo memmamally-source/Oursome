@@ -80,7 +80,11 @@ export function HomeHeader({ now, today, name, color = 'coral', household, event
       {showLogo ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <Wordmark size={24} />
-          <Pressable onPress={() => router.push('/settings')} accessibilityRole="button" accessibilityLabel="Profile and settings" hitSlop={8}>
+          <Pressable
+            onPress={() => router.push('/settings')}
+            accessibilityRole="button"
+            accessibilityLabel="Profile and settings"
+            hitSlop={8}>
             <Avatar name={name ?? 'You'} accent={color} size={40} ring />
           </Pressable>
         </View>
@@ -99,7 +103,11 @@ export function HomeHeader({ now, today, name, color = 'coral', household, event
               paddingVertical: space.sm,
               paddingHorizontal: space.md,
             }}>
-            <Icon name={occasion.kind === 'birthday' ? 'gift' : occasion.kind === 'anniversary' ? 'heart' : 'star'} size={18} color={palette.accents.sunshine.ink} />
+            <Icon
+              name={occasion.kind === 'birthday' ? 'gift' : occasion.kind === 'anniversary' ? 'heart' : 'star'}
+              size={18}
+              color={palette.accents.sunshine.ink}
+            />
             <Text variant="callout" tone="sunshine" style={{ flex: 1 }}>
               {occasionText(occasion)}
               {occasions.length > 1 ? ` · and ${occasions.length - 1} more` : ''}
@@ -109,7 +117,11 @@ export function HomeHeader({ now, today, name, color = 'coral', household, event
         </Reveal>
       ) : null}
 
-      <View style={[{ borderRadius: radius.xxl, overflow: 'hidden', borderWidth: 1, borderColor: palette.border, minHeight: 230 }, elevation(palette, 1)]}>
+      <View
+        style={[
+          { borderRadius: radius.xxl, overflow: 'hidden', borderWidth: 1, borderColor: palette.border, minHeight: 230 },
+          elevation(palette, 1),
+        ]}>
         <HouseholdCover cover={(household?.cover as CoverKey) ?? 'hearth'} photo={household?.photo} season={seasonOf(now)} />
         {!showLogo ? (
           <Pressable
@@ -151,13 +163,21 @@ export function HomeHeader({ now, today, name, color = 'coral', household, event
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.sm }}>
               <Stat icon="calendar-outline" accent="sky" label={`${events} on today`} onPress={() => router.navigate('/calendar')} />
               <Stat icon="checkmark-circle-outline" accent="mint" label={`${toDo} to do`} onPress={() => router.navigate('/tasks')} />
-              {overdue ? <Stat icon="alert-circle-outline" accent="coral" label={`${overdue} overdue`} onPress={() => router.navigate('/tasks')} /> : null}
+              {overdue ? (
+                <Stat icon="alert-circle-outline" accent="coral" label={`${overdue} overdue`} onPress={() => router.navigate('/tasks')} />
+              ) : null}
             </View>
             <Pressable
               onPress={() => router.push('/household')}
               accessibilityRole="button"
               accessibilityLabel={household ? `${household.name}. Make it yours` : 'Make this home yours'}
-              style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: space.sm, alignSelf: 'flex-start', opacity: pressed ? 0.7 : 1 })}>
+              style={({ pressed }) => ({
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: space.sm,
+                alignSelf: 'flex-start',
+                opacity: pressed ? 0.7 : 1,
+              })}>
               {household?.members.length ? <AvatarStack people={household.members} size={26} /> : null}
               <View style={{ flexShrink: 1 }}>
                 <Text variant="bodyStrong" numberOfLines={1}>

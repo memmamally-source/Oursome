@@ -45,6 +45,9 @@ type SettingsState = {
   celebrations: boolean;
   setMotion: (motion: 'system' | 'reduced') => void;
   setCelebrations: (on: boolean) => void;
+  /** A look back at the week on Home, on Sundays and Mondays. */
+  weeklySummary: boolean;
+  setWeeklySummary: (on: boolean) => void;
   setTheme: (theme: ThemePreference) => void;
   completeOnboarding: () => void;
   toggleSection: (section: DashboardSection) => void;
@@ -74,6 +77,7 @@ const defaults = {
   tasksOnCalendar: true,
   motion: 'system' as 'system' | 'reduced',
   celebrations: true,
+  weeklySummary: true,
 };
 
 export const useSettings = create<SettingsState>()(
@@ -88,6 +92,7 @@ export const useSettings = create<SettingsState>()(
       setTaskSortMode: (taskSortMode) => set({ taskSortMode }),
       setMotion: (motion) => set({ motion }),
       setCelebrations: (celebrations) => set({ celebrations }),
+      setWeeklySummary: (weeklySummary) => set({ weeklySummary }),
       setTasksOnCalendar: (tasksOnCalendar) => set({ tasksOnCalendar }),
       reset: () => set({ ...defaults }),
     }),

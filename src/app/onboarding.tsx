@@ -4,35 +4,83 @@ import { FlatList, Pressable, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Wordmark } from '@/components/brand/Logo';
+import { OrbRoll } from '@/components/brand/Orb';
 import { Illustration, type IllustrationName } from '@/components/illustrations/Illustration';
 import { Button, Text } from '@/components/ui';
 import { Brand } from '@/config/brand';
 import { useSettings } from '@/features/settings/store';
 import { space, useTheme, type AccentKey } from '@/theme';
 
-const slides: { key: string; illustration: IllustrationName; accent: AccentKey; title: string; body: string }[] = [
+type Art = IllustrationName | 'orb' | 'journal';
+
+const slides: { key: string; art: Art; accent: AccentKey; title: string; body: string }[] = [
   {
-    key: 'one-place',
-    illustration: 'sun',
-    accent: 'sunshine',
-    title: 'Your whole day,\nbeautifully simple',
-    body: 'Appointments, tasks, reminders and lists — together in one calm, colourful place.',
+    key: 'welcome',
+    art: 'orb',
+    accent: 'coral',
+    title: 'Welcome home',
+    body: 'One warm place for your household’s plans, lists and little moments.',
   },
   {
     key: 'together',
-    illustration: 'together',
-    accent: 'coral',
+    art: 'together',
+    accent: 'sunshine',
     title: 'Better together',
     body: 'Share calendars, chores and shopping with the people you live with. Private things stay private.',
   },
   {
+    key: 'journal',
+    art: 'journal',
+    accent: 'mint',
+    title: 'Keep the moments',
+    body: 'A journal for the days worth remembering: photos, milestones and notes, page by page.',
+  },
+  {
     key: 'assistant',
-    illustration: 'assistant',
+    art: 'assistant',
     accent: 'lavender',
     title: 'Just say it',
-    body: '“Dentist Tuesday at 3.” Oursome turns everyday words into plans — and always checks with you first.',
+    body: '“Dinner with my parents on Friday at 7.” Oursome turns everyday words into plans, and always checks with you first.',
   },
 ];
+
+/** A little open book for the journal slide. */
+function JournalArt() {
+  const { palette } = useTheme();
+  const page = {
+    width: 96,
+    height: 128,
+    backgroundColor: palette.surface,
+    borderWidth: 1,
+    borderColor: palette.border,
+    padding: 12,
+    gap: 8,
+  } as const;
+  const line = (w: number) => <View style={{ height: 6, width: w, borderRadius: 3, backgroundColor: palette.border }} />;
+  return (
+    <View style={{ flexDirection: 'row' }}>
+      <View style={[page, { borderTopLeftRadius: 8, borderBottomLeftRadius: 8, transform: [{ rotate: '-3deg' }] }]}>
+        <View style={{ height: 52, borderRadius: 4, backgroundColor: palette.accents.sunshine.soft }} />
+        {line(60)}
+        {line(44)}
+      </View>
+      <View style={[page, { borderTopRightRadius: 8, borderBottomRightRadius: 8, transform: [{ rotate: '3deg' }] }]}>
+        <Text variant="caption" color={palette.accents.coral.ink}>
+          ♥
+        </Text>
+        {line(64)}
+        {line(52)}
+        {line(58)}
+      </View>
+    </View>
+  );
+}
+
+function SlideArt({ art }: { art: Art }) {
+  if (art === 'orb') return <OrbRoll size={96} distance={120} />;
+  if (art === 'journal') return <JournalArt />;
+  return <Illustration name={art} width={240} />;
+}
 
 export default function Onboarding() {
   const { palette } = useTheme();
@@ -85,7 +133,7 @@ export default function Onboarding() {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <Illustration name={item.illustration} width={240} />
+              <SlideArt art={item.art} />
             </View>
             <Text variant="display" align="center" style={{ marginTop: space.lg }}>
               {item.title}

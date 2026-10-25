@@ -68,11 +68,14 @@ export function DatePicker({
   value,
   onChange,
   optional,
+  emptyLabel = 'No date',
   accent = 'coral',
 }: {
   value?: DateKey;
   onChange: (date?: DateKey) => void;
   optional?: boolean;
+  /** Label for the "no date" choice when optional. */
+  emptyLabel?: string;
   accent?: AccentKey;
 }) {
   const { palette } = useTheme();
@@ -90,7 +93,7 @@ export function DatePicker({
   return (
     <View style={{ gap: space.md }}>
       <ChipRow>
-        {optional ? <Chip label="No date" small selected={!value} accent={accent} onPress={() => onChange(undefined)} /> : null}
+        {optional ? <Chip label={emptyLabel} small selected={!value} accent={accent} onPress={() => onChange(undefined)} /> : null}
         {quick.map((q) => (
           <Chip key={q.label} label={q.label} small selected={value === q.date} accent={accent} onPress={() => onChange(q.date)} />
         ))}

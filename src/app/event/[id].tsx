@@ -40,6 +40,10 @@ export default function EventEditor() {
   const [title, setTitle] = useState(existing?.title ?? params.title ?? '');
   const [allDay, setAllDay] = useState(existing?.allDay ?? (!!params.allDay || !!params.important));
   const [date, setDate] = useState(existing ? dateKeyOf(existing.start) : params.date || todayKey());
+  // All-day events can run over several days ("Half term", "Grandma visits").
+  const [lastDay, setLastDay] = useState<string | undefined>(
+    existing?.allDay && dateKeyOf(existing.end) > dateKeyOf(existing.start) ? dateKeyOf(existing.end) : undefined,
+  );
   const [start, setStart] = useState(initialStart);
   const [duration, setDuration] = useState(Math.max(15, minutesOfDay(initialEnd) - minutesOfDay(initialStart)));
   const [calendarId, setCalendarId] = useState(existing?.calendarId ?? PERSONAL_CALENDAR_ID);
@@ -62,7 +66,7 @@ export default function EventEditor() {
     const data = {
       title: title.trim(),
       start: combine(date, allDay ? '00:00' : start),
-      end: combine(date, allDay ? '23:59' : end),
+      end: combine(allDay && lastDay && lastDay > date ? lastDay : date, allDay ? '23:59' : end),
       allDay,
       timeZone,
       calendarId,
@@ -117,6 +121,12 @@ export default function EventEditor() {
       <View style={{ backgroundColor: palette.surface, borderRadius: radius.lg, paddingHorizontal: space.md }}>
         <SettingRow icon="sunny-outline" accent="sunshine" label="All day" value={allDay} onValueChange={setAllDay} />
       </View>
+
+      {allDay ? (
+        <Field icon="calendar-number-outline" label="Last day" accent="sky">
+          <DatePicker value={lastDay && lastDay > date ? lastDay : undefined} onChange={setLastDay} optional emptyLabel="Same day" accent="sky" />
+        </Field>
+      ) : null}
 
       {!allDay ? (
         <>

@@ -4,7 +4,18 @@ import { Pressable, View } from 'react-native';
 
 import { CaptureBox } from '@/components/assistant/CaptureBox';
 import { HomeHeader } from '@/components/home/HomeHeader';
-import { ComingUp, PeopleRow, QuickActions, RecentActivity, SectionTitle, ShoppingPreview, SuggestionLine, TodayCard } from '@/components/home/HomeSections';
+import {
+  ComingUp,
+  PeopleRow,
+  QuickActions,
+  RecentActivity,
+  SectionTitle,
+  ShoppingPreview,
+  SuggestionLine,
+  TodayCard,
+  WeeklyCard,
+  GettingStarted,
+} from '@/components/home/HomeSections';
 import { Screen, Text } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { Reveal } from '@/components/ui/Reveal';
@@ -14,6 +25,9 @@ import { useDashboard } from '@/features/dashboard/useDashboard';
 import type { Suggestion } from '@/features/dashboard/suggestions';
 import { clearDemoContent } from '@/features/demo/seed';
 import { upcomingOccasions } from '@/features/home/occasions';
+import { START_ID, startSteps } from '@/features/home/start';
+import { showsWeekly, weekLines, weekSummary } from '@/features/home/weekly';
+import { useMemories } from '@/features/memories/store';
 import { plateCounts, todayTasks } from '@/features/people/logic';
 import { useSession } from '@/features/session/store';
 import { useSettings } from '@/features/settings/store';
@@ -34,6 +48,9 @@ export default function HomeScreen() {
   const { isWide } = useLayout();
   const profile = useSession((s) => s.profile);
   const dismiss = useSettings((s) => s.dismissSuggestion);
+  const weeklyOn = useSettings((s) => s.weeklySummary);
+  const dismissed = useSettings((s) => s.dismissedSuggestions);
+  const memories = useMemories((s) => s.memories);
   const tasks = useTasks((s) => s.tasks);
   const calendars = useCalendar((s) => s.calendars);
   const hasDemo = tasks.some((t) => t.isDemo);
@@ -47,6 +64,17 @@ export default function HomeScreen() {
   const memberForCalendar = (id: string) => calendars.find((c) => c.id === id)?.memberId;
   const occasions = upcomingOccasions(d.upcomingImportant, now);
   const weekAhead = toDateKey(addDays(now, 7));
+  const allEvents = useCalendar((s) => s.events);
+  const week =
+    weeklyOn && showsWeekly(now)
+      ? weekSummary(
+          tasks,
+          allEvents,
+          memories.map((m) => m.date),
+          now,
+        )
+      : null;
+  const weekly = week && !dismissed.includes(week.id) ? { id: week.id, ...weekLines(week) } : null;
   const upcomingReminders = tasks.filter((t) => !t.completedAt && t.isReminder && t.due && t.due > d.today && t.due <= weekAhead);
 
   const runSuggestion = (s: Suggestion) => {
@@ -130,6 +158,17 @@ export default function HomeScreen() {
     <SuggestionLine suggestion={d.suggestion} onAction={() => runSuggestion(d.suggestion!)} onDismiss={() => dismiss(d.suggestion!.id)} />
   ) : null;
 
+  const steps = startSteps({
+    hasHome: !!household,
+    people: people.length,
+    plans: tasks.length + allEvents.length,
+    memories: memories.length,
+  });
+  const firstSteps =
+    !dismissed.includes(START_ID) && steps.some((s) => !s.done) ? <GettingStarted steps={steps} onHide={() => dismiss(START_ID)} /> : null;
+
+  const weeklyCard = weekly ? <WeeklyCard back={weekly.back} ahead={weekly.ahead} onDismiss={() => dismiss(weekly.id)} /> : null;
+
   const peopleSection = (
     <View>
       <SectionTitle title="My people" action={people.length > 1 ? 'Our Space' : undefined} onAction={() => router.navigate('/space')} />
@@ -176,7 +215,9 @@ export default function HomeScreen() {
       <Screen tabBar wide>
         {header}
         <View style={{ flexDirection: 'row', gap: space.xxl, alignItems: 'flex-start' }}>
-          <View style={{ flex: 3, gap: space.xxl }}>{stagger([<CaptureBox key="c" />, <QuickActions key="q" />, suggestion, day])}</View>
+          <View style={{ flex: 3, gap: space.xxl }}>
+            {stagger([firstSteps, <CaptureBox key="c" />, <QuickActions key="q" />, weeklyCard, suggestion, day])}
+          </View>
           <View style={{ flex: 2, gap: space.xxl }}>{stagger([demoNote, peopleSection, shopping, coming, recent])}</View>
         </View>
       </Screen>
@@ -187,7 +228,19 @@ export default function HomeScreen() {
     <Screen tabBar>
       {header}
       <View style={{ gap: space.xxl }}>
-        {stagger([<CaptureBox key="c" />, <QuickActions key="q" />, demoNote, suggestion, day, shopping, peopleSection, coming, recent])}
+        {stagger([
+          firstSteps,
+          <CaptureBox key="c" />,
+          <QuickActions key="q" />,
+          demoNote,
+          weeklyCard,
+          suggestion,
+          day,
+          shopping,
+          peopleSection,
+          coming,
+          recent,
+        ])}
       </View>
     </Screen>
   );

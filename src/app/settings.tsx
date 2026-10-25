@@ -164,6 +164,17 @@ export default function SettingsScreen() {
         />
       </Section>
 
+      <Section title="Home">
+        <SettingRow
+          icon="calendar-clear-outline"
+          accent="sky"
+          label="Weekly summary"
+          detail="On Sundays and Mondays: what got done, and a glance at the week ahead."
+          value={settings.weeklySummary}
+          onValueChange={settings.setWeeklySummary}
+        />
+      </Section>
+
       <Section title="Notifications">
         <NotificationSettings />
       </Section>
