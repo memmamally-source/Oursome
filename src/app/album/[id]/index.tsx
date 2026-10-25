@@ -115,7 +115,8 @@ export default function AlbumReader() {
   };
 
   return (
-    <Screen wide>
+    // flexGrow lets the book sit in the middle of tall phones instead of leaving a gap below it.
+    <Screen wide contentStyle={{ flexGrow: 1 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, marginBottom: space.lg }}>
         <IconButton icon="chevron-back" label="Back" onPress={() => (router.canGoBack() ? router.back() : router.navigate('/albums'))} />
         <View style={{ flex: 1 }}>
@@ -200,15 +201,17 @@ export default function AlbumReader() {
       ) : null}
 
       {album.pages.length || !preparing ? (
-        <PageTurn
-          count={pages.length}
-          index={shown}
-          onIndexChange={setIndex}
-          spread={spread}
-          pageWidth={pageWidth}
-          pageHeight={pageHeight}
-          renderPage={render}
-        />
+        <View style={{ flex: 1, justifyContent: 'center' }}>
+          <PageTurn
+            count={pages.length}
+            index={shown}
+            onIndexChange={setIndex}
+            spread={spread}
+            pageWidth={pageWidth}
+            pageHeight={pageHeight}
+            renderPage={render}
+          />
+        </View>
       ) : null}
     </Screen>
   );

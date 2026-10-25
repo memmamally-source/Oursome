@@ -1,28 +1,55 @@
 # App Store pack
 
-Everything App Store Connect asks for, ready to paste. The app's code side is done: the bundle ID, privacy manifest, photo permission text, in-app privacy policy and support links, and full account deletion. What's left needs the owner's Apple account and money, so nothing here has been submitted.
+Everything App Store Connect asks for, ready to paste. The code side is done: bundle ID, privacy manifest, photo permission text, in-app privacy policy and support links, full account deletion, safe-area margins checked on iPhone sizes, and screenshots. Nothing has been submitted yet.
 
-## What it costs
+The iPhone app builds on GitHub's Macs and uploads itself to App Store Connect (`.github/workflows/ios.yml`), the same way as Crossword Hub and the Research Tracker, so no Mac or Expo account is needed. Your Apple Developer account and App Store Connect API key carry over, so there's nothing new to pay for.
 
-- **Apple Developer Program:** US$99 a year (about £79). It's required to publish on the App Store.
-- **Expo EAS builds:** the free plan includes a monthly allowance of cloud builds, which is plenty for this.
-- Nothing else. The website, privacy and support pages stay on free GitHub Pages.
+## Step by step (from your iPhone)
 
-## Steps (owner)
+If a page is cramped, tap **aA → Request Desktop Website**.
 
-1. **Join the Apple Developer Program** at <https://developer.apple.com/programs/enroll/> as an individual, using the Apple ID you want to own the app. Approval takes from a day to a couple of days.
-2. **Create a free Expo account** at <https://expo.dev/signup>.
-3. **Build:** on a computer with Node 20+, in this repo:
-   ```bash
-   npm install
-   npx eas-cli login
-   npx eas-cli init            # links the project to your Expo account (adds a projectId to app.json)
-   npx eas-cli build --platform ios --profile production
-   ```
-   EAS asks to sign in to your Apple account and creates the certificates for you; say yes.
-4. **Upload:** `npx eas-cli submit --platform ios --latest`. This creates the app in App Store Connect if it doesn't exist yet.
-5. **Test on your iPhone with TestFlight** before submitting: install **TestFlight** from the App Store, and the build appears there once processed. Go through every screen, including making an album, deleting an album and deleting your account.
-6. **Fill in the listing** in App Store Connect (<https://appstoreconnect.apple.com>) using the text below. Add screenshots, then **Add for Review** → **Submit**.
+### 1. Register the app's ID (once)
+
+1. Open https://developer.apple.com/account/resources/identifiers/list
+2. Tap **+** → **App IDs** → **App** → Continue.
+3. **Description:** Oursome · **Bundle ID:** Explicit, `org.oursome.app`
+4. Continue → **Register**. No capabilities are needed.
+
+### 2. Create the app in App Store Connect (once)
+
+1. https://appstoreconnect.apple.com → **Apps → + → New App**: iOS · name **Oursome** · language English (UK) · bundle ID **org.oursome.app** · SKU `oursome-ios` · Full Access. If the name is taken, use **Oursome: Family Organiser**.
+2. Fill in everything from the sections below: subtitle, description, keywords, URLs, category, age rating, price, App Privacy, review notes, and the screenshots.
+
+### 3. Let GitHub upload for you (once)
+
+Add the **same** four secrets you used for the crosswords and First-project repositories (the API key works for every app on your account):
+
+https://github.com/memmamally-source/Oursome/settings/secrets/actions → **New repository secret**
+
+| Name | Value |
+|---|---|
+| `APPSTORE_KEY_ID` | the Key ID |
+| `APPSTORE_ISSUER_ID` | the Issuer ID |
+| `APPSTORE_KEY` | the whole text of the `.p8` file, from `-----BEGIN PRIVATE KEY-----` to `-----END PRIVATE KEY-----` |
+| `APPLE_TEAM_ID` | the Team ID |
+
+Lost the `.p8` file? Make a new key: App Store Connect → **Users and Access → Integrations → App Store Connect API → Team Keys → +** (access **Admin**), download it, and use its Key ID.
+
+### 4. Build and test (each release, about 30 minutes)
+
+1. https://github.com/memmamally-source/Oursome/actions/workflows/ios.yml → **Run workflow → Run workflow**.
+2. When it's green (15–20 minutes), wait 10–15 minutes for Apple to process it.
+3. In App Store Connect → Oursome → **TestFlight**, add yourself as an internal tester, then install it from the **TestFlight** app.
+4. Try every screen on your phone: make an album, turn its pages, edit it, delete it; add a task, an event and a shopping item; then Settings → Delete account and data.
+
+### 5. Submit for review
+
+1. App Store Connect → Oursome → the **1.0** page → **Build** → choose the uploaded build.
+2. **Add for Review → Submit**. Apple usually replies within a day or two. If they reject it, send me their message.
+
+### Updating the app later
+
+The app doesn't update itself when the website changes; each update is a new build. Raise `version` in `app.json` (1.0.0 → 1.1.0) for a new App Store version, then repeat steps 4 and 5. The build number goes up by itself.
 
 ## Listing
 
@@ -109,9 +136,11 @@ Leave "Sign-in required" unticked, since there is no demo account to give.
 
 ## Screenshots
 
-Required: **6.9-inch iPhone**, 1320 × 2868 (portrait), 3 to 10 images. App Store Connect scales them for smaller iPhones. iPad isn't needed because `supportsTablet` is `false`.
+Upload the PNGs in [`screenshots-6.3in/`](screenshots-6.3in) (1206 × 2622) to the **iPhone** slot. App Store Connect's iPhone slot now accepts only 1206 × 2622 or 1179 × 2556, as the Research Tracker found. [`screenshots/`](screenshots) holds the same set at 1320 × 2868 in case the 6.9-inch slot is offered. All are RGB PNGs without transparency, as Apple requires.
 
-Suggested set: Home, an album page, the album reader mid-page-turn, the calendar, a shopping list, and the organiser turning a sentence into an event. Take them on a real iPhone from the TestFlight build (side button + volume up). An iPhone 16/17 Pro Max gives the exact size; screenshots from other recent iPhones are accepted for their own size class.
+They were taken from the app at iPhone sizes with the notch and home-bar areas emulated (top 62 pt, bottom 34 pt), using made-up sample content and illustrated photos, with a 9:41 status bar drawn in. Order: Home, album reader, calendar, tasks, shopping list, Our Space, album editor. iPad isn't needed because `supportsTablet` is `false`.
+
+To regenerate them after design changes, ask Claude: the scripts drive the built website in Chromium at those sizes.
 
 ## Before you submit (checklist)
 
@@ -120,4 +149,4 @@ Suggested set: Home, an album page, the album reader mid-page-turn, the calendar
 - [ ] Every screen tested in TestFlight on a real iPhone (this hasn't been done yet)
 - [ ] Album creation, album deletion and account deletion tested on the phone
 - [ ] Privacy and support pages open from Settings → Help
-- [ ] Screenshots uploaded
+- [ ] Screenshots uploaded (`screenshots-6.3in/`)

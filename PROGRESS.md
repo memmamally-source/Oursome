@@ -20,17 +20,20 @@
 | 5. Smart imports (images/PDF) | Text and .ics import done; images/PDF need the AI service |
 | 6. Premium subscriptions | — |
 | 7. Polish & testing | In progress (no physical-device testing yet) |
-| 8. Store release | App configured and listing pack ready (`docs/app-store`); needs the owner's Apple Developer account (US$99/yr), an EAS build and TestFlight testing on a real iPhone |
+| 8. Store release | App configured, listing pack and screenshots ready (`docs/app-store`); `ios.yml` builds on GitHub's Macs and uploads with the owner's existing App Store Connect key (same as Crossword Hub / Research Tracker). Needs the 4 secrets, a first build, and TestFlight testing on a real iPhone |
 
 ## App Store readiness (25 Oct 2026)
 
 - Support email `oursomeapp@outlook.com` and site `https://oursome.org` in `Brand` (`supportEmail`, `siteUrl`, `privacyUrl`, `supportUrl`), the support and privacy pages, and the legal drafts.
-- `app.json`: version 1.0.0; bundle ID / package `org.oursome.app` (matches the owned domain; never submitted before, so the change was free); iOS privacy manifest (no tracking, no collected data, required-reason APIs); clearer photo permission text; camera and microphone blocked on Android. `eas.json` with preview/production profiles (remote build numbers, auto-increment).
+- `app.json`: version 1.0.0; bundle ID / package `org.oursome.app` (matches the owned domain; never submitted before, so the change was free); iOS privacy manifest (no tracking, no collected data, required-reason APIs); clearer photo permission text; camera and microphone blocked on Android.
 - Settings → Help: support page, email, privacy policy (Apple requires an in-app privacy link). Sign-up links the privacy policy instead of unpublished terms.
 - "Delete account and data" now also erases albums, album photo files (IndexedDB database / documents folder), journal and household photos, memories, activity and reminder history.
 - Premium teaser hidden on native (no purchase flow yet; App Review rejects plans that can't be bought). PDF export stays web-only.
 - Privacy and support pages rewritten for albums, photos, no AI training, deletion.
-- Native iOS and Android bundles export cleanly. Not run on a device.
+- Native iOS and Android bundles export cleanly; `expo prebuild` gives `ios/Oursome.xcworkspace`, scheme `Oursome`, bundle `org.oursome.app`, iPhone only, with the privacy manifest and photo text. Not run on a device.
+- `.github/workflows/ios.yml` (mirrors the Research Tracker's): unsigned build check on PRs that touch the app; manual run prebuilds, archives with automatic signing via the App Store Connect API key, uploads; build number = run number. Free on GitHub's macOS runners because the repo is public.
+- Margins: audited every screen at 375×667 (SE), 402×874 (16 Pro) and 440×956 (Pro Max) with safe-area insets emulated through CDP `Emulation.setSafeAreaInsetsOverride`. Fixes: `Screen` covers the status bar strip so scrolled content doesn't show under the clock; `ModalScreen` pads by the top inset except on iOS (sheets); the album reader centres the book on tall phones. Tab bar, toasts and orb already clear the home bar; text fields are 16 px (no iOS zoom).
+- Store screenshots: `docs/app-store/screenshots-6.3in` (1206×2622, the size App Store Connect's iPhone slot accepts) and `screenshots` (1320×2868), RGB without alpha, 3× renders with insets and a drawn 9:41 status bar.
 
 ## Redesign, functional upgrade and photo albums (PR #6, merged)
 
@@ -135,7 +138,7 @@ Decision (23 Oct 2026): launch as a website first, like Crossword Hub. We reuse 
 1. Owner review of the `redesign-home` PR on a phone, then merge (deploys).
 2. If wanted: create the Firebase project (free Spark plan) and set the repo variables (`docs/CLOUD.md`).
 3. Decide on cloud photo storage (paid options) for shared albums.
-4. Device testing; EAS development build.
+4. Device testing via TestFlight (`ios.yml`).
 
 ## Handy commands
 
