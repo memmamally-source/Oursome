@@ -1,7 +1,7 @@
 import { router, type Href } from 'expo-router';
 import { Pressable, ScrollView, View } from 'react-native';
 
-import { useCalendarAccent } from '@/components/calendar/EventCard';
+import { useEventAccent } from '@/components/calendar/EventCard';
 import { TaskRow } from '@/components/tasks/TaskRow';
 import type { Activity } from '@/features/activity/store';
 import type { Suggestion } from '@/features/dashboard/suggestions';
@@ -50,7 +50,7 @@ export function SectionTitle({
 
 function AgendaRow({ o, nowTime, person }: { o: EventOccurrence; nowTime: string; person?: Member }) {
   const { palette } = useTheme();
-  const accent = useCalendarAccent(o.event.calendarId);
+  const accent = useEventAccent(o.event);
   const start = timeKeyOf(o.start);
   const end = timeKeyOf(o.end);
   const past = !o.event.allDay && end <= nowTime;

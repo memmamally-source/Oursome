@@ -1,6 +1,6 @@
 import type { CalendarSource, EventOccurrence, Member, Task } from '@/features/types';
 
-import { isTaskFor, plateCounts, todayTasks } from '../logic';
+import { eventAccents, eventInvolves, eventOwner, isTaskFor, plateCounts, todayTasks } from '../logic';
 
 const me: Member = { id: 'me', name: 'Sam', color: 'coral', role: 'admin', isMe: true };
 const ru: Member = { id: 'ru', name: 'Rufaida', color: 'sky', role: 'member', kind: 'person' };
@@ -69,5 +69,37 @@ describe('people logic', () => {
       '2026-10-24',
     );
     expect(list.map((t) => t.id)).toEqual(['c', 'd', 'b', 'a']);
+  });
+
+  describe('whose event it is, and its colour', () => {
+    const jo: Member = { id: 'jo', name: 'Jordan', color: 'sunshine', role: 'member', kind: 'person' };
+    const calendars: CalendarSource[] = [
+      { id: 'cal_personal', name: 'My calendar', color: 'coral', kind: 'personal', visible: true },
+      { id: 'joCal', name: 'Jordan', color: 'lavender', kind: 'member', memberId: 'jo', visible: true },
+      { id: 'kids', name: 'Kids', color: 'mint', kind: 'shared', visible: true },
+    ];
+    const ev = (p: Partial<EventOccurrence['event']>) => ({ ...occ(undefined, 'cal_personal').event, ...p });
+
+    it('counts an appointment I made as mine, even when someone else is going', () => {
+      const e = ev({ participantIds: ['jo'] });
+      expect(eventOwner(e, calendars)).toBe('me');
+      expect(eventInvolves(e, 'me', calendars)).toBe(true);
+      expect(eventInvolves(e, 'jo', calendars)).toBe(true);
+    });
+
+    it('keeps someone else’s appointment theirs', () => {
+      expect(eventOwner(ev({ calendarId: 'joCal' }), calendars)).toBe('jo');
+      expect(eventInvolves(ev({ personId: 'jo' }), 'me', calendars)).toBe(false);
+    });
+
+    it('colours entries by the people they’re for', () => {
+      expect(eventAccents(ev({ personId: 'jo' }), calendars, [me, jo])).toEqual(['sunshine']);
+      expect(eventAccents(ev({ calendarId: 'joCal' }), calendars, [me, jo])).toEqual(['sunshine']);
+      expect(eventAccents(ev({ personId: 'me', participantIds: ['jo'] }), calendars, [me, jo])).toEqual(['coral', 'sunshine']);
+      expect(eventAccents(ev({ participantIds: ['jo'] }), calendars, [me, jo])).toEqual(['coral', 'sunshine']);
+      // Nobody named: the calendar's colour; a task with nobody: mint.
+      expect(eventAccents(ev({ calendarId: 'kids' }), calendars, [me, jo])).toEqual(['mint']);
+      expect(eventAccents(ev({ calendarId: 'cal_tasks', taskId: 't1' }), calendars, [me, jo])).toEqual(['mint']);
+    });
   });
 });

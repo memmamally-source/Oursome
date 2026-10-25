@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Wordmark } from '@/components/brand/Logo';
 import type { IconName } from '@/features/types';
 import { SIDEBAR_WIDTH, useLayout } from '@/hooks/useLayout';
+import { useCalendarFocus } from '@/features/calendar/focus';
 import { haptic } from '@/lib/haptics';
 import { elevation, fonts, layout, radius, space, useTheme, type AccentKey } from '@/theme';
 
@@ -20,9 +21,11 @@ export const tabMeta: Record<string, TabMeta> = {
   space: { label: 'Our Space', icon: 'people-outline', activeIcon: 'people', accent: 'sunshine' },
 };
 
-const openComposer = () => {
+/** On the Calendar tab, things added from the + button go on the day picked there. */
+const openComposer = (onCalendar: boolean) => {
   haptic.impact();
-  router.push('/quick-add');
+  const date = onCalendar ? useCalendarFocus.getState().date : null;
+  router.push(date ? { pathname: '/quick-add', params: { date } } : '/quick-add');
 };
 
 function TabItem({ name, focused, onPress, wide }: { name: string; focused: boolean; onPress: () => void; wide?: boolean }) {
@@ -60,6 +63,7 @@ export function TabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
   const { palette } = useTheme();
   const { isWide } = useLayout();
   const routes = state.routes.filter((r) => tabMeta[r.name]);
+  const compose = () => openComposer(state.routes[state.index]?.name === 'calendar');
   const go = (key: string) => {
     haptic.tap();
     navigateToTab(key);
@@ -72,7 +76,7 @@ export function TabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
           <Wordmark size={24} />
         </View>
         <Pressable
-          onPress={openComposer}
+          onPress={compose}
           accessibilityRole="button"
           accessibilityLabel="Add or ask"
           style={({ pressed }) => [styles.sideCompose, { backgroundColor: palette.accents.coral.base, opacity: pressed ? 0.85 : 1 }]}>
@@ -99,7 +103,7 @@ export function TabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
         {routes.slice(0, mid).map(item)}
         <View style={styles.centerSlot}>
           <Pressable
-            onPress={openComposer}
+            onPress={compose}
             accessibilityRole="button"
             accessibilityLabel="Add or ask"
             accessibilityHint="Opens the organiser to add a task, event, reminder or list item"

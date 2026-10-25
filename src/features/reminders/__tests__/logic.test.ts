@@ -1,7 +1,7 @@
 import type { NotificationPrefs } from '@/features/settings/store';
 import type { CalendarEvent, Task } from '@/features/types';
 
-import { coalesce, daySummary, inQuietHours, remindersDue } from '../logic';
+import { coalesce, daySummary, inQuietHours, MAX_SCHEDULED, phoneSchedule, quietHoursEnd, remindersDue } from '../logic';
 
 const prefs: NotificationPrefs = {
   appointments: true,
@@ -129,3 +129,35 @@ describe('reminders', () => {
     expect(daySummary([], [], '2026-10-26')).toBe('Nothing planned. Enjoy the space.');
   });
 });
+
+describe('reminders handed to the phone', () => {
+  const now = new Date(2026, 9, 25, 12, 0);
+
+  it('schedules upcoming reminders at their time', () => {
+    const list = phoneSchedule({ tasks: [], events: [event({})], prefs, now });
+    expect(list).toHaveLength(1);
+    expect(list[0]).toMatchObject({ title: 'Dentist', href: '/event/e1' });
+    expect(list[0].at).toEqual(new Date(2026, 9, 26, 9, 30));
+  });
+
+  it('leaves out reminders already past', () => {
+    expect(phoneSchedule({ tasks: [], events: [event({ start: '2026-10-25T11:00', end: '2026-10-25T12:00' })], prefs, now })).toEqual([]);
+  });
+
+  it('moves quiet-hours reminders to when quiet hours end', () => {
+    const late = event({ start: '2026-10-25T23:00', end: '2026-10-25T23:30' });
+    const [r] = phoneSchedule({ tasks: [], events: [late], prefs, now });
+    expect(r.at).toEqual(new Date(2026, 9, 26, 7, 0));
+    expect(quietHoursEnd(new Date(2026, 9, 26, 6, 0), prefs.quietHours)).toEqual(new Date(2026, 9, 26, 7, 0));
+  });
+
+  it('turns several landing together into one summary, and stays within the phone’s limit', () => {
+    const many = ['a', 'b', 'c', 'd'].map((id) => event({ id, title: id, start: '2026-10-25T23:00', end: '2026-10-25T23:30' }));
+    const list = phoneSchedule({ tasks: [], events: many, prefs, now });
+    expect(list).toHaveLength(1);
+    expect(list[0].title).toBe('4 reminders');
+    const lots = Array.from({ length: 100 }, (_, i) => event({ id: `x${i}`, start: `2026-10-${String(26 + (i % 5)).padStart(2, '0')}T${String(8 + (i % 12)).padStart(2, '0')}:${String(i % 60).padStart(2, '0')}` }));
+    expect(phoneSchedule({ tasks: [], events: lots, prefs: { ...prefs, quietHours: { ...prefs.quietHours, enabled: false } }, now }).length).toBeLessThanOrEqual(MAX_SCHEDULED);
+  });
+});
+
