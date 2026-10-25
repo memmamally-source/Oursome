@@ -9,7 +9,7 @@
 Oursome launches as a website first, like Crossword Hub: one codebase that runs in the browser and installs to a phone's home screen. The App Store and Google Play apps come later from the same code.
 
 - `npm run build:web` builds the site into `dist/`: static files with offline support, a web app manifest, and privacy and support pages.
-- `.github/workflows/deploy-web.yml` publishes it to GitHub Pages whenever `main` changes. One-time setup: Settings → Pages → Source: **GitHub Actions**.
+- `.github/workflows/deploy-web.yml` publishes it to GitHub Pages at **https://oursome.org** whenever `main` changes (custom domain on Cloudflare DNS; Pages source: **GitHub Actions**).
 - To install it on an iPhone, open the site in Safari, tap Share, then **Add to Home Screen**.
 
 ## The organiser (AI)
@@ -26,6 +26,10 @@ Choose photos, name the album and tap **Create album**: Oursome designs the page
 ## Sharing with your family
 
 Accounts and family sharing use Firebase and are off until a Firebase project is configured. See [`docs/CLOUD.md`](docs/CLOUD.md) (free Spark plan). Private things never leave the device.
+
+## The App Store
+
+The iPhone app is configured for release (`org.oursome.app`, privacy manifest, account deletion, in-app privacy and support links). Listing text, privacy answers, review notes and the steps to build and submit are in [`docs/app-store`](docs/app-store/README.md). Support: oursomeapp@outlook.com.
 
 ## Preview the native app on your iPhone
 

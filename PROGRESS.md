@@ -11,20 +11,37 @@
 | Stage | Status |
 | --- | --- |
 | 1. Beautiful foundation | ✅ Done |
-| 1b. Website first (PWA on GitHub Pages) | ✅ Live at memmamally-source.github.io/Oursome |
+| 1b. Website first (PWA on GitHub Pages) | ✅ Live at https://oursome.org (domain on Cloudflare, owner's account; verified on GitHub) |
 | Overhaul (PRs #2–#5) | ✅ Merged |
-| Redesign + photo albums (branch `redesign-home`) | ✅ Built and tested; PR for review, **not merged** (merging deploys) |
+| Redesign + photo albums (PR #6), update fix + sample removal (PR #7) | ✅ Merged and live |
 | 2. Core functionality (accounts, reminders) | ✅ Reminders work while open; Firebase accounts built, off until configured |
 | 3. Household sharing | ✅ Built (Firebase, rules tested on the emulator), off until configured |
 | 4. AI assistant (server) | Built, not deployed (owner decision) |
 | 5. Smart imports (images/PDF) | Text and .ics import done; images/PDF need the AI service |
 | 6. Premium subscriptions | — |
 | 7. Polish & testing | In progress (no physical-device testing yet) |
-| 8. Store release | — |
+| 8. Store release | App configured, listing pack and screenshots ready (`docs/app-store`); `ios.yml` builds on GitHub's Macs and uploads with the owner's existing App Store Connect key (same as Crossword Hub / Research Tracker). Needs the 4 secrets, a first build, and TestFlight testing on a real iPhone |
 
-## Redesign, functional upgrade and photo albums (branch `redesign-home`, not merged)
+## Owner decision (25 Oct 2026): launch on-device; cloud and AI later, for Premium
 
-Merging to `main` deploys the website, so merge only with the owner's approval.
+- **AI assistant (Smart mode / server):** paused. The app ships with Basic mode (on-device) only; `EXPO_PUBLIC_AI_ENDPOINT` stays unset.
+- **Storage:** on the phone (or browser) only for launch. Firebase stays unconfigured, so no accounts in the cloud, no sync, and the App Privacy answer stays "Data not collected".
+- **Later:** paid plans get cloud sync/family sharing and the AI assistant. The code for both is built and tested (`features/cloud`, `server/ai`); turning them on needs subscriptions (Stage 6), updated privacy policy, App Privacy label and privacy manifest first.
+
+## App Store readiness (25 Oct 2026)
+
+- Support email `oursomeapp@outlook.com` and site `https://oursome.org` in `Brand` (`supportEmail`, `siteUrl`, `privacyUrl`, `supportUrl`), the support and privacy pages, and the legal drafts.
+- `app.json`: version 1.0.0; bundle ID / package `org.oursome.app` (matches the owned domain; never submitted before, so the change was free); iOS privacy manifest (no tracking, no collected data, required-reason APIs); clearer photo permission text; camera and microphone blocked on Android.
+- Settings → Help: support page, email, privacy policy (Apple requires an in-app privacy link). Sign-up links the privacy policy instead of unpublished terms.
+- "Delete account and data" now also erases albums, album photo files (IndexedDB database / documents folder), journal and household photos, memories, activity and reminder history.
+- Premium teaser hidden on native (no purchase flow yet; App Review rejects plans that can't be bought). PDF export stays web-only.
+- Privacy and support pages rewritten for albums, photos, no AI training, deletion.
+- Native iOS and Android bundles export cleanly; `expo prebuild` gives `ios/Oursome.xcworkspace`, scheme `Oursome`, bundle `org.oursome.app`, iPhone only, with the privacy manifest and photo text. Not run on a device.
+- `.github/workflows/ios.yml` (mirrors the Research Tracker's): unsigned build check on PRs that touch the app; manual run prebuilds, archives with automatic signing via the App Store Connect API key, uploads; build number = run number. Free on GitHub's macOS runners because the repo is public.
+- Margins: audited every screen at 375×667 (SE), 402×874 (16 Pro) and 440×956 (Pro Max) with safe-area insets emulated through CDP `Emulation.setSafeAreaInsetsOverride`. Fixes: `Screen` covers the status bar strip so scrolled content doesn't show under the clock; `ModalScreen` pads by the top inset except on iOS (sheets); the album reader centres the book on tall phones. Tab bar, toasts and orb already clear the home bar; text fields are 16 px (no iOS zoom).
+- Store screenshots: `docs/app-store/screenshots-6.3in` (1206×2622, the size App Store Connect's iPhone slot accepts) and `screenshots` (1320×2868), RGB without alpha, 3× renders with insets and a drawn 9:41 status bar.
+
+## Redesign, functional upgrade and photo albums (PR #6, merged)
 
 
 - **R1 Design system:** linen `#F4EEE5`, ivory `#FFF9F0`, terracotta `#B95F49` (solid fills `#A9533F` for AA), sage, honey, espresso; Fraunces headings (self-hosted on web), Nunito Sans text; paper grain on web (`paperProps`); warm dark palette. Each accent has `base/soft/ink/on`.
@@ -127,7 +144,7 @@ Decision (23 Oct 2026): launch as a website first, like Crossword Hub. We reuse 
 1. Owner review of the `redesign-home` PR on a phone, then merge (deploys).
 2. If wanted: create the Firebase project (free Spark plan) and set the repo variables (`docs/CLOUD.md`).
 3. Decide on cloud photo storage (paid options) for shared albums.
-4. Device testing; EAS development build.
+4. Device testing via TestFlight (`ios.yml`).
 
 ## Handy commands
 

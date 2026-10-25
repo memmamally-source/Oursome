@@ -13,7 +13,9 @@ export const Brand = {
   tagline: 'Life’s better together.',
   altTagline: 'Your life. Your people. One place.',
   principle: 'Spend less time organising life and more time living it.',
-  supportEmail: 'hello@example.com', // TODO: replace once a domain is secured
+  supportEmail: 'oursomeapp@outlook.com',
+  /** The website; the privacy policy and support pages live under it (App Store listing URLs). */
+  siteUrl: 'https://oursome.org',
   colors: {
     /** Warm linen: the main background. */
     linen: '#F4EEE5',
@@ -30,5 +32,8 @@ export const Brand = {
     espresso: '#332B27',
   },
 } as const;
+
+export const privacyUrl = `${Brand.siteUrl}/privacy/`;
+export const supportUrl = `${Brand.siteUrl}/support/`;
 
 export type BrandColor = keyof typeof Brand.colors;

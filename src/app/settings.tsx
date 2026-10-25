@@ -3,12 +3,12 @@ import { Icon } from '@/components/ui/Icon';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useState, type ReactNode } from 'react';
-import { Pressable, View } from 'react-native';
+import { Linking, Platform, Pressable, View } from 'react-native';
 
 import { LogoMark } from '@/components/brand/Logo';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { Avatar, Card, Divider, IconButton, Screen, Segmented, SettingRow, Text, TextField } from '@/components/ui';
-import { Brand } from '@/config/brand';
+import { Brand, privacyUrl, supportUrl } from '@/config/brand';
 import { cloudConfigured } from '@/features/cloud';
 import { deleteAllLocalData, exportData } from '@/features/settings/account';
 import { useSettings } from '@/features/settings/store';
@@ -102,31 +102,33 @@ export default function SettingsScreen() {
         </View>
       </Card>
 
-      {/* Premium teaser — no purchase flow until subscriptions are implemented. */}
-      <Card
-        tint="lavender"
-        onPress={() => router.push('/premium')}
-        accessibilityLabel={`${Brand.name} Premium`}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, marginBottom: space.xxl }}>
-        <View
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 14,
-            backgroundColor: palette.accents.lavender.base,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-          <Icon name="diamond" size={22} color={palette.accents.lavender.on} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text variant="subheading">{Brand.name} Premium</Text>
-          <Text variant="caption" tone="lavender">
-            Free plan · See what’s coming
-          </Text>
-        </View>
-        <Icon name="chevron-forward" size={18} color={palette.accents.lavender.ink} />
-      </Card>
+      {/* Premium teaser (web only): no purchase flow until subscriptions exist, and App Review rejects unbuyable plans. */}
+      {Platform.OS === 'web' ? (
+        <Card
+          tint="lavender"
+          onPress={() => router.push('/premium')}
+          accessibilityLabel={`${Brand.name} Premium`}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, marginBottom: space.xxl }}>
+          <View
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 14,
+              backgroundColor: palette.accents.lavender.base,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <Icon name="diamond" size={22} color={palette.accents.lavender.on} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text variant="subheading">{Brand.name} Premium</Text>
+            <Text variant="caption" tone="lavender">
+              Free plan · See what’s coming
+            </Text>
+          </View>
+          <Icon name="chevron-forward" size={18} color={palette.accents.lavender.ink} />
+        </Card>
+      ) : null}
 
       <View style={{ marginBottom: space.xxl }}>
         <Text variant="overline" tone="secondary" style={{ marginBottom: space.sm, marginLeft: space.xs }}>
@@ -197,6 +199,14 @@ export default function SettingsScreen() {
               : 'Everything stays on this device. Nothing is sent to a server.'
           }
         />
+      </Section>
+
+      <Section title="Help">
+        <SettingRow icon="help-circle-outline" accent="sunshine" label="Help & support" detail="Answers to common questions" onPress={() => Linking.openURL(supportUrl)} />
+        <Divider />
+        <SettingRow icon="mail-outline" accent="sky" label="Email us" detail={Brand.supportEmail} onPress={() => Linking.openURL(`mailto:${Brand.supportEmail}`)} />
+        <Divider />
+        <SettingRow icon="document-text-outline" accent="mint" label="Privacy policy" onPress={() => Linking.openURL(privacyUrl)} />
       </Section>
 
       <Section title="Account">
