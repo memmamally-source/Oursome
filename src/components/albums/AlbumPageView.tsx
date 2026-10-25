@@ -56,6 +56,8 @@ export const shortDate = (iso?: string) =>
 /** One photo in its frame, cropped and positioned exactly as saved. */
 export function FramedPhoto({ photo, crop, aspect, version }: { photo?: PhotoMeta; crop: Crop; aspect: number; version: Version }) {
   const url = useAlbumPhoto(photo?.id, version);
+  // Photos already loaded appear at once (e.g. mid page-turn); late arrivals fade in.
+  const [instant] = useState(() => !!photo && !!cachedPhotoUrl(photo.id, version));
   if (!photo) return <View style={{ flex: 1, backgroundColor: '#E6DDD0' }} />;
   const r = imageRect(photo.width && photo.height ? photo.width / photo.height : 1, aspect, crop);
   return (
@@ -64,7 +66,7 @@ export function FramedPhoto({ photo, crop, aspect, version }: { photo?: PhotoMet
         <Image
           source={{ uri: url }}
           contentFit="fill"
-          transition={160}
+          transition={instant ? 0 : 160}
           accessibilityIgnoresInvertColors
           style={{
             position: 'absolute',

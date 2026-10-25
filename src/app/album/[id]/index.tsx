@@ -10,6 +10,7 @@ import { unplaced } from '@/features/albums/auto';
 import { resumeAlbum, retryFailed, useImports, whenSettled } from '@/features/albums/importer';
 import { themeOf } from '@/features/albums/templates';
 import { PRINT_SPEC, printChecks, SCREEN_SPEC } from '@/features/albums/print';
+import { photoUrl } from '@/features/albums/storage';
 import { useAlbum, useAlbums } from '@/features/albums/store';
 import type { Album, PhotoMeta } from '@/features/albums/types';
 import { saveBlob } from '@/lib/files';
@@ -31,6 +32,15 @@ export default function AlbumReader() {
   const progress = useImports((s) => s.progress[id]);
   const [index, setIndex] = useState(0);
   const [exporting, setExporting] = useState(false);
+
+  // Have the next few pages' photos ready before they're turned to (and keep the previous ones).
+  useEffect(() => {
+    const a = useAlbums.getState().albums.find((x) => x.id === id);
+    if (!a) return;
+    const near = a.pages.slice(Math.max(0, index - 3), index + 5);
+    for (const page of near) for (const slot of page.slots) void photoUrl(slot.photoId, 'display').catch(() => {});
+    if (a.cover.photoId) void photoUrl(a.cover.photoId, 'display').catch(() => {});
+  }, [id, index, album?.pages]);
 
   // Carry on preparing photos, then design whatever isn't on a page yet.
   useEffect(() => {

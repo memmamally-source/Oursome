@@ -456,7 +456,7 @@ export function QuickActions() {
           <PressableScale
             key={a.label}
             onPress={a.go}
-            accessibilityLabel={`New ${a.label.toLowerCase()}`}
+            accessibilityLabel={`Add ${/^[aeiou]/i.test(a.label) ? 'an' : 'a'} ${a.label.toLowerCase()}`}
             style={{
               flex: 1,
               alignItems: 'center',
