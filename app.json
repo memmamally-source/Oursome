@@ -2,28 +2,63 @@
   "expo": {
     "name": "Oursome",
     "slug": "oursome",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "oursome",
     "userInterfaceStyle": "automatic",
     "backgroundColor": "#F4EEE5",
     "ios": {
-      "bundleIdentifier": "app.oursome.ios",
+      "bundleIdentifier": "org.oursome.app",
       "supportsTablet": false,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "privacyManifests": {
+        "NSPrivacyTracking": false,
+        "NSPrivacyTrackingDomains": [],
+        "NSPrivacyCollectedDataTypes": [],
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "C617.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "E174.1"
+            ]
+          },
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "35F9.1"
+            ]
+          }
+        ]
       }
     },
     "android": {
-      "package": "app.oursome.android",
+      "package": "org.oursome.app",
       "adaptiveIcon": {
         "backgroundColor": "#F4EEE5",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "output": "single",
@@ -33,7 +68,7 @@
       "lang": "en",
       "themeColor": "#F4EEE5",
       "backgroundColor": "#F4EEE5",
-      "description": "A warm, colourful organiser for you and the people you live with: calendar, tasks, reminders, shopping lists and a shared Our Space."
+      "description": "A warm home for your family’s plans and memories: calendar, tasks, reminders, shopping lists, a journal and photo albums."
     },
     "plugins": [
       "expo-router",
@@ -52,7 +87,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Oursome uses your photos only when you choose a screenshot or document to turn into events and tasks.",
+          "photosPermission": "Oursome opens the photos you choose for your albums, journal and household cover, and screenshots you want turned into events and tasks. They stay on your device.",
           "cameraPermission": false,
           "microphonePermission": false
         }

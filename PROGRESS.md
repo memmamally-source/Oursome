@@ -11,20 +11,28 @@
 | Stage | Status |
 | --- | --- |
 | 1. Beautiful foundation | ✅ Done |
-| 1b. Website first (PWA on GitHub Pages) | ✅ Live at memmamally-source.github.io/Oursome |
+| 1b. Website first (PWA on GitHub Pages) | ✅ Live at https://oursome.org (domain on Cloudflare, owner's account; verified on GitHub) |
 | Overhaul (PRs #2–#5) | ✅ Merged |
-| Redesign + photo albums (branch `redesign-home`) | ✅ Built and tested; PR for review, **not merged** (merging deploys) |
+| Redesign + photo albums (PR #6), update fix + sample removal (PR #7) | ✅ Merged and live |
 | 2. Core functionality (accounts, reminders) | ✅ Reminders work while open; Firebase accounts built, off until configured |
 | 3. Household sharing | ✅ Built (Firebase, rules tested on the emulator), off until configured |
 | 4. AI assistant (server) | Built, not deployed (owner decision) |
 | 5. Smart imports (images/PDF) | Text and .ics import done; images/PDF need the AI service |
 | 6. Premium subscriptions | — |
 | 7. Polish & testing | In progress (no physical-device testing yet) |
-| 8. Store release | — |
+| 8. Store release | App configured and listing pack ready (`docs/app-store`); needs the owner's Apple Developer account (US$99/yr), an EAS build and TestFlight testing on a real iPhone |
 
-## Redesign, functional upgrade and photo albums (branch `redesign-home`, not merged)
+## App Store readiness (25 Oct 2026)
 
-Merging to `main` deploys the website, so merge only with the owner's approval.
+- Support email `oursomeapp@outlook.com` and site `https://oursome.org` in `Brand` (`supportEmail`, `siteUrl`, `privacyUrl`, `supportUrl`), the support and privacy pages, and the legal drafts.
+- `app.json`: version 1.0.0; bundle ID / package `org.oursome.app` (matches the owned domain; never submitted before, so the change was free); iOS privacy manifest (no tracking, no collected data, required-reason APIs); clearer photo permission text; camera and microphone blocked on Android. `eas.json` with preview/production profiles (remote build numbers, auto-increment).
+- Settings → Help: support page, email, privacy policy (Apple requires an in-app privacy link). Sign-up links the privacy policy instead of unpublished terms.
+- "Delete account and data" now also erases albums, album photo files (IndexedDB database / documents folder), journal and household photos, memories, activity and reminder history.
+- Premium teaser hidden on native (no purchase flow yet; App Review rejects plans that can't be bought). PDF export stays web-only.
+- Privacy and support pages rewritten for albums, photos, no AI training, deletion.
+- Native iOS and Android bundles export cleanly. Not run on a device.
+
+## Redesign, functional upgrade and photo albums (PR #6, merged)
 
 
 - **R1 Design system:** linen `#F4EEE5`, ivory `#FFF9F0`, terracotta `#B95F49` (solid fills `#A9533F` for AA), sage, honey, espresso; Fraunces headings (self-hosted on web), Nunito Sans text; paper grain on web (`paperProps`); warm dark palette. Each accent has `base/soft/ink/on`.

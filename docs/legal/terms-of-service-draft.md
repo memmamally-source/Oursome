@@ -18,4 +18,4 @@ _Last updated: [date]_
 12. **Disclaimers and liability.** The service is provided “as is”. To the extent permitted by law, our liability is limited to [amount paid in the prior 12 months / $50].
 13. **Governing law.** [Jurisdiction]. Consumer rights under local law are not affected.
 14. **Apple-specific terms.** [Include the Apple Licensed Application EULA requirements.]
-15. **Contact.** [support email]
+15. **Contact.** oursomeapp@outlook.com

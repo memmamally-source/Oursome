@@ -5,7 +5,7 @@
 _Last updated: [date]_
 
 ## Who we are
-Oursome (“we”, “us”) is operated by [legal entity name, address]. Contact: [privacy email].
+Oursome (“we”, “us”) is operated by [legal entity name, address]. Contact: oursomeapp@outlook.com.
 
 ## What Oursome does
 Oursome helps you organise your calendar, tasks, reminders, shopping lists and shared household plans.
@@ -37,7 +37,7 @@ Items you mark **Shared** are visible to members of your Our Space. **Private** 
 We keep your data while your account is active. You can delete your account in Settings → Account; we delete your personal data within [30] days, except where we must keep limited records by law. Backups expire within [period].
 
 ## Your rights
-Depending on where you live (including California (CCPA/CPRA), other US states, the UK/EU (GDPR) and Canada (PIPEDA)), you may have rights to access, correct, export, delete or restrict use of your data, and to complain to a regulator. Use Settings → Export my data, or contact [privacy email].
+Depending on where you live (including California (CCPA/CPRA), other US states, the UK/EU (GDPR) and Canada (PIPEDA)), you may have rights to access, correct, export, delete or restrict use of your data, and to complain to a regulator. Use Settings → Export my data, or contact oursomeapp@outlook.com.
 
 ## Children
 Oursome is intended for adults. We do not knowingly create accounts for children under [13/16], and we do not collect children's personal information directly. Parents may add family activities (for example, “swim class”) to their own calendars.

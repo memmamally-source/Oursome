@@ -19,7 +19,7 @@ Nothing on Firebase's free **Spark** plan for a household or a small group of fa
 
 1. Go to <https://console.firebase.google.com> and **Add project** (Analytics isn't needed). Keep the free Spark plan.
 2. **Build → Authentication → Get started → Sign-in method → Email/Password → Enable.**
-   Under **Settings → Authorised domains**, add `memmamally-source.github.io` (and any custom domain).
+   Under **Settings → Authorised domains**, add `oursome.org`.
 3. **Build → Firestore Database → Create database** in production mode, in a region near you.
 4. **Publish the security rules** from this repository, either:
    - in the console: Firestore → **Rules**, paste the contents of [`firebase/firestore.rules`](../firebase/firestore.rules), **Publish**; or
