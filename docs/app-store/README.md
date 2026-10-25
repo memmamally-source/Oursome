@@ -142,6 +142,12 @@ They were taken from the app at iPhone sizes with the notch and home-bar areas e
 
 To regenerate them after design changes, ask Claude: the scripts drive the built website in Chromium at those sizes.
 
+## Review video
+
+[`review-walkthrough.mp4`](review-walkthrough.mp4) (1 min 42 s, 804 × 1748, H.264) walks through the whole app: welcome screens, **sign up**, adding a task, an event and a shopping list, **creating a photo album**, turning its pages and opening the editor, **signing out and back in**, and **Delete account and data**, which returns to the welcome screen. Attach it under **App Review Information → Attachment**, or upload it if Apple asks for a demo video.
+
+It was recorded from the same app code running at iPhone size with the notch and home-bar insets, with made-up content. If Apple asks for a recording from a device, record the TestFlight build on your iPhone instead: Control Centre → Screen Recording, then follow the same steps.
+
 ## Before you submit (checklist)
 
 - [ ] "Oursome" name checked for trademarks (the name is still provisional; see `src/config/brand.ts`)
