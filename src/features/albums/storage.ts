@@ -113,8 +113,9 @@ export async function photoUrl(id: string, v: Version): Promise<string | null> {
     const blob = await getPhotoBlob(id, v);
     url = blob ? URL.createObjectURL(blob) : null;
   } else {
-    const f = deviceFile(id, v);
-    url = f.exists ? f.uri : null;
+    // A smaller version not made yet (or lost) falls back to the original, so a page is never blank.
+    const f = [deviceFile(id, v), deviceFile(id, 'original')].find((x) => x.exists);
+    url = f ? f.uri : null;
   }
   if (url) urls.set(key, url);
   return url;
