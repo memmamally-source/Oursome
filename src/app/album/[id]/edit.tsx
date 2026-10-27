@@ -1,5 +1,4 @@
 import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { PanResponder, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
@@ -22,7 +21,7 @@ import {
   swapPhotos,
   updatePage,
 } from '@/features/albums/edit';
-import { toIso } from '@/features/albums/exif';
+import { pickPhotos } from '@/features/albums/picker';
 import { addPhotos, whenSettled } from '@/features/albums/importer';
 import { layoutById, layoutsFor } from '@/features/albums/layouts';
 import { getPhotoBlob } from '@/features/albums/storage';
@@ -723,27 +722,16 @@ function PhotosTab({ album, photos, list }: { album: Album; photos: Map<string, 
   const size = Math.max(72, Math.min(110, Math.floor((Math.min(width, 1000) - 60) / 6)));
 
   const add = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsMultipleSelection: true,
-      selectionLimit: 0,
-      exif: Platform.OS !== 'web',
-      quality: 1,
-    });
-    if (result.canceled) return;
+    let picked;
+    try {
+      picked = await pickPhotos();
+    } catch (e) {
+      toast({ message: `Your photos couldn’t be opened${e instanceof Error && e.message ? ` (${e.message})` : ''}. Please try again.`, tone: 'error' });
+      return;
+    }
+    if (!picked.length) return;
     setBusy(true);
-    await addPhotos(
-      album.id,
-      result.assets.map((a) => ({
-        file: a.file,
-        uri: a.file ? undefined : a.uri,
-        width: a.width || undefined,
-        height: a.height || undefined,
-        name: a.fileName ?? undefined,
-        takenAt: typeof a.exif?.DateTimeOriginal === 'string' ? toIso(a.exif.DateTimeOriginal) : undefined,
-      })),
-      { keepOriginals: true },
-    );
+    await addPhotos(album.id, picked, { keepOriginals: true });
     await whenSettled(album.id);
     // Redesign keeps sections that didn't change; new photos land in their place in time.
     useAlbums.getState().design(album.id);

@@ -1,15 +1,14 @@
 import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Platform, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
 
 import { ChipRow, DatePicker, Field } from '@/components/forms/Fields';
 import { Button, Chip, ModalHeader, ModalScreen, SettingRow, Text, TextField } from '@/components/ui';
 import { Icon } from '@/components/ui/Icon';
 import { toast } from '@/components/ui/Toast';
-import { toIso } from '@/features/albums/exif';
-import { addPhotos, type Picked } from '@/features/albums/importer';
+import { addPhotos } from '@/features/albums/importer';
+import { pickPhotos, type PickedPhoto } from '@/features/albums/picker';
 import { storageEstimate } from '@/features/albums/storage';
 import { useAlbums } from '@/features/albums/store';
 import { suggestTemplate, TEMPLATES } from '@/features/albums/templates';
@@ -17,7 +16,7 @@ import type { TemplateKey } from '@/features/albums/types';
 import { useSpace } from '@/features/space/store';
 import { radius, space, useTheme } from '@/theme';
 
-type Chosen = Picked & { preview: string };
+type Chosen = PickedPhoto;
 
 const mb = (bytes: number) => (bytes > 1e9 ? `${(bytes / 1e9).toFixed(1)} GB` : `${Math.round(bytes / 1e6)} MB`);
 
@@ -37,6 +36,7 @@ export default function NewAlbum() {
   const [keepOriginals, setKeepOriginals] = useState(true);
   const [space_, setSpace] = useState<{ used: number; quota: number } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [picking, setPicking] = useState(false);
   const effective: TemplateKey = template ?? suggestTemplate(title);
   const growing = effective === 'growingUp';
   const size = chosen.reduce((n, c) => n + (c.file?.size ?? 0), 0);
@@ -46,25 +46,15 @@ export default function NewAlbum() {
   }, []);
 
   const pick = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsMultipleSelection: true,
-      selectionLimit: 0,
-      orderedSelection: true,
-      exif: Platform.OS !== 'web',
-      quality: 1,
-    });
-    if (result.canceled) return;
-    const added: Chosen[] = result.assets.map((a) => ({
-      file: a.file,
-      uri: a.file ? undefined : a.uri,
-      width: a.width || undefined,
-      height: a.height || undefined,
-      name: a.fileName ?? a.file?.name ?? undefined,
-      takenAt: typeof a.exif?.DateTimeOriginal === 'string' ? toIso(a.exif.DateTimeOriginal) : undefined,
-      preview: a.uri,
-    }));
-    setChosen((c) => [...c, ...added]);
+    if (picking) return;
+    try {
+      const added = await pickPhotos(() => setPicking(true));
+      if (added.length) setChosen((c) => [...c, ...added]);
+    } catch (e) {
+      toast({ message: `Your photos couldn’t be opened${e instanceof Error && e.message ? ` (${e.message})` : ''}. Please try again.`, tone: 'error' });
+    } finally {
+      setPicking(false);
+    }
   };
 
   const create = async () => {
@@ -113,12 +103,16 @@ export default function NewAlbum() {
           gap: space.sm,
           opacity: pressed ? 0.8 : 1,
         })}>
-        <Icon name="images-outline" size={32} color={palette.accents.coral.ink} />
+        {picking ? <ActivityIndicator color={palette.accents.coral.ink} /> : <Icon name="images-outline" size={32} color={palette.accents.coral.ink} />}
         <Text variant="heading">
-          {chosen.length ? `${chosen.length} ${chosen.length === 1 ? 'photo' : 'photos'} chosen` : 'Choose photos'}
+          {picking ? 'Getting your photos…' : chosen.length ? `${chosen.length} ${chosen.length === 1 ? 'photo' : 'photos'} chosen` : 'Choose photos'}
         </Text>
         <Text variant="callout" tone="secondary" align="center">
-          {chosen.length ? 'Tap to add more.' : 'Pick as many as you like: a day, a holiday, a whole school year.'}
+          {picking
+            ? 'Choose your photos, then tap Add at the top. Lots of photos can take a few seconds.'
+            : chosen.length
+              ? 'Tap to add more.'
+              : 'Pick as many as you like: a day, a holiday, a whole school year.'}
         </Text>
       </Pressable>
       {chosen.length ? (
