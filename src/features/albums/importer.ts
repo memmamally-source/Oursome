@@ -4,7 +4,7 @@ import { create } from 'zustand';
 import { createId } from '@/lib/id';
 
 import { readExif } from './exif';
-import { askToKeepPhotos, deletePhotoFiles, getPhotoBlob, hasPhoto, putPhoto } from './storage';
+import { askToKeepPhotos, deletePhotoFiles, getPhotoBlob, hasPhoto, photoUrl, putPhoto } from './storage';
 import { useAlbums } from './store';
 import type { PhotoMeta } from './types';
 
@@ -129,9 +129,31 @@ async function prepare(id: string) {
       if (!meta.hasOriginal) await deletePhotoFiles(id, ['original']);
       useAlbums.getState().updatePhoto(id, { width, height, status: 'ready' });
     } else {
-      // Phones: the picked file is kept as is and the image view scales it down (not yet tried on a device).
-      if (!(await hasPhoto(id, 'original'))) throw new Error('missing');
-      useAlbums.getState().updatePhoto(id, { status: 'ready', hasOriginal: true });
+      // Phones: make the display and thumbnail versions the pages show (JPEG, the right way up).
+      const source = await photoUrl(id, 'original');
+      if (!source) throw new Error('missing');
+      try {
+        const { ImageManipulator, SaveFormat } = await import('expo-image-manipulator');
+        const full = await ImageManipulator.manipulate(source).renderAsync();
+        const width = full.width;
+        const height = full.height;
+        for (const [version, max, compress] of [
+          ['display', DISPLAY, 0.86],
+          ['thumb', THUMB, 0.78],
+        ] as const) {
+          const scale = Math.min(1, max / Math.max(width, height));
+          const sized = await ImageManipulator.manipulate(source)
+            .resize({ width: Math.max(1, Math.round(width * scale)) })
+            .renderAsync();
+          const saved = await sized.saveAsync({ format: SaveFormat.JPEG, compress });
+          await putPhoto(id, version, saved.uri);
+        }
+        if (!meta.hasOriginal) await deletePhotoFiles(id, ['original']);
+        useAlbums.getState().updatePhoto(id, { width, height, status: 'ready' });
+      } catch {
+        // Couldn't make the smaller copies: the pages show the original instead (see photoUrl).
+        useAlbums.getState().updatePhoto(id, { status: 'ready', hasOriginal: true });
+      }
     }
   } catch {
     useAlbums.getState().updatePhoto(id, { status: 'failed' });

@@ -22,6 +22,11 @@
 | 7. Polish & testing | In progress (no physical-device testing yet) |
 | 8. Store release | App configured, listing pack and screenshots ready (`docs/app-store`); `ios.yml` builds on GitHub's Macs and uploads with the owner's existing App Store Connect key (same as Crossword Hub / Research Tracker). Needs the 4 secrets, a first build, and TestFlight testing on a real iPhone |
 
+## TestFlight round 2 fixes (27 Oct 2026)
+
+- **Create album greyed out:** choosing photos now shows "Getting your photos…" while iOS hands them over, and picker errors are shown (`features/albums/picker.ts`, shared by new and edit).
+- **Blank album pages on iPhone:** phones only saved the original, but pages load the display/thumb versions. `importer.prepare` now makes them on the phone with `expo-image-manipulator` (JPEG, 2048/480 px); if that fails the photo stays ready and `photoUrl` falls back to the original, so pages are never blank. Journal/cover photos on phones are shrunk the same way (were full-size base64).
+
 ## TestFlight round 1 fixes (25 Oct 2026)
 
 From the owner's first TestFlight session:
