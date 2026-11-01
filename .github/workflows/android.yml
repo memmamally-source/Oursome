@@ -1,0 +1,90 @@
+# Builds the Android app on GitHub's computers (free for this public repo).
+#
+# - On a pull request that changes the app: checks it builds.
+# - Run it by hand (Actions → Android app → Run workflow) to build the signed
+#   app bundle (.aab) for Google Play. Download it from the run's Artifacts
+#   and upload it in Play Console (see docs/play-store/README.md).
+#
+# Signing uses the upload key, from three repository secrets (Settings →
+# Secrets and variables → Actions): ANDROID_UPLOAD_KEYSTORE (the keystore
+# file as base64 text), ANDROID_UPLOAD_KEYSTORE_PASSWORD and
+# ANDROID_UPLOAD_KEY_PASSWORD. Google then re-signs the app for the store
+# (Play App Signing), so a lost upload key can be reset.
+name: Android app
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'assets/**'
+      - 'app.json'
+      - 'app.config.js'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/android.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install
+        run: npm ci
+
+      - name: Make the Android project
+        # Generated from app.json each time (android/ isn't committed).
+        run: npx expo prebuild --platform android --clean --no-install
+        env:
+          # Google Play refuses an upload whose version code isn't higher than the last one.
+          ANDROID_VERSION_CODE: ${{ github.run_number }}
+
+      - name: Check it builds
+        if: github.event_name == 'pull_request'
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Build the signed app bundle
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: android
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_UPLOAD_KEYSTORE }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE" ] || [ -z "$STORE_PASSWORD" ] || [ -z "$KEY_PASSWORD" ]; then
+            echo "::error::Add the three Android upload key secrets first (see docs/play-store/README.md)."
+            exit 1
+          fi
+          # Pasted secrets often carry stray newlines or spaces.
+          printf '%s' "$KEYSTORE" | tr -d '[:space:]' | base64 --decode > "$RUNNER_TEMP/upload.keystore"
+          ./gradlew bundleRelease --no-daemon \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/upload.keystore" \
+            -Pandroid.injected.signing.store.password="$(printf '%s' "$STORE_PASSWORD" | tr -d '\r\n')" \
+            -Pandroid.injected.signing.key.alias=upload \
+            -Pandroid.injected.signing.key.password="$(printf '%s' "$KEY_PASSWORD" | tr -d '\r\n')"
+          rm -f "$RUNNER_TEMP/upload.keystore"
+          cp app/build/outputs/bundle/release/app-release.aab "$RUNNER_TEMP/Oursome-${{ github.run_number }}.aab"
+
+      - name: Keep the app bundle for download
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Oursome-android-${{ github.run_number }}
+          path: ${{ runner.temp }}/Oursome-${{ github.run_number }}.aab
+          retention-days: 30

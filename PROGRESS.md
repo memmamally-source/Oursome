@@ -20,6 +20,7 @@
 | 5. Smart imports (images/PDF) | Text and .ics import done; images/PDF need the AI service |
 | 6. Premium subscriptions | — |
 | 7. Polish & testing | In progress (no physical-device testing yet) |
+| 8b. Google Play | Android build workflow (`android.yml`, signed .aab as an artifact), notification channel, permissions trimmed, listing pack and 1080×1920 screenshots in `docs/play-store`. Needs the owner's Play account (US$25 once), the 3 upload-key secrets, and a 14-day closed test with 12+ testers |
 | 8. Store release | App configured, listing pack and screenshots ready (`docs/app-store`); `ios.yml` builds on GitHub's Macs and uploads with the owner's existing App Store Connect key (same as Crossword Hub / Research Tracker). Needs the 4 secrets, a first build, and TestFlight testing on a real iPhone |
 
 ## TestFlight round 2 fixes (27 Oct 2026)
