@@ -1,7 +1,7 @@
 /**
  * Extends app.json. EXPO_BASE_URL sets the web sub-path, e.g. "/Oursome"
  * for https://<user>.github.io/Oursome/. Leave it unset for a custom domain.
- * IOS_BUILD_NUMBER (set by the iPhone app workflow) must rise with every App Store upload.
+ * IOS_BUILD_NUMBER / ANDROID_VERSION_CODE (set by the app workflows) must rise with every store upload.
  */
 const { withEntitlementsPlist } = require('expo/config-plugins');
 
@@ -20,6 +20,10 @@ module.exports = ({ config }) => ({
   ios: {
     ...config.ios,
     ...(process.env.IOS_BUILD_NUMBER ? { buildNumber: process.env.IOS_BUILD_NUMBER } : {}),
+  },
+  android: {
+    ...config.android,
+    ...(process.env.ANDROID_VERSION_CODE ? { versionCode: Number(process.env.ANDROID_VERSION_CODE) } : {}),
   },
   experiments: {
     ...config.experiments,

@@ -31,6 +31,10 @@ Accounts and family sharing use Firebase and are off until a Firebase project is
 
 The iPhone app is configured for release (`org.oursome.app`, privacy manifest, account deletion, in-app privacy and support links). Listing text, privacy answers, review notes and the steps to build and submit are in [`docs/app-store`](docs/app-store/README.md). Support: oursomeapp@outlook.com.
 
+## Google Play
+
+The Android app builds on GitHub (`.github/workflows/android.yml`) as a signed app bundle; listing text, Data safety answers, graphics and the steps are in [`docs/play-store`](docs/play-store/README.md).
+
 ## Preview the native app on your iPhone
 
 1. Install **Expo Go** from the App Store.

@@ -1,5 +1,5 @@
 import * as Notifications from 'expo-notifications';
-import { AppState } from 'react-native';
+import { AppState, Platform } from 'react-native';
 
 import type { NotifyPermission } from './notify';
 
@@ -49,7 +49,7 @@ export function pageVisible(): boolean {
 export async function showSystemNotification(title: string, body: string, href: string): Promise<boolean> {
   if (cached !== 'granted') return false;
   try {
-    await Notifications.scheduleNotificationAsync({ content: { title, body, data: { href }, sound: true }, trigger: null });
+    await Notifications.scheduleNotificationAsync({ content: { title, body, data: { href }, sound: true }, trigger: Platform.OS === 'android' ? { channelId: 'reminders' } : null });
     return true;
   } catch {
     return false;
