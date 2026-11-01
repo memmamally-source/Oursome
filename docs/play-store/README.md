@@ -106,7 +106,7 @@ Oursome is free.
 | Section | Answer |
 | --- | --- |
 | Privacy policy | https://oursome.org/privacy/ |
-| App access | **All functionality is available without special access.** Accounts are created on the phone with any email and password. |
+| Sign in details (App access) | **Yes**, then **Add details**: username `oursomeapp@outlook.com`, password `Sunshine123`. Note: "Accounts are stored only on the device. Tap 'I already have an account' and sign in with these details; on a device with no account yet, this sets it up. Account deletion: Settings → Account → Delete account and data." Reviewers can't create accounts, so signing in on a fresh device sets the account up. |
 | Ads | **No**, the app doesn't contain ads |
 | Content rating | Category **Utility, Productivity, Communication or Other**. Answer **No** to everything (violence, sexuality, language, controlled substances, gambling, user interaction/sharing, location sharing, digital purchases). |
 | Target audience | **18 and over** (it's for adults running a household; this keeps it out of the Families programme) |

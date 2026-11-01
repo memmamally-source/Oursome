@@ -1,4 +1,4 @@
-import { localAuth, useSession } from '../store';
+import { localAuth, nameFromEmail, useSession } from '../store';
 
 beforeEach(() => useSession.setState({ profile: null, credential: null, signedIn: false }));
 
@@ -27,5 +27,20 @@ describe('device-only accounts', () => {
   it('keeps the password out of the profile', async () => {
     await localAuth.signUp({ name: 'Alex', email: 'alex@example.com', password: 'sunshine123' });
     expect(JSON.stringify(useSession.getState().profile)).not.toMatch(/sunshine|hash|salt/);
+  });
+
+  it('sets up the account when signing in on a phone that has none yet', async () => {
+    expect(await localAuth.signIn({ email: 'OursomeApp@outlook.com', password: 'Sunshine123' })).toEqual({ ok: true });
+    expect(useSession.getState().profile).toMatchObject({ email: 'oursomeapp@outlook.com', name: 'OursomeApp' });
+    await localAuth.signOut();
+    expect(await localAuth.signIn({ email: 'oursomeapp@outlook.com', password: 'nope12345' })).toMatchObject({ ok: false });
+    expect(await localAuth.signIn({ email: 'someone@else.com', password: 'Sunshine123' })).toMatchObject({ ok: false });
+    expect(await localAuth.signIn({ email: 'oursomeapp@outlook.com', password: 'Sunshine123' })).toEqual({ ok: true });
+  });
+
+  it('still needs a proper password to set one up', async () => {
+    expect(await localAuth.signIn({ email: 'a@b.co', password: 'short' })).toMatchObject({ ok: false });
+    expect(useSession.getState().profile).toBeNull();
+    expect(nameFromEmail('sam.rivera@example.com')).toBe('Sam');
   });
 });

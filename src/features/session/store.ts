@@ -68,6 +68,12 @@ export function validatePassword(password: string): string | null {
   return null;
 }
 
+/** "sam.rivera@example.com" → "Sam" (changeable later in Settings). */
+export function nameFromEmail(email: string): string {
+  const first = email.trim().split('@')[0].split(/[._+-]/)[0] ?? '';
+  return first ? first[0].toUpperCase() + first.slice(1) : 'Me';
+}
+
 export const localAuth: AuthService = {
   async signUp({ name, email, password }) {
     const emailError = validateEmail(email);
@@ -92,7 +98,14 @@ export const localAuth: AuthService = {
     if (emailError) return { ok: false, error: emailError };
     if (!password) return { ok: false, error: 'Please enter your password.' };
     const profile = useSession.getState().profile;
-    if (!profile || profile.email !== email.trim().toLowerCase()) {
+    // Accounts live on the device, so signing in on a phone with none yet sets
+    // one up with these details (as a new phone, or an app reviewer, would expect).
+    if (!profile) {
+      const pwError = validatePassword(password);
+      if (pwError) return { ok: false, error: pwError };
+      return localAuth.signUp({ name: nameFromEmail(email), email, password });
+    }
+    if (profile.email !== email.trim().toLowerCase()) {
       return { ok: false, error: 'No account with that email on this device yet. Create one to get started.' };
     }
     const { credential } = useSession.getState();
