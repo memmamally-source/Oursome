@@ -8,8 +8,8 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 const base =
   'inline-flex items-center justify-center gap-2 rounded-full font-medium transition active:scale-[0.98] disabled:opacity-45 disabled:pointer-events-none select-none';
 const variants: Record<Variant, string> = {
-  primary: 'bg-clay text-white hover:bg-clay-dark shadow-soft',
-  secondary: 'bg-white text-ink ring-1 ring-line hover:bg-cream',
+  primary: 'bg-brand text-white hover:bg-brand-dark shadow-soft',
+  secondary: 'bg-white text-ink ring-1 ring-line hover:bg-pop-soft hover:ring-pop/30',
   ghost: 'text-ink hover:bg-cream',
   danger: 'bg-white text-[#9b2c2c] ring-1 ring-[#e8c4c4] hover:bg-[#fbeeee]',
 };
@@ -45,7 +45,7 @@ export function IconButton({ icon, label, className = '', active, ...rest }: But
       type="button"
       aria-label={label}
       title={label}
-      className={`inline-flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-cream disabled:opacity-40 ${active ? 'bg-clay-soft text-clay-dark' : 'text-ink'} ${className}`}
+      className={`inline-flex h-10 w-10 items-center justify-center rounded-full transition hover:bg-cream disabled:opacity-40 ${active ? 'bg-pop-soft text-pop-dark' : 'text-ink'} ${className}`}
       {...rest}
     >
       <Icon name={icon} />
@@ -59,7 +59,7 @@ export function Chip({ selected, children, onClick, className = '' }: { selected
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`h-10 rounded-full px-4 text-sm transition ring-1 ${selected ? 'bg-ink text-ivory ring-ink' : 'bg-white text-ink ring-line hover:bg-cream'} ${className}`}
+      className={`h-10 rounded-full px-4 text-sm transition ring-1 ${selected ? 'bg-pop text-white ring-pop shadow-soft' : 'bg-white text-ink ring-line hover:bg-pop-soft'} ${className}`}
     >
       {children}
     </button>
@@ -79,7 +79,7 @@ export function Field({ label, hint, children, htmlFor }: { label: string; hint?
 }
 
 export const inputClass =
-  'w-full rounded-2xl border-0 bg-white px-4 py-3 text-ink ring-1 ring-line placeholder:text-muted/70 focus:outline-none focus:ring-2 focus:ring-clay';
+  'w-full rounded-2xl border-0 bg-white px-4 py-3 text-ink ring-1 ring-line placeholder:text-muted/70 focus:outline-none focus:ring-2 focus:ring-pop';
 
 export function Toggle({ checked, onChange, label, help }: { checked: boolean; onChange: (v: boolean) => void; label: string; help?: string }) {
   const id = useId();
@@ -95,7 +95,7 @@ export function Toggle({ checked, onChange, label, help }: { checked: boolean; o
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative mt-0.5 h-7 w-12 shrink-0 rounded-full transition ${checked ? 'bg-clay' : 'bg-sand'}`}
+        className={`relative mt-0.5 h-7 w-12 shrink-0 rounded-full transition ${checked ? 'bg-pop' : 'bg-sand'}`}
       >
         <span className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition ${checked ? 'left-[22px]' : 'left-0.5'}`} />
       </button>
@@ -106,7 +106,7 @@ export function Toggle({ checked, onChange, label, help }: { checked: boolean; o
 export function ProgressBar({ value, className = '' }: { value: number; className?: string }) {
   return (
     <div className={`h-1.5 overflow-hidden rounded-full bg-sand ${className}`} role="progressbar" aria-valuenow={Math.round(value * 100)} aria-valuemin={0} aria-valuemax={100}>
-      <div className="h-full rounded-full bg-clay transition-[width] duration-300" style={{ width: `${Math.max(0, Math.min(1, value)) * 100}%` }} />
+      <div className="h-full rounded-full bg-gradient-to-r from-brand via-[#ff7a59] to-pop transition-[width] duration-300" style={{ width: `${Math.max(0, Math.min(1, value)) * 100}%` }} />
     </div>
   );
 }
@@ -185,7 +185,7 @@ export function Confirm({ open, title, body, confirmLabel, danger, onConfirm, on
 }
 
 export function Notice({ tone = 'info', children, className = '' }: { tone?: 'info' | 'warn' | 'error'; children: ReactNode; className?: string }) {
-  const tones = { info: 'bg-mist text-mist-ink', warn: 'bg-butter text-butter-ink', error: 'bg-[#f6dcdc] text-[#7d2a2a]' };
+  const tones = { info: 'bg-mist text-mist-ink', warn: 'bg-butter/70 text-butter-ink', error: 'bg-[#f6dcdc] text-[#7d2a2a]' };
   return (
     <div className={`flex gap-3 rounded-2xl px-4 py-3 text-sm ${tones[tone]} ${className}`} role={tone === 'error' ? 'alert' : 'status'}>
       <Icon name={tone === 'info' ? 'info' : 'info'} size={18} className="mt-0.5 shrink-0" />

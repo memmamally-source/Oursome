@@ -45,7 +45,7 @@ export function ChooseOccasion() {
             {!results.length && (
               <p className="col-span-full rounded-2xl bg-cream p-5 text-sm text-muted">
                 Nothing matches “{q}”. Try{' '}
-                <Link className="text-clay underline" to={`/new/custom${suffix}`}>
+                <Link className="text-brand underline" to={`/new/custom${suffix}`}>
                   a custom album
                 </Link>{' '}
                 — it works for anything.
@@ -71,8 +71,8 @@ export function ChooseOccasion() {
 
 function OccasionCard({ o, suffix }: { o: (typeof OCCASIONS)[number]; suffix: string }) {
   return (
-    <Link to={`/new/${o.id}${suffix}`} className={`flex min-h-36 flex-col justify-between rounded-3xl p-4 transition hover:-translate-y-0.5 hover:shadow-soft ${TINTS[o.tint].bg}`}>
-      <span className="text-3xl" aria-hidden="true">
+    <Link to={`/new/${o.id}${suffix}`} className={`group flex min-h-36 flex-col justify-between rounded-3xl p-4 transition hover:-translate-y-0.5 hover:shadow-soft ${TINTS[o.tint].bg}`}>
+      <span className="grid h-12 w-12 place-items-center rounded-2xl bg-white/80 text-2xl shadow-soft transition group-hover:scale-110 group-hover:-rotate-6" aria-hidden="true">
         {o.icon}
       </span>
       <span>

@@ -89,9 +89,7 @@ export function buildScene({ page, theme, photos, measure }: SceneInput): Scene 
   const layout = getLayout(page.layoutId);
   const dark = isDarkPage(theme, layout.kind === 'chapter' ? 'chapter' : 'other');
   const c = theme.colors;
-  const palette = dark
-    ? { ink: '#F5F0E4', muted: '#D3C9B4', accent: '#C9A86B', accent2: '#9DB3A0', pattern: '#4A5A4F' }
-    : { ink: c.ink, muted: c.muted, accent: c.accent, accent2: c.accent2, pattern: c.pattern };
+  const palette = dark && theme.chapterInk ? theme.chapterInk : { ink: c.ink, muted: c.muted, accent: c.accent, accent2: c.accent2, pattern: c.pattern };
   const decorColor = (k: DecorColor | undefined): string =>
     ({ accent: palette.accent, accent2: palette.accent2, ink: palette.ink, muted: palette.muted, paper: c.page, mat: c.mat })[k ?? 'accent'];
   const textColor = (k: TextColor | undefined, role: string): string =>

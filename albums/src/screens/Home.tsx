@@ -23,12 +23,12 @@ export function Home() {
     <div className="min-h-dvh">
       <AppHeader right={<ButtonLink to="/new" size="sm" icon="plus" className="hidden sm:inline-flex">Create an album</ButtonLink>} />
       <main className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
-        <section className="paper-grain relative mt-4 overflow-hidden rounded-[2rem] bg-cream px-6 py-10 sm:mt-6 sm:px-12 sm:py-16">
-          <div className="pointer-events-none absolute -top-16 -right-10 h-56 w-56 rounded-full bg-rose/70 blur-2xl" />
-          <div className="pointer-events-none absolute -bottom-20 left-1/3 h-56 w-56 rounded-full bg-sage/70 blur-2xl" />
+        <section className="relative mt-4 overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#ffe0cc] via-[#ffd3e4] to-[#e1d6ff] px-6 py-10 sm:mt-6 sm:px-12 sm:py-16">
+          <div className="pointer-events-none absolute -top-20 -right-10 h-72 w-72 rounded-full bg-butter/80 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 left-1/4 h-72 w-72 rounded-full bg-sky/90 blur-3xl" />
           <HeroBooks />
           <div className="relative max-w-xl">
-            <p className="font-hand text-2xl text-clay">Hello there,</p>
+            <p className="font-hand text-3xl text-pop">Hello there,</p>
             <h1 className="mt-1 font-display text-4xl leading-[1.05] tracking-tight sm:text-6xl">Your memories, beautifully kept.</h1>
             <p className="mt-4 max-w-md text-[17px] leading-relaxed text-muted">{Brand.tagline}</p>
             <div className="mt-7 flex flex-wrap gap-3">
@@ -47,7 +47,7 @@ export function Home() {
             <h2 id="ideas" className="font-display text-2xl">
               Start with an occasion
             </h2>
-            <Link to="/new" className="text-sm text-clay hover:underline">
+            <Link to="/new" className="text-sm font-medium text-pop hover:underline">
               See all
             </Link>
           </div>
@@ -58,7 +58,7 @@ export function Home() {
                 to={`/new/${o.id}`}
                 className={`group relative flex h-44 w-40 shrink-0 snap-start flex-col justify-between overflow-hidden rounded-3xl p-4 transition hover:-translate-y-0.5 hover:shadow-soft ${TINTS[o.tint].bg}`}
               >
-                <span className="text-3xl" aria-hidden="true">
+                <span className="grid h-14 w-14 place-items-center rounded-2xl bg-white/80 text-3xl shadow-soft transition group-hover:scale-110 group-hover:-rotate-6" aria-hidden="true">
                   {o.icon}
                 </span>
                 <span>
@@ -70,13 +70,13 @@ export function Home() {
           </div>
         </section>
 
-        <section className="mt-12" aria-labelledby="library">
+        <section className="mt-12 rounded-[2rem] bg-white p-5 shadow-soft sm:p-7" aria-labelledby="library">
           <h2 id="library" className="font-display text-2xl">
             Your library
           </h2>
           {loaded && !projects.length && (
-            <div className="mt-4 rounded-3xl border border-dashed border-line px-6 py-10 text-center">
-              <Icon name="book" size={32} className="mx-auto text-muted" />
+            <div className="mt-4 rounded-3xl bg-gradient-to-br from-pop-soft to-rose/60 px-6 py-10 text-center">
+              <Icon name="book" size={32} className="mx-auto text-pop" />
               <p className="mt-3 font-display text-xl">No albums yet</p>
               <p className="mx-auto mt-1 max-w-sm text-sm text-muted">Pick an occasion above to plan your photos, or bring the photos you already have — we’ll design the pages.</p>
               <ButtonLink to="/new" className="mt-5" icon="plus">
@@ -103,17 +103,18 @@ function HeroBooks() {
   return (
     <div className="pointer-events-none absolute top-1/2 right-10 hidden h-80 w-80 -translate-y-1/2 lg:block" aria-hidden="true">
       <div className={`${card} top-6 left-2 w-44 -rotate-8`}>
-        <div className="aspect-square bg-gradient-to-b from-[#f2c7a5] via-[#e9a88f] to-[#7c8fb0]" />
+        <div className="aspect-square bg-gradient-to-b from-[#ffb36b] via-[#ff6f91] to-[#6a3ff0]" />
         <p className="mt-2 text-center font-hand text-lg text-ink/80">first view</p>
       </div>
       <div className={`${card} top-0 right-0 w-40 rotate-6`}>
-        <div className="aspect-[4/5] bg-gradient-to-b from-[#cfe0d2] to-[#8fab95]" />
+        <div className="aspect-[4/5] bg-gradient-to-b from-[#7fe0ff] to-[#2ec4b6]" />
       </div>
       <div className={`${card} bottom-0 left-20 w-48 rotate-2`}>
-        <div className="aspect-[4/3] bg-gradient-to-br from-[#f6e3b4] via-[#f0c9a5] to-[#d98c7b]" />
+        <div className="aspect-[4/3] bg-gradient-to-br from-[#ffe26b] via-[#ffa35c] to-[#ff5a6e]" />
         <p className="mt-2 text-center font-hand text-lg text-ink/80">golden hour</p>
       </div>
-      <div className="absolute top-2 left-24 h-5 w-16 -rotate-12 bg-[#c9826b]/45" />
+      <div className="absolute top-2 left-24 h-5 w-16 -rotate-12 bg-[#ff6f91]/60" />
+      <div className="absolute right-6 bottom-10 h-5 w-14 rotate-[20deg] bg-[#2ec4b6]/55" />
     </div>
   );
 }

@@ -91,7 +91,7 @@ function FrameView({ op, ids, variant, showEmpty, selected, onPointerDown }: {
       </clipPath>
       <g clipPath={`url(#${clipId})`}>{image}</g>
       {op.over && <Parts parts={op.over} shadeId="" />}
-      {selected && <path d={op.clip} fill="none" stroke="#C9826B" strokeWidth={0.9} strokeDasharray="2 1.2" />}
+      {selected && <path d={op.clip} fill="none" stroke="#6A3FF0" strokeWidth={0.9} strokeDasharray="2 1.2" />}
       {onPointerDown && <rect x={op.box.x} y={op.box.y} width={op.box.w} height={op.box.h} fill="transparent" />}
     </g>
   );

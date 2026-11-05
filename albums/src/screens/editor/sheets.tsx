@@ -46,7 +46,7 @@ export function LayoutSheet({ open, onClose, page, themeId, photos, onPick, mode
       </div>
       <div className="grid grid-cols-3 gap-3 pb-4 sm:grid-cols-4 md:grid-cols-5">
         {list.map((l) => (
-          <button key={l.id} type="button" onClick={() => (onPick(l.id), onClose())} className={`rounded-xl p-1.5 text-left transition hover:bg-cream ${page?.layoutId === l.id && mode === 'change' ? 'ring-2 ring-clay' : ''}`}>
+          <button key={l.id} type="button" onClick={() => (onPick(l.id), onClose())} className={`rounded-xl p-1.5 text-left transition hover:bg-cream ${page?.layoutId === l.id && mode === 'change' ? 'ring-2 ring-pop' : ''}`}>
             <div className="overflow-hidden rounded-sm shadow-soft">
               <PageView page={demo(l)} theme={theme} photos={photos} variant="thumb" showEmpty />
             </div>
@@ -173,7 +173,7 @@ export function CropSheet({ open, onClose, page, slot, themeId, photo, onSave }:
       </div>
       <div className="mt-4 flex items-center gap-3">
         <span className="text-sm text-muted">Zoom</span>
-        <input type="range" min={1} max={3} step={0.01} value={focal.zoom} onChange={(e) => setFocal({ ...focal, zoom: Number(e.target.value) })} className="flex-1 accent-[#a65e44]" aria-label="Zoom" />
+        <input type="range" min={1} max={3} step={0.01} value={focal.zoom} onChange={(e) => setFocal({ ...focal, zoom: Number(e.target.value) })} className="flex-1 accent-[#6a3ff0]" aria-label="Zoom" />
       </div>
       <div className="mt-3 flex justify-center gap-1 pb-2" aria-label="Nudge">
         <Button size="sm" variant="secondary" onClick={() => nudge(-0.05, 0)} aria-label="Show more of the left">
@@ -202,7 +202,7 @@ export function ThemeSheet({ open, onClose, current, onPick }: { open: boolean; 
             key={t.id}
             type="button"
             onClick={() => (onPick(t.id), onClose())}
-            className={`flex items-center gap-4 rounded-2xl p-3 text-left ring-1 transition ${current === t.id ? 'bg-white ring-2 ring-clay' : 'ring-line hover:bg-white'}`}
+            className={`flex items-center gap-4 rounded-2xl p-3 text-left ring-1 transition ${current === t.id ? 'bg-white ring-2 ring-pop' : 'ring-line hover:bg-white'}`}
           >
             <span className="flex h-14 w-11 shrink-0 flex-col justify-end overflow-hidden rounded-sm shadow-soft" style={{ background: t.colors.page }}>
               <span className="h-2" style={{ background: t.colors.accent }} />

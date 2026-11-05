@@ -20,6 +20,7 @@ export const CATEGORY_LABELS: Record<ShotCategory, string> = {
   moments: 'Memories & moments',
 };
 const ORDER: ShotCategory[] = ['places', 'people', 'moments', 'food', 'details'];
+const CATEGORY_DOT: Record<ShotCategory, string> = { places: 'bg-[#2ec4b6]', people: 'bg-[#ff5a6e]', moments: 'bg-pop', food: 'bg-[#ffa21f]', details: 'bg-[#3d8bff]' };
 
 export function PlanScreen() {
   const project = useProject((s) => s.project)!;
@@ -42,7 +43,7 @@ export function PlanScreen() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 pb-28 sm:px-6">
-      <section className="mt-5 rounded-3xl bg-cream p-5 sm:p-6">
+      <section className="mt-5 rounded-3xl bg-gradient-to-br from-[#ffe0cc] via-[#ffd3e4] to-[#e1d6ff] p-5 sm:p-6">
         <p className="text-sm text-muted">
           {occasion.icon} {occasion.name}
           {project.answers.location ? ` · ${project.answers.location}` : ''}
@@ -59,7 +60,7 @@ export function PlanScreen() {
           </span>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Link to={`/album/${project.id}/details`} className="text-sm text-clay hover:underline">
+          <Link to={`/album/${project.id}/details`} className="text-sm text-brand hover:underline">
             Change details
           </Link>
         </div>
@@ -74,7 +75,10 @@ export function PlanScreen() {
         if (!items.length) return null;
         return (
           <section key={cat} className="mt-8">
-            <h2 className="font-display text-xl">{CATEGORY_LABELS[cat]}</h2>
+            <h2 className="flex items-center gap-2 font-display text-xl">
+              <span className={`h-3 w-3 rounded-full ${CATEGORY_DOT[cat]}`} aria-hidden="true" />
+              {CATEGORY_LABELS[cat]}
+            </h2>
             <ul className="mt-3 space-y-2">
               {items.map((item) => (
                 <PlanRow key={item.id} item={item} photoIds={attached[item.id] ?? []} onToggle={() => setItem(item.id, { done: !item.done })} onEdit={() => setEditing(item)} onSkip={() => setItem(item.id, { skipped: true })} />
@@ -128,7 +132,7 @@ export function PlanScreen() {
 function PlanRow({ item, photoIds, onToggle, onEdit, onSkip }: { item: PlanItem; photoIds: string[]; onToggle: () => void; onEdit: () => void; onSkip: () => void }) {
   const complete = itemComplete(item, photoIds.length);
   return (
-    <li className={`rounded-2xl bg-white p-3 ring-1 transition sm:p-4 ${complete ? 'ring-sage-ink/30' : 'ring-line'}`}>
+    <li className={`rounded-2xl bg-white p-3 ring-1 transition sm:p-4 ${complete ? 'bg-sage/40 ring-sage-ink/30' : 'ring-line'}`}>
       <div className="flex items-start gap-3">
         <button
           type="button"
@@ -136,7 +140,7 @@ function PlanRow({ item, photoIds, onToggle, onEdit, onSkip }: { item: PlanItem;
           role="checkbox"
           aria-checked={complete}
           aria-label={`Mark “${item.title}” as ${complete ? 'not done' : 'done'}`}
-          className={`mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full ring-1 transition ${complete ? 'bg-sage-ink text-white ring-sage-ink' : 'bg-white ring-line hover:bg-cream'}`}
+          className={`mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full ring-1 transition ${complete ? 'bg-[#16a36a] text-white ring-[#16a36a]' : 'bg-white ring-line hover:bg-pop-soft'}`}
         >
           {complete && <Icon name="check" size={16} />}
         </button>

@@ -136,7 +136,7 @@ export function PhotosScreen() {
                 <Thumb photo={p} className="h-full w-full" />
               </button>
               {p.favourite && (
-                <span className="pointer-events-none absolute top-1.5 right-1.5 grid h-7 w-7 place-items-center rounded-full bg-white/90 text-clay">
+                <span className="pointer-events-none absolute top-1.5 right-1.5 grid h-7 w-7 place-items-center rounded-full bg-white/90 text-brand">
                   <Icon name="heart" size={15} filled />
                 </span>
               )}

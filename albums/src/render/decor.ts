@@ -166,7 +166,7 @@ export function decorPaths(kind: DecorKind, r: Rect): PathPart[] {
         if (i % 2) blue += seg;
         else red += seg;
       }
-      return [{ d: red, fill: '#B5553C', opacity: 0.85 }, { d: blue, fill: '#3D6B7A', opacity: 0.85 }];
+      return [{ d: red, fill: '#D7263D', opacity: 0.9 }, { d: blue, fill: '#1F4E8C', opacity: 0.9 }];
     }
     case 'confetti':
     case 'dots-row': {
@@ -273,7 +273,7 @@ export function backgroundPaths(kind: BackgroundKind, W: number, H: number): Pat
     case 'lines': {
       let d = '';
       for (let yy = 12; yy < H; yy += 6) d += `M0 ${yy}H${W}`;
-      parts = [{ d, stroke: 'pattern', strokeWidth: 0.15 }, { d: `M12 0V${H}`, stroke: '#D7A79A', strokeWidth: 0.2 }];
+      parts = [{ d, stroke: 'pattern', strokeWidth: 0.15 }, { d: `M12 0V${H}`, stroke: '#FF7A7A', strokeWidth: 0.25 }];
       break;
     }
     case 'kraft': {
@@ -305,7 +305,7 @@ export function backgroundPaths(kind: BackgroundKind, W: number, H: number): Pat
         if (i % 2) d1 += circle(px, py, r0);
         else d2 += rect(px, py, r0 * 1.8, r0 * 0.7);
       }
-      parts = [{ d: d1, fill: 'accent', opacity: 0.28 }, { d: d2, fill: 'accent2', opacity: 0.28 }];
+      parts = [{ d: d1, fill: 'accent', opacity: 0.5 }, { d: d2, fill: 'accent2', opacity: 0.45 }];
       break;
     }
     case 'deckle':

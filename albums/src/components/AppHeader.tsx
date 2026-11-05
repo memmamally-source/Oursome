@@ -8,7 +8,7 @@ import { IconButton } from './ui';
 export function Logo() {
   return (
     <Link to="/" className="flex items-center gap-2" aria-label={`${Brand.name} home`}>
-      <span className="grid h-8 w-8 place-items-center rounded-xl bg-clay text-white shadow-soft">
+      <span className="grid h-8 w-8 place-items-center rounded-xl bg-gradient-to-br from-brand via-[#ff6f61] to-pop text-white shadow-soft">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M4 5c3-1 6-1 8 1 2-2 5-2 8-1v14c-3-1-6-1-8 1-2-2-5-2-8-1zM12 6v14" />
         </svg>

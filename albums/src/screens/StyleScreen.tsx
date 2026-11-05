@@ -18,7 +18,14 @@ export function useThemePreview(project: Project, photos: Photo[], themeId: Them
     const sample = photos.slice(0, 9);
     const album: Album = generateAlbum({ project: { ...project, themeId, answers: { ...project.answers, length: 'standard' } }, photos: sample, seed: 11 });
     const interior = album.pages.filter((p) => getLayout(p.layoutId).kind === 'photos');
-    return { cover: album.pages[0], pages: interior.slice(0, 2) };
+    // Always show a chapter opener too: it's where each style's boldest colours live.
+    const chapter = album.pages.find((p) => getLayout(p.layoutId).kind === 'chapter') ?? {
+      id: `preview-chapter-${themeId}`,
+      layoutId: 'chapter-centered',
+      photos: [],
+      text: { heading: project.chapters[1]?.title ?? project.chapters[0]?.title ?? 'Chapter one' },
+    };
+    return { cover: album.pages[0], pages: [chapter, interior[0]] };
   }, [project, photos, themeId]);
 }
 
@@ -74,7 +81,7 @@ function ThemeCard({ theme, project, photos, map, selected, recommended, onSelec
       type="button"
       onClick={onSelect}
       aria-pressed={selected}
-      className={`group rounded-3xl p-4 text-left ring-2 transition ${selected ? 'bg-white ring-clay shadow-soft' : 'bg-cream/60 ring-transparent hover:bg-white hover:ring-line'}`}
+      className={`group rounded-3xl p-4 text-left ring-2 transition ${selected ? 'bg-white ring-pop shadow-soft' : 'bg-white/70 ring-transparent hover:bg-white hover:ring-line'}`}
     >
       <div className="grid grid-cols-3 gap-2">
         {[preview.cover, ...preview.pages].map((pg, i) =>
@@ -95,7 +102,7 @@ function ThemeCard({ theme, project, photos, map, selected, recommended, onSelec
           </p>
           <p className="mt-1 text-sm text-muted">{theme.description}</p>
         </div>
-        <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ring-1 ${selected ? 'bg-clay text-white ring-clay' : 'ring-line'}`}>{selected && <Icon name="check" size={16} />}</span>
+        <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ring-1 ${selected ? 'bg-pop text-white ring-pop' : 'ring-line'}`}>{selected && <Icon name="check" size={16} />}</span>
       </div>
     </button>
   );

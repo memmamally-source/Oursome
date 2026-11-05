@@ -31,6 +31,8 @@ export interface ThemeDef {
     mat: string;
     pattern: string;
   };
+  /** Text and ornament colours on chapter pages, when those pages are dark. */
+  chapterInk?: { ink: string; muted: string; accent: string; accent2: string; pattern: string };
   fonts: Record<'title' | 'heading' | 'body' | 'caption' | 'label', FontSpec>;
   background: BackgroundKind;
   chapterBackground: BackgroundKind;
@@ -71,7 +73,8 @@ export const THEMES: ThemeDef[] = [
     id: 'minimal',
     name: 'Minimal Editorial',
     description: 'Magazine pages: generous white space, refined serif titles and large, uncluttered photographs.',
-    colors: { page: '#FBFAF7', chapterPage: '#F3F0EA', ink: '#1F1D1A', muted: '#6B655C', accent: '#9A8F80', accent2: '#C9BFB0', mat: '#FFFFFF', pattern: '#E9E4DB' },
+    colors: { page: '#FFFFFF', chapterPage: '#141414', ink: '#141414', muted: '#5E5E5E', accent: '#FF4F2E', accent2: '#141414', mat: '#FFFFFF', pattern: '#ECECEC' },
+    chapterInk: { ink: '#FFFFFF', muted: '#BDBDBD', accent: '#FF6A4D', accent2: '#FFFFFF', pattern: '#2A2A2A' },
     fonts: {
       title: { family: SERIF, weight: 500, lineHeight: 1.05, tracking: -0.01 },
       heading: { family: SERIF, weight: 500, style: 'italic', lineHeight: 1.1 },
@@ -93,7 +96,7 @@ export const THEMES: ThemeDef[] = [
     id: 'scrapbook',
     name: 'Warm Scrapbook',
     description: 'Kraft paper, taped prints at playful angles, handwritten captions and little doodles.',
-    colors: { page: '#EADBC4', chapterPage: '#E3D0B3', ink: '#3B2A1E', muted: '#6E5643', accent: '#C9826B', accent2: '#8FA382', mat: '#FFFDF8', pattern: '#D9C6A8' },
+    colors: { page: '#E2C8A4', chapterPage: '#F6D9C2', ink: '#3A2416', muted: '#6A4A33', accent: '#E8604C', accent2: '#3FA37C', mat: '#FFFDF8', pattern: '#C9A97F' },
     fonts: {
       title: { family: HAND, weight: 600, lineHeight: 1, scale: 1.35 },
       heading: { family: HAND, weight: 600, lineHeight: 1, scale: 1.3 },
@@ -121,7 +124,7 @@ export const THEMES: ThemeDef[] = [
     id: 'polaroid',
     name: 'Playful Polaroid',
     description: 'Instant-photo frames, photo-booth strips and cheerful pastel pages with confetti.',
-    colors: { page: '#F6EFE6', chapterPage: '#E7F0EA', ink: '#2E2A33', muted: '#5F5867', accent: '#E58F84', accent2: '#7FB7A4', mat: '#FFFFFF', pattern: '#F0C9A8' },
+    colors: { page: '#FFF1E6', chapterPage: '#CDEFFF', ink: '#2B2340', muted: '#5A5070', accent: '#FF5C7A', accent2: '#16B3A3', mat: '#FFFFFF', pattern: '#FFC24B' },
     fonts: {
       title: { family: HAND, weight: 600, lineHeight: 1, scale: 1.4 },
       heading: { family: HAND, weight: 600, lineHeight: 1, scale: 1.35 },
@@ -143,7 +146,8 @@ export const THEMES: ThemeDef[] = [
     id: 'romantic',
     name: 'Romantic',
     description: 'Blush tones, soft rounded frames and arches, delicate botanical sprigs and italic serif type.',
-    colors: { page: '#FAF1EE', chapterPage: '#F3E2DD', ink: '#4A2F33', muted: '#7D5F62', accent: '#C2848A', accent2: '#A9B59A', mat: '#FFFBFA', pattern: '#EBD3CE' },
+    colors: { page: '#FDE8EC', chapterPage: '#9E2A4B', ink: '#4A1E2C', muted: '#7A4656', accent: '#D6456B', accent2: '#6E9E6A', mat: '#FFF8F9', pattern: '#F5C2CE' },
+    chapterInk: { ink: '#FFF0F3', muted: '#F7C9D4', accent: '#FFB3C4', accent2: '#CDE6C6', pattern: '#B4405F' },
     fonts: {
       title: { family: PLAYFAIR, weight: 400, style: 'italic', lineHeight: 1.08 },
       heading: { family: PLAYFAIR, weight: 400, style: 'italic', lineHeight: 1.1 },
@@ -165,7 +169,8 @@ export const THEMES: ThemeDef[] = [
     id: 'travel',
     name: 'Travel Journal',
     description: 'Field-notebook grid paper, postage-stamp frames, postmarks, typewriter dates and airmail stripes.',
-    colors: { page: '#F4EEDF', chapterPage: '#EFE6D0', ink: '#24323A', muted: '#55636A', accent: '#B5553C', accent2: '#3D6B7A', mat: '#FFFDF6', pattern: '#DCD3BC' },
+    colors: { page: '#F7ECD2', chapterPage: '#1F3A64', ink: '#1B2A41', muted: '#4C5A70', accent: '#D7263D', accent2: '#1F4E8C', mat: '#FFFDF6', pattern: '#E2D2AC' },
+    chapterInk: { ink: '#FFF6E3', muted: '#C9D6EA', accent: '#FF6B6B', accent2: '#F7D774', pattern: '#2D4C7C' },
     fonts: {
       title: { family: FRAUNCES, weight: 600, lineHeight: 1.05 },
       heading: { family: FRAUNCES, weight: 600, lineHeight: 1.08 },
@@ -193,7 +198,8 @@ export const THEMES: ThemeDef[] = [
     id: 'heritage',
     name: 'Classic Heritage',
     description: 'A traditional album: ivory card, photo corners, fine double borders and timeless serif titles.',
-    colors: { page: '#F5F0E4', chapterPage: '#2F3B33', ink: '#2A2621', muted: '#6A6155', accent: '#8C6B3F', accent2: '#4C5E50', mat: '#FBF8EF', pattern: '#E6DDC9' },
+    colors: { page: '#F4EEDC', chapterPage: '#1F4A3A', ink: '#2A2018', muted: '#62554A', accent: '#8E1F3A', accent2: '#1F4A3A', mat: '#FBF8EF', pattern: '#E2D6BA' },
+    chapterInk: { ink: '#F4EEDC', muted: '#CFE0D4', accent: '#E3B866', accent2: '#E3B866', pattern: '#2A5E4A' },
     fonts: {
       title: { family: FRAUNCES, weight: 500, lineHeight: 1.08, tracking: 0.01 },
       heading: { family: SERIF, weight: 600, upper: true, tracking: 0.14, lineHeight: 1.15, scale: 0.8 },
@@ -217,9 +223,9 @@ export const THEME_BY_ID: Record<ThemeId, ThemeDef> = Object.fromEntries(THEMES.
 
 export const getTheme = (id: ThemeId): ThemeDef => THEME_BY_ID[id] ?? THEME_BY_ID.minimal;
 
-/** Heritage chapter pages are dark; everything printed on them flips to light ink. */
+/** Themes with dark chapter pages flip everything printed on them to light ink. */
 export function isDarkPage(theme: ThemeDef, kind: 'chapter' | 'other'): boolean {
-  return kind === 'chapter' && theme.id === 'heritage';
+  return kind === 'chapter' && !!theme.chapterInk;
 }
 
 /** Ranks themes for an occasion's recommendation list and the user's mood. */

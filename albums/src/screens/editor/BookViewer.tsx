@@ -102,7 +102,7 @@ export function BookViewer({ pages, theme, photos, current, onSelect, onSlot, se
           {visible.map((i, pos) => (
             <div
               key={`${i}-${pages[i].id}`}
-              className={`relative ${wide ? 'w-1/2' : 'w-full'} ${editing && current === i && wide ? 'z-10 outline-2 outline-offset-2 outline-clay' : ''}`}
+              className={`relative ${wide ? 'w-1/2' : 'w-full'} ${editing && current === i && wide ? 'z-10 outline-2 outline-offset-2 outline-pop' : ''}`}
               style={anim(pos)}
               onClick={() => current !== i && onSelect(i)}
             >

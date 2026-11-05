@@ -121,7 +121,7 @@ export function EditorScreen() {
                 role="listitem"
                 onClick={() => select(i)}
                 aria-current={i === idx}
-                className={`w-16 shrink-0 snap-start rounded p-0.5 transition sm:w-20 ${i === idx ? 'ring-2 ring-clay' : 'opacity-80 hover:opacity-100'}`}
+                className={`w-16 shrink-0 snap-start rounded p-0.5 transition sm:w-20 ${i === idx ? 'ring-2 ring-pop' : 'opacity-80 hover:opacity-100'}`}
               >
                 <PageView page={pg} theme={theme} photos={map} variant="thumb" />
                 <span className="mt-0.5 block text-center text-[11px] text-muted">{i === 0 ? 'Cover' : i + 1}</span>
@@ -159,7 +159,7 @@ export function EditorScreen() {
                     key={i}
                     type="button"
                     onClick={() => onSlot(idx, i)}
-                    className={`relative h-14 w-14 overflow-hidden rounded-lg bg-sand ring-2 transition ${slot === i ? 'ring-clay' : swapFrom === i ? 'ring-sage-ink' : 'ring-transparent'}`}
+                    className={`relative h-14 w-14 overflow-hidden rounded-lg bg-sand ring-2 transition ${slot === i ? 'ring-pop' : swapFrom === i ? 'ring-sage-ink' : 'ring-transparent'}`}
                     aria-label={`Photo ${i + 1}`}
                   >
                     {s.photoId ? <Thumb photo={{ id: s.photoId }} className="h-full w-full" /> : <Icon name="plus" className="m-auto text-muted" />}

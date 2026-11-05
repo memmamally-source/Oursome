@@ -20,7 +20,7 @@ export function StepNav() {
           key={s.to}
           to={`/album/${project.id}/${s.to}`}
           className={({ isActive }) =>
-            `flex h-9 shrink-0 items-center gap-2 rounded-full px-3.5 text-sm transition ${isActive ? 'bg-ink text-ivory' : 'text-muted hover:bg-cream'}`
+            `flex h-9 shrink-0 items-center gap-2 rounded-full px-3.5 text-sm transition ${isActive ? 'bg-pop text-white shadow-soft' : 'text-muted hover:bg-pop-soft'}`
           }
         >
           <span className="text-xs opacity-70">{i + 1}</span>

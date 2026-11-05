@@ -93,7 +93,7 @@ export function Personalise({ edit }: { edit?: boolean }) {
       <main className="mx-auto max-w-2xl px-4 pb-32 sm:px-6">
         {!edit && (
           <div className={`mt-5 flex items-center gap-4 rounded-3xl p-5 ${TINTS[occasion.tint].bg}`}>
-            <span className="text-4xl" aria-hidden="true">
+            <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-white/80 text-4xl shadow-soft" aria-hidden="true">
               {occasion.icon}
             </span>
             <div>
@@ -215,10 +215,10 @@ export function Personalise({ edit }: { edit?: boolean }) {
                     type="button"
                     onClick={() => set({ mode: id })}
                     aria-pressed={a.mode === id}
-                    className={`rounded-2xl p-4 text-left ring-1 transition ${a.mode === id ? 'bg-ink text-ivory ring-ink' : 'bg-white ring-line hover:bg-cream'}`}
+                    className={`rounded-2xl p-4 text-left ring-1 transition ${a.mode === id ? 'bg-pop text-white ring-pop' : 'bg-white ring-line hover:bg-pop-soft'}`}
                   >
                     <span className="block font-medium">{label}</span>
-                    <span className={`mt-0.5 block text-sm ${a.mode === id ? 'text-ivory/75' : 'text-muted'}`}>{help}</span>
+                    <span className={`mt-0.5 block text-sm ${a.mode === id ? 'text-white/80' : 'text-muted'}`}>{help}</span>
                   </button>
                 ))}
               </div>
