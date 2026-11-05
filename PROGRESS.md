@@ -21,20 +21,11 @@
 | 6. Premium subscriptions | — |
 | 7. Polish & testing | In progress (no physical-device testing yet) |
 | 8b. Google Play | Android build workflow (`android.yml`, signed .aab as an artifact), notification channel, permissions trimmed, listing pack and 1080×1920 screenshots in `docs/play-store`. Needs the owner's Play account (US$25 once), the 3 upload-key secrets, and a 14-day closed test with 12+ testers |
-| Albums web app (`albums/`) | ✅ MVP built on `claude/albums-memory-scrapbook-app-gy9o1f`: standalone Vite/React/Tailwind app, full journey works in Chromium; not deployed, not tested on a phone |
 | 8. Store release | App configured, listing pack and screenshots ready (`docs/app-store`); `ios.yml` builds on GitHub's Macs and uploads with the owner's existing App Store Connect key (same as Crossword Hub / Research Tracker). Needs the 4 secrets, a first build, and TestFlight testing on a real iPhone |
 
-## Albums web app — standalone MVP (5 Nov 2026)
+## Related project: In Pictures (5 Nov 2026)
 
-A separate, local-first web app in `albums/` (Vite 8, React 19, TS 6, Tailwind 4, IndexedDB via `idb`, jsPDF). It doesn't share tooling with the Expo app: the root `tsconfig`, ESLint and Jest ignore `albums/`, and `ci.yml` has its own `albums-web` job (`npm run check` + `npm run build`). Docs: `albums/README.md` (run, example workflows, GitHub Pages options) and `albums/docs/ARCHITECTURE.md` (engines, extension points, Firebase integration points, limitations).
-
-- **Journey:** Home → occasion (20, searchable) → adaptive questions → photo checklist (attach, tick, skip, edit, custom) → photos (multi-upload, camera, drag-drop, captions, favourites, chapters, reorder) → 6 styles previewed with the user's photos → generated album → editor (page-turn spreads, layouts, swap/replace, crop/zoom, text, add/delete/move pages, restyle, redesign) → autosave → PDF (150 / 300 dpi, resolution warnings).
-- **Template engine:** 53 library shots + occasion-only shots, conditions (group, children, days, answers), target rules, per-day shots, tokens filled only from answers. **Layout engine:** 51 layouts in page units (100 × 125 = 8 × 10 in); DP pagination over crop loss, favourites, captions, density and variety; deterministic per seed. One scene builder feeds both the SVG preview and the PDF canvas.
-- **Tests:** 58 unit tests (planner, generator, edits, geometry, text fitting, scene, export checks, IndexedDB repository via fake-indexeddb). A Playwright run (scratchpad, not in the repo) against a production build served under `/Oursome/albums/` passed 13 checks with no console errors: honeymoon plan personalisation, attach/custom prompts, 25-photo upload (a .txt rejected), captions/favourite, style choice, generation, crop/layout/shuffle, theme switch, standard and 300 dpi PDF (`pdfinfo`: 8 × 10 in, 2400 × 3000 px pages), reload persistence, duplicate, and an emulated-iPhone birthday flow without horizontal scroll.
-- **Colour (owner feedback: “too bland”, wants a lifestyle-app feel):** brighter palette. App: warm white base, coral-red primary `#D9352B` (white text AA), violet `#6A3FF0` for selection/highlights, saturated pastels with matching dark inks, gradient hero. Styles each have their own colours: Minimal white + vermilion with black chapter pages; Scrapbook kraft with coral/green; Polaroid candy pink/teal/sky; Romantic deep blush with wine chapters; Travel parchment, postal red and navy chapters; Heritage ivory, burgundy and forest-green chapters with gold. A test keeps every style’s text at WCAG AA.
-- **Separate project (5 Nov 2026):** renamed **In Pictures**; `albums/` now carries its own `CLAUDE.md`, `PROGRESS.md` and `.github/workflows` (CI + Pages deploy), ready to become its own repository. Until it moves, those workflows don't run here.
-- **Decision for the owner:** where to host it. Pages here already serves oursome.org; the README shows how to publish it at `/albums/` from `deploy-web.yml`, or as its own repo. Nothing is deployed.
-- **Not done:** physical-device testing; print-shop output (no bleed/CMYK); cloud backup, sharing and AI (architecture only).
+A separate memory-planner and album-maker web app was built on branch `claude/albums-memory-scrapbook-app-gy9o1f`, then moved to its own repository, `memmamally-source/in-pictures` (owner decision: separate project, renamed "In Pictures"). Nothing from it remains in Oursome; its status lives in that repo's `PROGRESS.md`.
 
 ## TestFlight round 2 fixes (27 Oct 2026)
 

@@ -75,11 +75,7 @@
     "testPathIgnorePatterns": [
       "/node_modules/",
       "<rootDir>/server/",
-      "<rootDir>/firebase/",
-      "<rootDir>/albums/"
-    ],
-    "modulePathIgnorePatterns": [
-      "<rootDir>/albums/"
+      "<rootDir>/firebase/"
     ]
   }
 }
