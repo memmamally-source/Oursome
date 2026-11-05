@@ -1,0 +1,55 @@
+rules_version = '2';
+// Steps Ahead — Firestore security rules (DRAFT: not deployed; no Firebase project exists yet).
+// Model: users/{uid}/** is private to that user; published content is world-readable;
+// writes to content, leaderboards and entitlements happen only through server code (Admin SDK),
+// which bypasses these rules. See DATABASE_ARCHITECTURE.md.
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function isEditor() { return signedIn() && request.auth.token.role in ['editor', 'medical_reviewer', 'admin']; }
+
+    // Learner data: only the owner can read or write it.
+    match /users/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && !request.resource.data.keys().hasAny(['entitlements', 'role']); // set server-side only
+      match /{sub=**} {
+        allow read, write: if isOwner(uid);
+      }
+      // Learning events are append-only and idempotent by document id = event id.
+      match /events/{eventId} {
+        allow create: if isOwner(uid) && request.resource.data.id == eventId;
+        allow update: if false;
+      }
+    }
+
+    // Published medical content: readable by anyone, never writable from clients.
+    match /packages/{pkg}/concepts/{id} {
+      allow read: if resource.data.review.status == 'published' || isEditor();
+      allow write: if false;
+    }
+    match /packages/{pkg}/items/{id} {
+      allow read: if resource.data.review.status == 'published' || isEditor();
+      allow write: if false;
+    }
+
+    // Editorial workspace (drafts, reviews, audit trail): editors only; writes via server functions.
+    match /editorial/{doc=**} {
+      allow read: if isEditor();
+      allow write: if false;
+    }
+
+    // Content error reports: any signed-in learner can file one; only editors read them.
+    match /reports/{id} {
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow read: if isEditor();
+    }
+
+    // Leaderboards: scores are computed and written server-side from validated events.
+    match /leaderboards/{board}/entries/{uid} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+  }
+}

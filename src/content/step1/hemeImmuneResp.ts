@@ -1,0 +1,418 @@
+import { defineConcepts } from '../define';
+
+/** Original, AI-drafted content awaiting medical review. */
+export const hemeImmuneResp = defineConcepts([
+  {
+    id: 'g6pd',
+    title: 'G6PD deficiency',
+    discipline: 'biochemistry',
+    alsoDisciplines: ['pathology', 'genetics'],
+    system: 'blood-immune',
+    topic: 'heme-anemias',
+    difficulty: 3,
+    objectives: [
+      'Link the pentose phosphate pathway to red cell oxidative defence',
+      'Recognise triggers and smear findings of G6PD deficiency',
+    ],
+    facts: [
+      'X-linked recessive; most common human enzyme deficiency.',
+      'G6PD is the rate-limiting enzyme of the oxidative pentose phosphate pathway, producing NADPH.',
+      'Red cells depend on NADPH to keep glutathione reduced; reduced glutathione neutralises H₂O₂.',
+      'Oxidative stress (infection, fava beans, primaquine, dapsone, sulfonamides, rasburicase) causes episodic haemolysis.',
+      'Denatured haemoglobin forms Heinz bodies; splenic macrophages remove them, leaving bite cells.',
+      'Haemolysis is both intravascular and extravascular; enzyme assays can be falsely normal during an acute episode because older, deficient cells have already lysed.',
+      'Heterozygosity is thought to give some protection against falciparum malaria.',
+    ],
+    mechanism:
+      'Without G6PD, red cells cannot regenerate NADPH, so glutathione stays oxidised and cannot detoxify peroxide. Oxidant stress denatures haemoglobin (Heinz bodies) and damages membranes, causing haemolysis.',
+    associations: ['Heinz bodies', 'Bite cells', 'Fava beans', 'Primaquine, dapsone, rasburicase', 'Neonatal jaundice', 'Malaria protection'],
+    misconception: 'A normal G6PD level during acute haemolysis does not rule it out: the most deficient (oldest) cells have already been destroyed. Repeat testing weeks later.',
+    quick:
+      'G6PD makes NADPH, which keeps glutathione reduced. Without it, oxidant triggers (infection, fava beans, primaquine, dapsone) cause haemolysis with Heinz bodies and bite cells. X-linked recessive.',
+    detailed: [
+      'The oxidative branch of the pentose phosphate pathway is the red cell’s only source of NADPH, since red cells lack mitochondria. NADPH powers glutathione reductase, which keeps glutathione in its reduced form (GSH). GSH, via glutathione peroxidase, neutralises hydrogen peroxide.',
+      'When an oxidant load arrives, deficient cells cannot keep up. Haemoglobin is oxidised and precipitates as Heinz bodies (seen with supravital stains); splenic macrophages pluck them out, creating bite cells. Damaged cells lyse in the circulation and the spleen.',
+      'Classic presentation: a male, often of African, Mediterranean or Asian descent, with sudden jaundice, dark urine and anaemia a few days after an infection or an oxidant drug.',
+    ],
+    takeaway: 'G6PD → NADPH → reduced glutathione. Deficiency: oxidant-triggered haemolysis, Heinz bodies, bite cells; X-linked recessive.',
+    related: ['hereditary-spherocytosis', 'x-linked-recessive'],
+    citations: [{ sourceId: 'medlineplus', locator: 'Genetics: G6PD deficiency' }],
+    mcq: [
+      {
+        stem: 'A 24-year-old man develops dark urine and scleral icterus three days after starting primaquine. The peripheral smear shows red cells with semicircular defects at their edges. Reduced production of which molecule is the primary defect?',
+        options: [
+          ['a', 'NADPH'],
+          ['b', 'ATP', 'Reduced ATP is the problem in pyruvate kinase deficiency (glycolysis), which causes chronic, not drug-triggered, haemolysis.'],
+          ['c', 'Spectrin', 'Spectrin defects cause hereditary spherocytosis, a membrane disorder with spherocytes, not bite cells.'],
+          ['d', '2,3-bisphosphoglycerate', '2,3-BPG shifts O₂ binding; its loss does not explain oxidant haemolysis.'],
+          ['e', 'Haem', 'Haem synthesis defects give sideroblastic anaemia or porphyrias, not acute oxidant haemolysis.'],
+        ],
+        answer: 'a',
+        mini: 'Primaquine is an oxidant. In G6PD deficiency, red cells cannot make NADPH to regenerate glutathione, so haemoglobin oxidises and bite cells appear.',
+        mechanism: 'G6PD → NADPH → glutathione reductase → reduced glutathione → peroxide detoxification.',
+        difficulty: 3,
+      },
+      {
+        stem: 'In a red cell, which enzyme directly uses NADPH to protect against oxidative damage?',
+        options: [
+          ['a', 'Glutathione reductase'],
+          ['b', 'Glutathione peroxidase', 'Glutathione peroxidase uses reduced glutathione (not NADPH) to break down H₂O₂.'],
+          ['c', 'Catalase', 'Catalase acts on H₂O₂ but does not consume NADPH as a substrate.'],
+          ['d', 'Superoxide dismutase', 'SOD converts superoxide to H₂O₂ without NADPH.'],
+        ],
+        answer: 'a',
+        mini: 'Glutathione reductase uses NADPH to convert oxidised glutathione (GSSG) back to reduced glutathione (GSH).',
+        difficulty: 3,
+      },
+    ],
+    tf: [
+      { statement: 'G6PD deficiency is inherited in an autosomal recessive pattern.', isTrue: false, correction: 'G6PD deficiency is X-linked recessive, so it mainly affects males.' },
+      { statement: 'Bite cells form when splenic macrophages remove Heinz bodies.', isTrue: true, correction: 'Correct: removal of precipitated haemoglobin leaves a "bite".' },
+      { statement: 'A normal G6PD level during acute haemolysis excludes the diagnosis.', isTrue: false, correction: 'Levels can be falsely normal during acute haemolysis; repeat after recovery.' },
+    ],
+    clues: [
+      { answer: 'NADPH', clue: 'Reducing equivalent made by G6PD in the pentose phosphate pathway' },
+      { answer: 'HEINZ', clue: '___ bodies: precipitated haemoglobin in oxidant haemolysis' },
+      { answer: 'GLUTATHIONE', clue: 'Tripeptide kept reduced by NADPH to detoxify peroxide' },
+      { answer: 'PRIMAQUINE', clue: 'Antimalarial oxidant drug that can trigger haemolysis in G6PD deficiency' },
+    ],
+  },
+  {
+    id: 'hereditary-spherocytosis',
+    title: 'Hereditary spherocytosis',
+    discipline: 'pathology',
+    alsoDisciplines: ['genetics'],
+    system: 'blood-immune',
+    topic: 'heme-anemias',
+    difficulty: 2,
+    objectives: ['Explain how cytoskeletal defects cause spherocytes', 'Recognise the laboratory profile'],
+    facts: [
+      'Usually autosomal dominant; defects in ankyrin, spectrin, band 3 or protein 4.2.',
+      'Loss of membrane produces small, round cells without central pallor.',
+      'Extravascular haemolysis in the spleen: splenomegaly, jaundice, pigment gallstones.',
+      'Raised MCHC; increased osmotic fragility; reduced eosin-5-maleimide (EMA) binding on flow cytometry; Coombs test negative.',
+      'Risk of aplastic crisis with parvovirus B19.',
+      'Splenectomy reduces haemolysis; spherocytes persist and Howell–Jolly bodies appear afterwards.',
+    ],
+    mechanism:
+      'Weak vertical links between the membrane and the spectrin skeleton let membrane bud off. Cells lose surface area relative to volume, become spherical and rigid, and are trapped and destroyed in the splenic cords.',
+    associations: ['Spherocytes', 'High MCHC', 'Osmotic fragility', 'Parvovirus B19 aplastic crisis', 'Pigment gallstones'],
+    misconception: 'Spherocytes also occur in warm autoimmune haemolytic anaemia; a negative direct Coombs test points to hereditary spherocytosis.',
+    quick:
+      'Spectrin/ankyrin defect → membrane loss → spherocytes destroyed in the spleen. High MCHC, osmotic fragility, Coombs-negative; parvovirus can trigger aplastic crisis.',
+    detailed: [
+      'The red cell membrane is anchored to a spectrin–actin skeleton by ankyrin and band 3. When these links are defective, small pieces of membrane are lost as microvesicles.',
+      'The cell keeps its haemoglobin but loses surface, so it becomes a sphere with a high haemoglobin concentration. Spheres cannot deform through splenic sinusoids and are phagocytosed.',
+    ],
+    takeaway: 'HS: ankyrin/spectrin defect, spherocytes, ↑MCHC, osmotic fragility, Coombs-negative; splenectomy helps.',
+    related: ['g6pd'],
+    mcq: [
+      {
+        stem: 'A 10-year-old with intermittent jaundice and splenomegaly has small red cells without central pallor, a raised MCHC and a negative direct antiglobulin test. Which protein is most likely abnormal?',
+        options: [
+          ['a', 'Ankyrin'],
+          ['b', 'Glucose-6-phosphate dehydrogenase', 'G6PD deficiency causes episodic oxidant haemolysis with bite cells, not spherocytes with high MCHC.'],
+          ['c', 'β-globin', 'β-globin mutations cause sickle cell disease or β-thalassaemia, with target or sickle cells.'],
+          ['d', 'CD55 (DAF)', 'Loss of GPI-anchored CD55/CD59 causes paroxysmal nocturnal haemoglobinuria (intravascular haemolysis).'],
+          ['e', 'Pyruvate kinase', 'PK deficiency causes haemolysis with echinocytes, not spherocytes.'],
+        ],
+        answer: 'a',
+        mini: 'Coombs-negative spherocytosis with high MCHC and splenomegaly is hereditary spherocytosis, caused by cytoskeletal defects such as ankyrin or spectrin.',
+      },
+    ],
+    tf: [
+      { statement: 'Hereditary spherocytosis is mostly autosomal recessive.', isTrue: false, correction: 'Most cases are autosomal dominant.' },
+    ],
+    clues: [
+      { answer: 'SPECTRIN', clue: 'Cytoskeletal protein defective in some hereditary spherocytosis' },
+      { answer: 'ANKYRIN', clue: 'Anchor protein linking spectrin to band 3; mutated in hereditary spherocytosis' },
+    ],
+  },
+  {
+    id: 'warfarin',
+    title: 'Warfarin',
+    discipline: 'pharmacology',
+    system: 'blood-immune',
+    topic: 'heme-coagulation',
+    difficulty: 2,
+    objectives: ['Explain vitamin K–dependent carboxylation', 'Recognise monitoring, interactions and reversal'],
+    facts: [
+      'Inhibits vitamin K epoxide reductase (VKORC1), preventing regeneration of reduced vitamin K.',
+      'Reduces γ-carboxylation of factors II, VII, IX, X and proteins C and S.',
+      'Monitored with PT/INR (extrinsic pathway; factor VII has the shortest half-life).',
+      'Early protein C depletion can cause a transient prothrombotic state: warfarin skin necrosis; bridging with heparin is used.',
+      'Teratogenic. Metabolised by CYP2C9; many drug interactions.',
+      'Reversal: vitamin K (slow) plus prothrombin complex concentrate (rapid).',
+    ],
+    mechanism:
+      'Vitamin K is the cofactor for γ-glutamyl carboxylase. Warfarin blocks recycling of vitamin K epoxide back to its active form, so new clotting factors are made without the Gla residues they need to bind calcium and phospholipid.',
+    associations: ['PT/INR', 'Skin necrosis', 'CYP2C9 interactions', 'Teratogen', 'PCC + vitamin K reversal'],
+    misconception: 'Warfarin does not destroy existing clotting factors; it stops new functional ones forming, so its full effect takes days.',
+    quick:
+      'Warfarin blocks VKORC1 → no recycling of vitamin K → II, VII, IX, X, C and S lose γ-carboxylation. Monitor INR; reverse with vitamin K plus PCC.',
+    detailed: [
+      'Factors II, VII, IX and X, and the anticoagulant proteins C and S, need γ-carboxyglutamate residues to bind Ca²⁺ on platelet phospholipid. That carboxylation uses reduced vitamin K, which becomes vitamin K epoxide.',
+      'Warfarin blocks the reductase, so vitamin K is used up. Because factors already in the blood keep working until cleared, the effect builds over 3–5 days. Protein C has a short half-life too, so early on the balance can tip towards clotting.',
+    ],
+    takeaway: 'Warfarin: VKORC1 inhibition, ↓ II/VII/IX/X/C/S, PT/INR, reverse with vitamin K + PCC.',
+    related: ['heparin'],
+    mcq: [
+      {
+        stem: 'Three days after starting warfarin without heparin bridging, a woman develops painful, dark skin lesions on her thighs. Rapid depletion of which protein explains this?',
+        options: [
+          ['a', 'Protein C'],
+          ['b', 'Factor II (prothrombin)', 'Prothrombin has a long half-life, so it falls late and does not explain early clotting.'],
+          ['c', 'Antithrombin', 'Antithrombin is not vitamin K–dependent.'],
+          ['d', 'Factor VIII', 'Factor VIII is not vitamin K–dependent.'],
+          ['e', 'von Willebrand factor', 'vWF is not affected by warfarin.'],
+        ],
+        answer: 'a',
+        mini: 'Protein C has a short half-life and falls before the procoagulant factors, briefly making the patient hypercoagulable: warfarin skin necrosis.',
+        difficulty: 3,
+      },
+    ],
+    tf: [
+      { statement: 'Warfarin effect is monitored with the activated partial thromboplastin time (aPTT).', isTrue: false, correction: 'Warfarin is monitored with PT/INR; unfractionated heparin with aPTT.' },
+    ],
+    clues: [{ answer: 'WARFARIN', clue: 'Vitamin K antagonist monitored with the INR' }],
+  },
+  {
+    id: 'heparin',
+    title: 'Heparin and HIT',
+    discipline: 'pharmacology',
+    alsoDisciplines: ['immunology'],
+    system: 'blood-immune',
+    topic: 'heme-coagulation',
+    difficulty: 3,
+    objectives: ['Explain antithrombin-mediated anticoagulation', 'Recognise heparin-induced thrombocytopenia'],
+    facts: [
+      'Unfractionated heparin binds antithrombin, greatly accelerating inactivation of thrombin (IIa) and factor Xa.',
+      'Low-molecular-weight heparin acts mainly on Xa; less effect on thrombin.',
+      'Unfractionated heparin is monitored with aPTT and reversed with protamine sulfate (LMWH is only partly reversed).',
+      'Safe in pregnancy (does not cross the placenta).',
+      'HIT: IgG antibodies against heparin–platelet factor 4 complexes activate platelets, causing thrombocytopenia AND thrombosis, typically 5–10 days after exposure.',
+      'HIT management: stop all heparin and start a non-heparin anticoagulant (e.g. argatroban).',
+    ],
+    mechanism:
+      'Heparin’s pentasaccharide binds antithrombin and changes its shape. Long heparin chains also bridge antithrombin to thrombin, so unfractionated heparin inhibits both thrombin and Xa.',
+    associations: ['aPTT', 'Protamine', 'HIT and PF4', 'Pregnancy-safe', 'Osteoporosis with long-term use'],
+    misconception: 'HIT is a prothrombotic state despite a low platelet count; platelet transfusion and warfarin alone are avoided.',
+    quick:
+      'Heparin activates antithrombin → ↓ thrombin and Xa. Monitor aPTT, reverse with protamine. HIT = anti-PF4/heparin IgG → low platelets with clots.',
+    detailed: [
+      'Antithrombin is a natural serine protease inhibitor. Heparin increases its activity by about 1000-fold. Unfractionated chains are long enough to bridge thrombin; LMWH chains mostly are not, so LMWH works mainly against Xa.',
+      'In HIT, IgG binds PF4–heparin complexes on platelets; the Fc portion engages FcγRIIa on other platelets, activating them. Platelets are consumed and thrombi form in veins and arteries.',
+    ],
+    takeaway: 'Heparin → antithrombin ↑ → ↓IIa/Xa; aPTT; protamine. HIT: anti-PF4 IgG, thrombocytopenia + thrombosis.',
+    related: ['warfarin', 'hypersensitivity'],
+    mcq: [
+      {
+        stem: 'Seven days into an inpatient stay on unfractionated heparin, a patient’s platelet count falls from 260 to 90 × 10⁹/L and a new deep vein thrombosis is found. What is the mechanism?',
+        options: [
+          ['a', 'IgG antibodies against platelet factor 4–heparin complexes activate platelets'],
+          ['b', 'Direct non-immune platelet aggregation by heparin', 'This is the mild, early (type 1) fall that does not cause thrombosis.'],
+          ['c', 'Antibodies against GPIIb/IIIa cause splenic clearance', 'This is immune thrombocytopenia, which causes bleeding, not thrombosis.'],
+          ['d', 'ADAMTS13 deficiency', 'ADAMTS13 deficiency is TTP, with haemolysis and schistocytes.'],
+        ],
+        answer: 'a',
+        mini: 'HIT: IgG binds PF4–heparin on platelets and activates them through Fc receptors, consuming platelets and causing thrombosis.',
+      },
+    ],
+    tf: [
+      { statement: 'Protamine sulfate reverses unfractionated heparin.', isTrue: true, correction: 'Correct: protamine is a positively charged protein that binds heparin.' },
+    ],
+    clues: [
+      { answer: 'PROTAMINE', clue: 'Positively charged reversal agent for heparin' },
+      { answer: 'ANTITHROMBIN', clue: 'Natural anticoagulant whose activity heparin increases' },
+    ],
+  },
+  {
+    id: 'hypersensitivity',
+    title: 'Hypersensitivity reactions (types I–IV)',
+    discipline: 'immunology',
+    system: 'blood-immune',
+    alsoSystems: ['multisystem'],
+    topic: 'immuno-hypersensitivity',
+    difficulty: 2,
+    objectives: ['Classify hypersensitivity reactions by mechanism', 'Match classic diseases to each type'],
+    facts: [
+      'Type I: IgE on mast cells cross-linked by antigen; rapid (minutes). Anaphylaxis, allergic asthma, urticaria.',
+      'Type II: antibodies (IgG/IgM) against cell-surface or matrix antigens. Autoimmune haemolytic anaemia, Goodpasture, Graves, myasthenia gravis, acute haemolytic transfusion reaction.',
+      'Type III: antigen–antibody immune complexes deposit and activate complement. Serum sickness, Arthus reaction, PSGN, SLE nephritis.',
+      'Type IV: T-cell mediated, delayed (48–72 h). Contact dermatitis, tuberculin skin test, type 1 diabetes, multiple sclerosis.',
+    ],
+    mechanism:
+      'The four types differ in the effector: IgE and mast cells (I), antibody against fixed antigens (II), circulating immune complexes (III), or T cells without antibody (IV).',
+    associations: ['Anaphylaxis', 'Goodpasture', 'Serum sickness', 'PPD test'],
+    misconception: 'Type II and III both involve IgG; the difference is whether the antigen is fixed on a cell/tissue (II) or circulating and deposited as complexes (III).',
+    quick:
+      'I = IgE/mast cells (fast). II = antibody against a fixed cell or tissue antigen. III = immune complexes + complement. IV = T cells, delayed, no antibody.',
+    detailed: [
+      'Type I reactions need prior sensitisation: IgE binds FcεRI on mast cells, and re-exposure cross-links it, releasing histamine and tryptase in minutes; leukotrienes and prostaglandins follow.',
+      'Type III reactions are systemic when complexes form in the blood (serum sickness: fever, rash, arthralgia, low complement about 1–2 weeks after a foreign protein) or local when antigen is injected into a sensitised person (Arthus).',
+    ],
+    takeaway: 'ACID: Anaphylactic (I), Cytotoxic antibody (II), Immune complex (III), Delayed T-cell (IV).',
+    related: ['psgn', 'heparin'],
+    mcq: [
+      {
+        stem: 'Ten days after receiving a chimeric monoclonal antibody, a patient develops fever, an urticarial rash, arthralgia and proteinuria, with low serum C3. Which mechanism is responsible?',
+        options: [
+          ['a', 'Type III: circulating immune complexes deposit and activate complement'],
+          ['b', 'Type I: IgE cross-linking on mast cells', 'Type I reactions occur within minutes, and complement is not consumed.'],
+          ['c', 'Type II: antibody against a fixed tissue antigen', 'No fixed tissue antigen is targeted; the antigen is a circulating drug protein.'],
+          ['d', 'Type IV: sensitised CD4⁺ T cells release cytokines', 'Type IV reactions do not lower complement.'],
+        ],
+        answer: 'a',
+        mini: 'Serum sickness: antibodies form against the foreign protein, immune complexes deposit in vessels, joints and kidneys, and complement is consumed.',
+      },
+    ],
+    tf: [
+      { statement: 'The tuberculin skin test is a type IV hypersensitivity reaction.', isTrue: true, correction: 'Correct: it is a delayed, T-cell mediated response.' },
+      { statement: 'Goodpasture syndrome is a type III hypersensitivity reaction.', isTrue: false, correction: 'Goodpasture is type II: antibodies against type IV collagen in basement membranes.' },
+    ],
+    clues: [
+      { answer: 'IGE', clue: 'Antibody class that triggers type I hypersensitivity' },
+      { answer: 'ARTHUS', clue: 'Local type III reaction at an injection site' },
+    ],
+  },
+  {
+    id: 'bruton',
+    title: 'X-linked agammaglobulinaemia (Bruton)',
+    discipline: 'immunology',
+    alsoDisciplines: ['genetics'],
+    system: 'blood-immune',
+    topic: 'immuno-immunodeficiency',
+    difficulty: 3,
+    objectives: ['Explain why B cells fail to mature in XLA', 'Predict the infection pattern and timing'],
+    facts: [
+      'Mutation in BTK (Bruton tyrosine kinase); X-linked recessive.',
+      'B cells arrest at the pre-B stage: absent mature B cells, very low immunoglobulins of all classes.',
+      'Lymph nodes lack germinal centres; tonsils are small or absent.',
+      'Recurrent bacterial infections (encapsulated organisms) begin after about 6 months, when maternal IgG wanes.',
+      'Enteroviral infections and Giardia are also characteristic.',
+      'Live vaccines (e.g. oral polio) are contraindicated. Treatment: immunoglobulin replacement.',
+    ],
+    mechanism:
+      'BTK transmits pre-B-cell receptor signals needed for B-cell development. Without it, B cells do not mature, so no plasma cells and no antibodies are produced.',
+    associations: ['Boys after 6 months', 'Absent tonsils', 'Enterovirus', 'IVIG'],
+    misconception: 'Infections start after maternal IgG wanes, not at birth; T-cell immunity is normal, so viral and fungal infections are generally handled.',
+    quick:
+      'BTK mutation (X-linked) → B cells stuck at pre-B → no antibodies. Boys after 6 months with recurrent bacterial infections, absent tonsils; treat with IVIG.',
+    detailed: [
+      'In the bone marrow, pre-B cells test their heavy chain through the pre-B-cell receptor. BTK relays that signal. Without BTK, cells fail to progress, so circulating CD19⁺ B cells are almost absent.',
+      'Antibody-dependent defences fail: opsonisation of encapsulated bacteria (S. pneumoniae, H. influenzae) and neutralisation of enteroviruses. Maternal IgG protects for the first months of life.',
+    ],
+    takeaway: 'XLA: BTK, absent B cells and immunoglobulins, infections after 6 months, avoid live vaccines, IVIG.',
+    related: ['x-linked-recessive', 'strep-pneumoniae'],
+    mcq: [
+      {
+        stem: 'A 9-month-old boy has had three episodes of pneumococcal pneumonia. His tonsils are not visible and flow cytometry shows almost no CD19⁺ cells. Which process is defective?',
+        options: [
+          ['a', 'Signalling through the pre-B-cell receptor'],
+          ['b', 'Class switching by CD40L–CD40 interaction', 'CD40L defects (hyper-IgM) leave B cells present with high IgM.'],
+          ['c', 'Thymic development', 'Thymic aplasia (DiGeorge) causes T-cell deficiency; B cells are present.'],
+          ['d', 'NADPH oxidase activity', 'Chronic granulomatous disease affects phagocytes, with catalase-positive infections.'],
+          ['e', 'IL-2 receptor signalling', 'Common γ-chain defects cause SCID with T-cell loss.'],
+        ],
+        answer: 'a',
+        mini: 'BTK carries pre-B-cell receptor signals. Without it B cells do not mature, so CD19⁺ cells and antibodies are absent.',
+      },
+    ],
+    tf: [{ statement: 'Infants with XLA usually develop severe bacterial infections in the first week of life.', isTrue: false, correction: 'Maternal IgG protects them for about 6 months.' }],
+    clues: [{ answer: 'TYROSINE', clue: 'Bruton ___ kinase, mutated in X-linked agammaglobulinaemia' }],
+  },
+  {
+    id: 'surfactant',
+    title: 'Pulmonary surfactant and neonatal RDS',
+    discipline: 'physiology',
+    alsoDisciplines: ['histology'],
+    system: 'respiratory',
+    topic: 'resp-physiology',
+    difficulty: 2,
+    objectives: ['Explain how surfactant reduces surface tension', 'Recognise neonatal respiratory distress syndrome and its risk factors'],
+    facts: [
+      'Produced by type II pneumocytes from about week 20; adequate levels by about weeks 34–35.',
+      'Main component: dipalmitoylphosphatidylcholine (lecithin).',
+      'Reduces alveolar surface tension, increasing compliance and preventing collapse of small alveoli (Laplace: P = 2T/r).',
+      'Lecithin:sphingomyelin ratio > 2 in amniotic fluid indicates lung maturity.',
+      'Neonatal RDS risk factors: prematurity, maternal diabetes (fetal insulin inhibits surfactant), caesarean delivery without labour.',
+      'Antenatal corticosteroids increase surfactant production.',
+    ],
+    mechanism:
+      'Without surfactant, smaller alveoli need higher pressure to stay open and collapse into larger ones. Surfactant lowers surface tension most at small volumes, stabilising alveoli of different sizes.',
+    associations: ['Type II pneumocytes', 'L:S ratio', 'Maternal diabetes', 'Antenatal steroids', 'Ground-glass chest X-ray'],
+    misconception: 'Type I pneumocytes cover most of the alveolar surface but do not make surfactant; type II cells make it and act as progenitors.',
+    quick:
+      'Type II pneumocytes make surfactant (mainly lecithin), lowering surface tension so small alveoli don’t collapse. Premature babies lack it; maternal diabetes delays it; steroids speed it up.',
+    detailed: [
+      'By Laplace’s law, collapsing pressure is proportional to surface tension divided by radius. Without surfactant, small alveoli would empty into large ones. Surfactant’s concentration rises as alveoli shrink, lowering tension most where it is needed.',
+      'Neonatal RDS presents within hours of birth with tachypnoea, grunting and retractions, hypoxaemia and a diffuse ground-glass chest film. Complications of treatment include bronchopulmonary dysplasia and retinopathy of prematurity.',
+    ],
+    takeaway: 'Surfactant (type II cells, lecithin) ↓ surface tension, ↑ compliance. L:S > 2 = mature lungs.',
+    related: ['alpha1-antitrypsin'],
+    mcq: [
+      {
+        stem: 'A baby born at 30 weeks to a mother with poorly controlled diabetes develops grunting and intercostal retractions within an hour. Which cell type’s product is deficient?',
+        options: [
+          ['a', 'Type II pneumocytes'],
+          ['b', 'Type I pneumocytes', 'Type I cells form the gas-exchange surface but do not secrete surfactant.'],
+          ['c', 'Club (Clara) cells', 'Club cells line bronchioles and secrete protective proteins; they are not the main surfactant source.'],
+          ['d', 'Alveolar macrophages', 'Macrophages clear debris and recycle surfactant but do not produce it.'],
+        ],
+        answer: 'a',
+        mini: 'Prematurity and maternal hyperglycaemia (fetal insulin suppresses surfactant) both reduce surfactant from type II pneumocytes.',
+      },
+    ],
+    tf: [{ statement: 'Maternal diabetes accelerates fetal lung maturation.', isTrue: false, correction: 'Fetal hyperinsulinaemia inhibits surfactant production and delays lung maturity.' }],
+    clues: [
+      { answer: 'SURFACTANT', clue: 'Type II pneumocyte product that lowers alveolar surface tension' },
+      { answer: 'LECITHIN', clue: 'Phosphatidylcholine compared with sphingomyelin to judge fetal lung maturity' },
+    ],
+  },
+  {
+    id: 'alpha1-antitrypsin',
+    title: 'Alpha-1 antitrypsin deficiency',
+    discipline: 'pathology',
+    alsoDisciplines: ['genetics'],
+    system: 'respiratory',
+    alsoSystems: ['gastrointestinal'],
+    topic: 'resp-pathology',
+    difficulty: 3,
+    objectives: ['Explain protease–antiprotease imbalance', 'Contrast panacinar and centriacinar emphysema'],
+    facts: [
+      'Codominant inheritance; the PiZZ genotype gives severe deficiency.',
+      'α1-antitrypsin inhibits neutrophil elastase in the lung.',
+      'Deficiency causes panacinar emphysema, worst in the lower lobes, at a young age (earlier in smokers).',
+      'Misfolded Z protein accumulates in hepatocyte ER, causing liver disease (PAS-positive, diastase-resistant globules) and possibly cirrhosis.',
+      'Smoking-related emphysema is centriacinar and upper-lobe predominant.',
+    ],
+    mechanism:
+      'Unopposed neutrophil elastase destroys alveolar walls across the whole acinus. In the liver, the misfolded protein is retained in the ER and injures hepatocytes (gain of toxic function).',
+    associations: ['Panacinar, lower-lobe emphysema', 'PAS-positive hepatocyte globules', 'PiZZ', 'Young non-smoker with COPD'],
+    misconception: 'The lung disease is from LOSS of function (no antiprotease), but the liver disease is from accumulation of misfolded protein, so augmentation therapy does not help the liver.',
+    quick:
+      'A1AT normally blocks neutrophil elastase. PiZZ deficiency → panacinar, lower-lobe emphysema in young adults, plus liver disease from misfolded protein stuck in hepatocytes (PAS+ globules).',
+    detailed: [
+      'Emphysema results from imbalance between proteases (elastase from neutrophils and macrophages) and antiproteases. Smoking increases proteases and oxidatively inactivates α1-antitrypsin; deficiency removes the antiprotease directly.',
+      'Because the deficiency is systemic, destruction is even across the acinus and gravity-dependent perfusion makes the lower lobes worst affected.',
+    ],
+    takeaway: 'A1AT deficiency: panacinar lower-lobe emphysema + liver PAS⁺ globules; codominant PiZZ.',
+    related: ['surfactant'],
+    mcq: [
+      {
+        stem: 'A 38-year-old who has never smoked has progressive dyspnoea. CT shows emphysema most marked in the lower lobes, and liver tests are mildly abnormal. A liver biopsy would most likely show which finding?',
+        options: [
+          ['a', 'PAS-positive, diastase-resistant globules in hepatocytes'],
+          ['b', 'Mallory–Denk bodies', 'These occur in alcoholic hepatitis and other steatohepatitis.'],
+          ['c', 'Iron deposition in hepatocytes', 'Iron overload suggests haemochromatosis, which does not cause emphysema.'],
+          ['d', 'Copper accumulation', 'Copper accumulation is Wilson disease, with neuropsychiatric features.'],
+          ['e', 'Onion-skin periductal fibrosis', 'This is primary sclerosing cholangitis.'],
+        ],
+        answer: 'a',
+        mini: 'Misfolded Z-type α1-antitrypsin is retained in hepatocyte ER, appearing as PAS-positive, diastase-resistant globules.',
+      },
+    ],
+    tf: [{ statement: 'Smoking-related emphysema is typically panacinar and lower-lobe predominant.', isTrue: false, correction: 'Smoking causes centriacinar, upper-lobe emphysema; panacinar lower-lobe disease suggests A1AT deficiency.' }],
+    clues: [{ answer: 'ELASTASE', clue: 'Neutrophil protease left unopposed in alpha-1 antitrypsin deficiency' }],
+  },
+]);

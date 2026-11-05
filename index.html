@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#111111" />
+    <meta name="description" content="Games that build real USMLE Step 1 knowledge, with study tracking, spaced review and weak-area analysis." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <title>Steps Ahead</title>
+    <script>
+      // Apply the saved theme before first paint (no flash).
+      try {
+        var p = JSON.parse(localStorage.getItem('steps-ahead:progress') || '{}').state;
+        var t = p && p.profile && p.profile.theme;
+        if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <noscript>Steps Ahead needs JavaScript to run.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
