@@ -1,8 +1,8 @@
-# Albums — memory planner & automatic scrapbook maker
+# In Pictures — memory planner & automatic album maker
 
-*Plan the memories. Capture the moments. Let Albums tell the story.*
+*Plan the memories. Capture the moments. Tell the story in pictures.*
 
-“Albums” is a working title (change it in `src/config/brand.ts`, `index.html` and `public/manifest.webmanifest`).
+The name lives in `src/config/brand.ts`, `index.html` and `public/manifest.webmanifest`.
 
 A mobile-first web app (React 19, TypeScript, Vite, Tailwind CSS 4) that:
 
@@ -18,14 +18,11 @@ A mobile-first web app (React 19, TypeScript, Vite, Tailwind CSS 4) that:
 
 The app is local-first: photos never leave the device, there are no accounts, no payments and no paid APIs.
 
-This folder is a standalone app inside the Oursome repository. It doesn’t share build tooling with the Expo app at the repo root.
-
 ## Run it
 
 Requires Node 20+ (CI uses 22).
 
 ```bash
-cd albums
 npm install
 npm run dev        # http://localhost:5173
 ```
@@ -65,59 +62,21 @@ Test photos: any JPG/PNG/WebP works. To check EXIF dates and orientation, use ph
 
 ## Deploy to GitHub Pages
 
-The build is fully static and path-independent:
+`.github/workflows/deploy.yml` checks, builds and publishes `dist/` on every push to `main`. One-time setup: **Settings → Pages → Build and deployment → Source: GitHub Actions**. Pages needs a public repository, or a paid GitHub plan for a private one.
+
+The build is static and path-independent, so it works at `https://<owner>.github.io/<repo>/` or on a custom domain without changes:
 
 - `vite.config.ts` sets `base: './'`, so every asset URL is relative;
-- routes use `HashRouter` (`…/#/album/123`), so no server rewrites or 404 tricks are needed;
+- routes use `HashRouter` (`…/#/album/123`), so no server rewrites are needed;
 - the service worker and manifest use relative scopes (`./`).
 
-So `dist/` works at a domain root or any sub-path (`/Oursome/albums/`) unchanged.
-
-This repository’s GitHub Pages site already serves the Oursome app (oursome.org), and a repo has one Pages site. Two options:
-
-**A. Serve it under the existing site** (e.g. `https://oursome.org/albums/`). In `.github/workflows/deploy-web.yml`, after “Build the website”, add:
-
-```yaml
-      - name: Build Albums into /albums
-        run: |
-          npm ci --prefix albums
-          npm run build --prefix albums
-          cp -r albums/dist dist/albums
-```
-
-**B. Its own site.** Copy `albums/` into a new repository, then add `.github/workflows/pages.yml`:
-
-```yaml
-name: Deploy
-on: { push: { branches: [main] }, workflow_dispatch: {} }
-permissions: { contents: read, pages: write, id-token: write }
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
-      - run: npm ci && npm run check && npm run build
-      - uses: actions/upload-pages-artifact@v3
-        with: { path: dist }
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment: { name: github-pages, url: '${{ steps.d.outputs.page_url }}' }
-    steps:
-      - id: d
-        uses: actions/deploy-pages@v4
-```
-
-and set **Settings → Pages → Source: GitHub Actions**.
-
-Neither is wired up yet: deploying is the owner’s call. `ci.yml` already runs `check` and `build` for `albums/` on every pull request.
+`.github/workflows/ci.yml` runs the same checks and build on every pull request.
 
 ## Project structure
 
 ```
-albums/
+in-pictures/
+  .github/workflows/       ci.yml (pull requests), deploy.yml (GitHub Pages)
   src/
     config/brand.ts          product name and tagline
     domain/types.ts          the JSON data model (Project, Photo, Album, PlanItem…)
@@ -138,7 +97,7 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the template engine, layo
 
 ## Browser support
 
-Built for current iPhone Safari, Android Chrome and desktop Chrome, Edge, Firefox and Safari. Tested in this repo’s CI-like environment with headless Chromium only (desktop 1280 × 900 and an emulated iPhone 13 viewport); **not yet tested on a physical iPhone or Android device.**
+Built for current iPhone Safari, Android Chrome and desktop Chrome, Edge, Firefox and Safari. Tested with headless Chromium only (desktop 1280 × 900 and an emulated iPhone 13 viewport); **not yet tested on a physical iPhone or Android device.**
 
 - HEIC photos open only where the browser can decode them (Safari). Elsewhere you get a clear message; iPhone users can choose “Most Compatible” camera format or share as JPEG.
 - iPhone Safari may delete site data for sites not opened for 7 days unless the app is added to the Home Screen. The app asks for persistent storage and says this plainly.

@@ -1,10 +1,10 @@
 /*
- * Albums service worker: app-shell caching for offline use.
+ * In Pictures service worker: app-shell caching for offline use.
  * - Navigations: network first (3 s), falling back to the cached shell.
  * - Built assets (hashed file names): cache first.
  * Photos never pass through here: they live in IndexedDB.
  */
-const CACHE = 'albums-v1';
+const CACHE = 'in-pictures-v1';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', (e) => {

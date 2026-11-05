@@ -1,4 +1,4 @@
-# Albums — architecture
+# In Pictures — architecture
 
 The app is a static, local-first single-page app. Everything that decides *what the album looks like* is pure TypeScript with tests; React only displays it.
 
@@ -82,7 +82,7 @@ PDF (`src/export/pdf.ts`, jsPDF loaded on demand): one canvas per page at 150 or
 
 ## 5. Storage, autosave, recovery
 
-- IndexedDB (`idb`), database `albums-db`: `projects` (JSON), `photos` (metadata, indexed by project), `blobs` (`<photoId>:thumb|display|full`).
+- IndexedDB (`idb`), database `in-pictures`: `projects` (JSON), `photos` (metadata, indexed by project), `blobs` (`<photoId>:thumb|display|full`).
 - Import (`storage/images.ts`): one photo at a time, decoded with EXIF orientation applied, then saved as three JPEGs (480 / 1600 / ≤3600 px). Transparent PNGs get a white background. Failures (unsupported format, full storage) are reported per file.
 - Autosave (`state/project.ts`): project JSON 400 ms after a change, photo metadata immediately, each photo as soon as it’s processed. Saving is flushed when the tab is hidden and on `beforeunload`, with a warning if an import is still running. The header shows *Saving… / Saved on this device / Not saved*.
 - Recovery: because everything is saved as it happens, reopening resumes where the user left off. The library links each draft to its last step.

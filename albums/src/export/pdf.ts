@@ -1,4 +1,5 @@
 import type { Album, Photo, ThemeId } from '@/domain/types';
+import { Brand } from '@/config/brand';
 import { PAGE_INCHES, PAGE_W } from '@/layouts/schema';
 import { getTheme } from '@/layouts/themes';
 import { renderScene } from '@/render/canvas';
@@ -34,7 +35,7 @@ export async function exportPdf({ album, photos, themeId, title, quality, onProg
   const q = QUALITY[quality];
   const pxPerUnit = (q.dpi * PAGE_INCHES.w) / PAGE_W;
   const pdf = new jsPDF({ unit: 'in', format: [PAGE_INCHES.w, PAGE_INCHES.h], orientation: 'portrait', compress: true });
-  pdf.setProperties({ title, creator: 'Albums' });
+  pdf.setProperties({ title, creator: Brand.name });
 
   const total = album.pages.length;
   for (let i = 0; i < total; i++) {

@@ -21,14 +21,14 @@ interface AlbumsDB extends DBSchema {
 let dbPromise: Promise<IDBPDatabase<AlbumsDB>> | null = null;
 
 export function db(): Promise<IDBPDatabase<AlbumsDB>> {
-  dbPromise ??= openDB<AlbumsDB>('albums-db', 1, {
+  dbPromise ??= openDB<AlbumsDB>('in-pictures', 1, {
     upgrade(d) {
       d.createObjectStore('projects', { keyPath: 'id' });
       d.createObjectStore('photos', { keyPath: 'id' }).createIndex('byProject', 'projectId');
       d.createObjectStore('blobs');
     },
     blocked() {
-      console.warn('Albums storage is open in another tab with an older version.');
+      console.warn('In Pictures storage is open in another tab with an older version.');
     },
   });
   return dbPromise;
