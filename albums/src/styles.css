@@ -1,0 +1,104 @@
+@import 'tailwindcss';
+
+/* Brand tokens for the app shell. Album page colours live in layouts/themes.ts. */
+@theme {
+  --color-ivory: #fbf7f0;
+  --color-cream: #f4ede2;
+  --color-sand: #e9dfd0;
+  --color-line: #e2d7c6;
+  --color-ink: #2b2620;
+  --color-muted: #6c6358;
+  --color-clay: #a65e44;
+  --color-clay-dark: #8c4c36;
+  --color-clay-soft: #f3e1d8;
+
+  --color-rose: #f4dfdb;
+  --color-rose-ink: #8a4a48;
+  --color-peach: #f8e4d2;
+  --color-peach-ink: #8a5530;
+  --color-butter: #f6edc9;
+  --color-butter-ink: #77621c;
+  --color-sage: #dfe8d7;
+  --color-sage-ink: #4d6440;
+  --color-mist: #dde5ec;
+  --color-mist-ink: #3f5a6e;
+  --color-lilac: #e7dfee;
+  --color-lilac-ink: #634f7a;
+  --color-sky: #dae8f1;
+  --color-sky-ink: #345e78;
+  --color-tan: #ede3d3;
+  --color-tan-ink: #6b5536;
+
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-hand: 'Caveat', cursive;
+
+  --shadow-soft: 0 1px 2px rgb(60 40 20 / 0.06), 0 8px 24px -8px rgb(60 40 20 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(60 40 20 / 0.08), 0 18px 40px -12px rgb(60 40 20 / 0.25);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-ivory text-ink font-sans antialiased;
+    min-height: 100dvh;
+  }
+  /* 16px inputs stop iOS Safari zooming on focus. */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-clay);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .paper-grain {
+    background-image: radial-gradient(rgb(120 90 60 / 0.035) 1px, transparent 1px);
+    background-size: 3px 3px;
+  }
+  .scroll-snap-x {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .scroll-snap-x::-webkit-scrollbar {
+    display: none;
+  }
+  .safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  .book-shadow {
+    box-shadow: 0 1px 1px rgb(40 30 20 / 0.08), 0 12px 30px -10px rgb(40 30 20 / 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes turn-forward {
+  from { transform: perspective(1800px) rotateY(0deg); }
+  to { transform: perspective(1800px) rotateY(-180deg); }
+}
+@keyframes turn-back {
+  from { transform: perspective(1800px) rotateY(0deg); }
+  to { transform: perspective(1800px) rotateY(180deg); }
+}
+@keyframes slide-in-left { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes slide-in-right { from { transform: translateX(-40px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes rise { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.animate-rise { animation: rise 0.35s ease-out both; }
+.animate-fade { animation: fade 0.25s ease-out both; }
