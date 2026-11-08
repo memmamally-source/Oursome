@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from 'react-native';
 import type { ScrollViewInstance } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -24,6 +24,19 @@ export default function AssistantScreen() {
   const [draft, setDraft] = useState('');
   const scrollRef = useRef<ScrollViewInstance>(null);
   const handled = useRef<string | undefined>(undefined);
+  // While the keyboard is up the home-indicator gap isn't needed, and the latest reply should stay in view.
+  const [keyboardUp, setKeyboardUp] = useState(false);
+  useEffect(() => {
+    const show = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow', () => {
+      setKeyboardUp(true);
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 250);
+    });
+    const hide = Keyboard.addListener(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide', () => setKeyboardUp(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
 
   // A prompt handed over from elsewhere (e.g. a Home suggestion) is sent once.
   useEffect(() => {
@@ -82,6 +95,8 @@ export default function AssistantScreen() {
       <ScrollView
         ref={scrollRef}
         onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
+        onLayout={() => scrollRef.current?.scrollToEnd({ animated: false })}
+        keyboardDismissMode="interactive"
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           padding: layout.screenPadding,
@@ -140,7 +155,7 @@ export default function AssistantScreen() {
           backgroundColor: palette.surface,
           paddingHorizontal: layout.screenPadding,
           paddingTop: space.sm,
-          paddingBottom: Math.max(insets.bottom, space.md),
+          paddingBottom: keyboardUp ? space.sm : Math.max(insets.bottom, space.md),
         }}>
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: space.sm, width: '100%', maxWidth: layout.maxContentWidth, alignSelf: 'center' }}>
           <TextInput

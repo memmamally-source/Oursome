@@ -546,8 +546,9 @@ function cleanTitle(raw: string): string {
   for (const re of LEAD_PHRASES) t = t.replace(re, '');
   t = t
     .replace(/\s+(?:to|in|on|into)\s+(?:my|the|our)\s+(?:calendar|diary|schedule|list|to-?do list|tasks?)\b/g, '')
-    .replace(/\s+(?:on|at|by|for|before|from|in|due|this)\s*$/g, '')
-    .replace(/\s+(?:on|at|by|for|before|from|in|due|this)\s*$/g, '')
+    // A preposition left behind once the date is taken out: "add swimming to [Friday]".
+    .replace(/\s+(?:on|at|by|for|before|from|in|due|this|to|until|till)\s*$/g, '')
+    .replace(/\s+(?:on|at|by|for|before|from|in|due|this|to|until|till)\s*$/g, '')
     .replace(/[\s,.!?;:]+$/g, '')
     .replace(/^[\s,.;:-]+/, '');
   return capitalise(t);

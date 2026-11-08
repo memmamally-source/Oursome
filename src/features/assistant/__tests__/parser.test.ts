@@ -1,3 +1,5 @@
+import { interpretBasic } from '../basic';
+import type { AssistantContext } from '../context';
 import { applyClarification, nextClarification, parseCapture, type ParseResult, type Proposal } from '../parser';
 
 // Wednesday 21 October 2026, 10:00 local time.
@@ -204,5 +206,19 @@ describe('parseCapture — other intents', () => {
 
   it('generative requests are deferred to the AI assistant', () => {
     expect(parseCapture('Create a grocery list for dinner tonight', ctx)).toEqual({ type: 'unsupported', reason: 'generative' });
+  });
+});
+
+describe('titles after the date is taken out', () => {
+  it('drops a dangling "to"', () => {
+    const ctx: AssistantContext = {
+      now: new Date(2026, 10, 8, 12), today: '2026-11-08', timeZone: 'UTC',
+      people: [{ id: 'me', name: 'Rufaida Khan', color: 'coral', role: 'admin', isMe: true }],
+      tasks: [], events: [], calendars: [], lists: [], proposals: [],
+      refs: { tasks: {}, events: {}, proposals: {} },
+    };
+    const a = interpretBasic('Add Muhammad day shift to tomorrow', ctx).actions[0];
+    expect(a).toMatchObject({ title: 'Muhammad day shift', date: '2026-11-09' });
+    expect(interpretBasic('Add swimming to Friday', ctx).actions[0]).toMatchObject({ title: 'Swimming' });
   });
 });
