@@ -5,7 +5,7 @@ import { createId } from '@/lib/id';
 
 import { buildContext } from './context';
 import { applyResult, emptyConversation, replaceProposal, type ConversationState } from './conversation';
-import { processMessage } from './engine';
+import { processMessage, type EngineResult } from './engine';
 import { addAndAssign, chooseMember, executeProposal, keepAsSuggestion, ProposalError, unassign } from './execute';
 import type { Proposal } from './proposals';
 import type { Answer } from './query';
@@ -34,7 +34,8 @@ type AssistantState = {
   turns: Turn[];
   conversation: ConversationState;
   busy: boolean;
-  send: (text: string) => Promise<void>;
+  /** `onDay`: the day picked on the calendar, used for new plans that don't name a date. */
+  send: (text: string, opts?: { onDay?: string }) => Promise<void>;
   proposal: (id: string) => Proposal | undefined;
   /** Save a proposal. Returns an error message if it can't be saved yet. */
   approve: (id: string) => string | null;
@@ -46,6 +47,15 @@ type AssistantState = {
   reset: () => void;
 };
 
+/** New tasks, reminders and events with no date go on the day picked on the calendar. */
+function withDefaultDay(result: EngineResult, day: string | undefined): EngineResult {
+  if (!day) return result;
+  const proposals = result.resolution.proposals.map((p) =>
+    !p.date && !p.update && (p.kind === 'task' || p.kind === 'reminder' || p.kind === 'event') ? { ...p, date: day } : p,
+  );
+  return { ...result, resolution: { ...result.resolution, proposals } };
+}
+
 /**
  * One conversation with the organiser, shared by the Home capture box and
  * the full chat. Kept in memory for the session: proposals are drafts until
@@ -56,7 +66,7 @@ export const useAssistant = create<AssistantState>()((set, get) => ({
   conversation: emptyConversation,
   busy: false,
 
-  send: async (raw) => {
+  send: async (raw, opts) => {
     const text = raw.trim();
     if (!text || get().busy) return;
     const userTurn: Turn = { id: createId('u_'), role: 'user', text };
@@ -67,7 +77,7 @@ export const useAssistant = create<AssistantState>()((set, get) => ({
     set((s) => ({ turns: [...s.turns, userTurn, pending], busy: true }));
     try {
       const ctx = buildContext(new Date(), get().conversation);
-      const result = await processMessage(text, ctx, history);
+      const result = withDefaultDay(await processMessage(text, ctx, history), opts?.onDay);
       const { resolution, answer } = result;
       const text_ = [resolution.clarify, resolution.reply].filter(Boolean).join(' ');
       set((s) => ({

@@ -16,7 +16,7 @@ import { AssistantReply } from './AssistantReply';
  * review cards) appears right underneath, so ordinary requests never need
  * another screen.
  */
-export function CaptureBox({ autoFocus, onSent }: { autoFocus?: boolean; onSent?: () => void }) {
+export function CaptureBox({ autoFocus, onSent, onDay }: { autoFocus?: boolean; onSent?: () => void; onDay?: string }) {
   const { palette } = useTheme();
   const [text, setText] = useState('');
   const send = useAssistant((s) => s.send);
@@ -30,7 +30,7 @@ export function CaptureBox({ autoFocus, onSent }: { autoFocus?: boolean; onSent?
     if (!value || busy) return;
     haptic.tap();
     setText('');
-    send(value);
+    send(value, { onDay });
     onSent?.();
   };
 

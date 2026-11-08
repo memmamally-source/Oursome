@@ -8,6 +8,7 @@ import { Text } from '@/components/ui';
 import { useShopping } from '@/features/shopping/store';
 import { useSpace } from '@/features/space/store';
 import type { IconName } from '@/features/types';
+import { format, fromDateKey } from '@/lib/dates';
 import { haptic } from '@/lib/haptics';
 import { fonts, layout, radius, space, useTheme, type AccentKey } from '@/theme';
 
@@ -80,9 +81,9 @@ export default function QuickAdd() {
         alignSelf: 'center',
       }}>
       <Text variant="title" accessibilityRole="header">
-        Add or ask
+        {date ? `Add to ${format(fromDateKey(date), 'EEEE d MMMM')}` : 'Add or ask'}
       </Text>
-      <CaptureBox autoFocus />
+      <CaptureBox autoFocus onDay={date} />
       <Text variant="overline" tone="tertiary">
         Or add it yourself
       </Text>
