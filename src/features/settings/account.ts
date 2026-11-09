@@ -5,6 +5,7 @@ import { useActivity } from '@/features/activity/store';
 import { deleteAllPhotoFiles } from '@/features/albums/storage';
 import { useAlbums } from '@/features/albums/store';
 import { useCalendar } from '@/features/calendar/store';
+import { cloudConfigured, deleteCloudAccount } from '@/features/cloud';
 import { useMemories } from '@/features/memories/store';
 import { useReminders } from '@/features/reminders/engine';
 import { useSession } from '@/features/session/store';
@@ -59,6 +60,8 @@ export async function exportData(): Promise<void> {
  * the Firebase account and server data via a Cloud Function.
  */
 export async function deleteAllLocalData(): Promise<void> {
+  // With cloud sharing on, the online account goes first (throws with a message if it can't).
+  if (cloudConfigured) await deleteCloudAccount();
   useTasks.getState().reset();
   useCalendar.getState().reset();
   useShopping.getState().reset();

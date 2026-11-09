@@ -1,4 +1,4 @@
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider as NavigationThemeProvider, type ErrorBoundaryProps } from 'expo-router';
+import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider as NavigationThemeProvider, type ErrorBoundaryProps } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -8,7 +8,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { OrbStage } from '@/components/brand/Orb';
 import { ConfirmHost } from '@/components/ui/ConfirmDialog';
 import { ToastHost } from '@/components/ui/Toast';
-import { CloudBoot } from '@/features/cloud';
+import { CloudBoot, cloudConfigured, useCloud } from '@/features/cloud';
 import { removeSampleContent } from '@/features/demo/cleanup';
 import { ReminderEngine } from '@/features/reminders/engine';
 import { useSession } from '@/features/session/store';
@@ -69,6 +69,13 @@ export default function RootLayout() {
 function AppNavigator() {
   const { palette, isDark } = useTheme();
   const signedIn = useSession((s) => s.signedIn);
+  // Opened from an invite link before having an account: once signed in, go and join.
+  const pendingInvite = useCloud((s) => s.pendingInvite);
+  useEffect(() => {
+    if (!signedIn || !pendingInvite || !cloudConfigured) return;
+    const t = setTimeout(() => router.push('/join'), 400);
+    return () => clearTimeout(t);
+  }, [signedIn, pendingInvite]);
   const hasOnboarded = useSettings((s) => s.hasOnboarded);
   const base = isDark ? DarkTheme : DefaultTheme;
   const navTheme = {
@@ -116,6 +123,8 @@ function AppNavigator() {
           <Stack.Screen name="album/[id]/edit" />
           <Stack.Screen name="premium" options={{ presentation: 'modal' }} />
         </Stack.Protected>
+        {/* Invite links work signed in or out (see invite.tsx). */}
+        <Stack.Screen name="invite" options={{ animation: 'fade' }} />
         <Stack.Protected guard={!signedIn}>
           <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
           <Stack.Screen name="(auth)" options={{ animation: 'fade' }} />

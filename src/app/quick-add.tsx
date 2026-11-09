@@ -45,6 +45,14 @@ export default function QuickAdd() {
       href: () => ({ pathname: '/event/[id]', params: { id: 'new', ...on } }),
     },
     {
+      // Not an appointment or a to-do: something going on that day ("Muhammad day shift", "Half term").
+      label: 'Day note',
+      hint: 'All day, on the calendar',
+      icon: 'sunny',
+      accent: 'lavender',
+      href: () => ({ pathname: '/event/[id]', params: { id: 'new', allDay: '1', ...on } }),
+    },
+    {
       label: 'Reminder',
       hint: 'Get a nudge',
       icon: 'notifications',

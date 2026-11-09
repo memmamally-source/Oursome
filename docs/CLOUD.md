@@ -36,7 +36,11 @@ Nothing on Firebase's free **Spark** plan for a household or a small group of fa
    | `EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | `messagingSenderId` |
 
    These values are **not secrets**: every Firebase web app ships them to the browser. The data is protected by the security rules, which only let members of a household read or write it.
-7. The next deploy (merging to `main`, or **Actions → Deploy website → Run workflow**) switches cloud sharing on.
+7. The next website deploy and the next **iPhone app** and **Android app** builds switch cloud sharing on (the workflows read the same variables).
+
+## Invites
+
+Invite messages carry a link, `https://oursome.org/invite?code=…`. On a phone, that page offers **Open in the Oursome app** (`oursome://invite?code=…`) or the store. In the app, the code is kept through sign-up or sign-in, then the join screen opens with it filled in. Entering the code by hand (Our Space → Join with a code) still works.
 
 ## What people see once it's on
 
@@ -84,5 +88,5 @@ EXPO_PUBLIC_FIREBASE_EMULATOR_HOST=localhost npx expo start --web
 
 - Photo sync (needs a paid storage plan, or another free option).
 - Push notifications with the app closed (needs a server to send them).
-- Native phone builds haven't been tested against Firebase. The web app has been tested against the emulators.
+- The phone apps haven't been tested against Firebase on a device yet. The web app has been tested end to end against the emulators: invite link, join, events shared both ways, account deletion.
 - Removing someone else from a family from inside the app (the rules allow admins to; the screen doesn't offer it yet).

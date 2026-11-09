@@ -35,5 +35,7 @@ export const Brand = {
 
 export const privacyUrl = `${Brand.siteUrl}/privacy/`;
 export const supportUrl = `${Brand.siteUrl}/support/`;
+export const APP_STORE_URL = 'https://apps.apple.com/app/id6826843084';
+export const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=org.oursome.app';
 
 export type BrandColor = keyof typeof Brand.colors;

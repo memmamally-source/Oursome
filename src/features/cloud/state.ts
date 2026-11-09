@@ -12,6 +12,9 @@ type CloudState = {
   synced: Record<string, Record<string, string>>;
   /** The latest invite code made on this device, per family. */
   invites: Record<string, { code: string; expiresAt: string }>;
+  /** An invite code from a link, kept until this person has an account and joins. */
+  pendingInvite: string | null;
+  setPendingInvite: (code: string | null) => void;
   setStatus: (status: CloudStatus, message?: string) => void;
   syncedFor: (spaceId: string) => Map<string, string>;
   setSynced: (spaceId: string, synced: Map<string, string>) => void;
@@ -25,11 +28,13 @@ export const useCloud = create<CloudState>()(
       status: 'off',
       synced: {},
       invites: {},
+      pendingInvite: null,
+      setPendingInvite: (pendingInvite) => set({ pendingInvite }),
       setStatus: (status, message) => set({ status, message }),
       syncedFor: (spaceId) => new Map(Object.entries(get().synced[spaceId] ?? {})),
       setSynced: (spaceId, synced) => set((s) => ({ synced: { ...s.synced, [spaceId]: Object.fromEntries(synced) } })),
       setInvite: (spaceId, invite) => set((s) => ({ invites: { ...s.invites, [spaceId]: invite } })),
     }),
-    { name: 'oursome.cloud', version: 1, storage: persistStorage, partialize: (s) => ({ synced: s.synced, invites: s.invites }) },
+    { name: 'oursome.cloud', version: 1, storage: persistStorage, partialize: (s) => ({ synced: s.synced, invites: s.invites, pendingInvite: s.pendingInvite }) },
   ),
 );

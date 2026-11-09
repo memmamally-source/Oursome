@@ -26,6 +26,8 @@ export default function ShoppingListScreen() {
     useShopping.getState();
   const hasSpace = useSpace((s) => !!s.space);
   const [draft, setDraft] = useState('');
+  // The name being edited; null when not editing.
+  const [name, setName] = useState<string | null>(null);
 
   if (!list) {
     return (
@@ -42,6 +44,11 @@ export default function ShoppingListScreen() {
   }
 
   const tone = palette.accents[list.color];
+  const saveName = () => {
+    const next = name?.trim();
+    if (next && next !== list.name) updateList(list.id, { name: next });
+    setName(null);
+  };
   const items = allItems.filter((i) => i.listId === list.id);
   const open = items.filter((i) => !i.purchased);
   const bought = items.filter((i) => i.purchased);
@@ -102,13 +109,22 @@ export default function ShoppingListScreen() {
             <Icon name={list.icon} size={24} color={tone.on} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text variant="title" numberOfLines={1} accessibilityRole="header">
-              {list.name}
-            </Text>
+            {/* Tap the name to rename the list. */}
+            <TextInput
+              value={name ?? list.name}
+              onChangeText={setName}
+              onBlur={saveName}
+              onSubmitEditing={saveName}
+              returnKeyType="done"
+              accessibilityLabel="List name"
+              accessibilityHint="Tap to rename this list"
+              style={{ fontFamily: fonts.display, fontSize: 28, lineHeight: 34, color: palette.text, padding: 0 }}
+            />
             <Text variant="callout" color={tone.ink}>
               {open.length} to get · {list.visibility === 'shared' ? 'Shared with Our Space' : 'Private'}
             </Text>
           </View>
+          <Icon name="create-outline" size={18} color={tone.ink} />
         </View>
       </View>
 

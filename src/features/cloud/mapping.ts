@@ -199,3 +199,10 @@ export function inviteCode(random: (n: number) => Uint8Array): string {
 }
 export const formatCode = (code: string) => `${code.slice(0, 5)}-${code.slice(5)}`;
 export const parseCode = (input: string) => input.toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+/** The link sent with an invite: opens oursome.org, which hands over to the app. */
+export const inviteLink = (code: string, site = 'https://oursome.org') => `${site}/invite?code=${parseCode(code)}`;
+
+/** What the person invited receives. */
+export const inviteMessage = (familyName: string, code: string) =>
+  `Join ${familyName} on Oursome: ${inviteLink(code)}\n\nOr open Oursome and go to Our Space → Join with a code: ${formatCode(parseCode(code))}. It works for 7 days.`;

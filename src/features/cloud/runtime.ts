@@ -4,4 +4,4 @@
  * only downloads when cloud sharing is configured.
  */
 export { firebaseAuth } from './auth';
-export { inviteToFamily, joinFamily, leaveFamily, shareFamily, startCloud } from './engine';
+export { deleteCloudAccount, inviteToFamily, joinFamily, leaveFamily, shareFamily, startCloud } from './engine';

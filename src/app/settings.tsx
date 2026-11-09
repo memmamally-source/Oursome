@@ -1,4 +1,5 @@
 import { confirmAction } from '@/components/ui/ConfirmDialog';
+import { toast } from '@/components/ui/Toast';
 import { Icon } from '@/components/ui/Icon';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
@@ -218,9 +219,16 @@ export default function SettingsScreen() {
           label="Delete account and data"
           destructive
           onPress={() =>
-            confirm('Delete everything?', 'This permanently removes your account and all data on this device.', 'Delete', () => {
-              deleteAllLocalData();
-            })
+            confirm(
+              'Delete everything?',
+              cloudConfigured
+                ? 'This permanently deletes your Oursome account and everything on this device. You’ll leave any shared families; what you shared stays with them.'
+                : 'This permanently removes your account and all data on this device.',
+              'Delete',
+              () => {
+                deleteAllLocalData().catch((e: Error) => toast({ message: e.message, tone: 'error' }));
+              },
+            )
           }
         />
       </Section>

@@ -23,6 +23,15 @@
 | 8b. Google Play | Android build workflow (`android.yml`, signed .aab as an artifact), notification channel, permissions trimmed, listing pack and 1080×1920 screenshots in `docs/play-store`. Needs the owner's Play account (US$25 once), the 3 upload-key secrets, and a 14-day closed test with 12+ testers |
 | 8. Store release | App configured, listing pack and screenshots ready (`docs/app-store`); `ios.yml` builds on GitHub's Macs and uploads with the owner's existing App Store Connect key (same as Crossword Hub / Research Tracker). Needs the 4 secrets, a first build, and TestFlight testing on a real iPhone |
 
+## Family sharing switched on (9 Nov 2026, owner decision: free Firebase Spark plan)
+
+- Reverses the earlier "on-device only" decision for sharing (photos still never upload; AI still off).
+- Invite link `oursome.org/invite?code=` → public `src/app/invite.tsx` (outside the auth guard) keeps the code in `useCloud.pendingInvite`; after sign-in/up the navigator opens `/join` with it filled in. Phones in a browser get "Open in the Oursome app" (`oursome://invite`) and store buttons.
+- Delete account deletes the Firebase account (`deleteCloudAccount`: leave every shared family, then `deleteUser`; asks for a recent sign-in if Firebase requires it).
+- iOS and Android workflows pass the `EXPO_PUBLIC_FIREBASE_*` repository variables; privacy manifest declares Name, Email, Other user content, User ID (linked, app functionality, no tracking); privacy policy, support page, App Store and Data safety answers updated.
+- Verified against the Firebase emulators in two browsers; rules tests 15/15. Not yet tested on a phone against real Firebase.
+- Also in this release (1.0.2): editable shopping-list names, "Day note" on the big +, reminder-less events stay reminder-less.
+
 ## TestFlight round 2 fixes (27 Oct 2026)
 
 - **Create album greyed out:** choosing photos now shows "Getting your photos…" while iOS hands them over, and picker errors are shown (`features/albums/picker.ts`, shared by new and edit).
