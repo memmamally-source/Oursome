@@ -54,6 +54,14 @@ jobs:
           # Google Play refuses an upload whose version code isn't higher than the last one.
           ANDROID_VERSION_CODE: ${{ github.run_number }}
 
+      - name: Download Gradle
+        # The generated wrapper gives up after 10 s; services.gradle.org can be slower than that.
+        working-directory: android
+        run: |
+          sed -i 's/^networkTimeout=.*/networkTimeout=120000/' gradle/wrapper/gradle-wrapper.properties
+          for i in 1 2 3; do ./gradlew --version --no-daemon && exit 0; echo "Gradle download failed, retrying ($i)"; sleep 15; done
+          exit 1
+
       - name: Check it builds
         if: github.event_name == 'pull_request'
         working-directory: android
