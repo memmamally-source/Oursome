@@ -1,3 +1,4 @@
+import { deleteUser } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
 
 import { useCalendar } from '@/features/calendar/store';
@@ -304,3 +305,26 @@ export async function leaveFamily(spaceId: string): Promise<void> {
   useSpace.getState().linkCloud(spaceId, undefined);
   useCloud.getState().setSynced(spaceId, new Map());
 }
+
+/**
+ * Delete this person's cloud account: they leave every shared family, then the
+ * Firebase account is deleted. What they shared stays with the family. Firebase
+ * asks for a recent sign-in before deleting an account.
+ */
+export async function deleteCloudAccount(): Promise<void> {
+  const me = await requireUser();
+  for (const space of useSpace.getState().spaces.filter((s) => s.cloudId)) {
+    detach(space.id);
+    await api.leaveHousehold(db, me, space.cloudId!).catch(() => {});
+  }
+  const user = firebase().auth.currentUser;
+  if (!user) return;
+  try {
+    await deleteUser(user);
+  } catch (e) {
+    if ((e as { code?: string }).code?.includes('requires-recent-login'))
+      throw new Error('For your security, sign out and sign back in, then delete your account again.');
+    throw new Error('Your account couldn’t be deleted. Check your connection and try again.');
+  }
+}
+

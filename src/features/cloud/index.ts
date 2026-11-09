@@ -23,3 +23,4 @@ export const shareFamily = async (spaceId: string) => (await engine()).shareFami
 export const inviteToFamily = async (spaceId: string) => (await engine()).inviteToFamily(spaceId);
 export const joinFamily = async (code: string) => (await engine()).joinFamily(code);
 export const leaveFamily = async (spaceId: string) => (await engine()).leaveFamily(spaceId);
+export const deleteCloudAccount = async () => (await engine()).deleteCloudAccount();

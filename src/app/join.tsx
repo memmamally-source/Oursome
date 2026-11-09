@@ -5,14 +5,18 @@ import { TextInput, View } from 'react-native';
 import { Button, ModalHeader, ModalScreen, Text } from '@/components/ui';
 import { toast } from '@/components/ui/Toast';
 import { cloudConfigured, joinFamily, useCloud } from '@/features/cloud';
-import { parseCode } from '@/features/cloud/mapping';
+import { formatCode, parseCode } from '@/features/cloud/mapping';
 import { fonts, radius, space, useTheme } from '@/theme';
 
 /** Join a family someone shared, with the code they sent. */
 export default function JoinScreen() {
   const { palette } = useTheme();
   const status = useCloud((s) => s.status);
-  const [code, setCode] = useState('');
+  // A code from an invite link is filled in already.
+  const [code, setCode] = useState(() => {
+    const pending = useCloud.getState().pendingInvite;
+    return pending ? formatCode(pending) : '';
+  });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const clean = parseCode(code);
@@ -22,6 +26,7 @@ export default function JoinScreen() {
     setError(null);
     try {
       const name = await joinFamily(clean);
+      useCloud.getState().setPendingInvite(null);
       toast({ message: `Welcome to ${name}` });
       router.replace('/space');
     } catch (e) {

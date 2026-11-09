@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/primitives';
 import { Text } from '@/components/ui/Text';
 import { toast } from '@/components/ui/Toast';
 import { cloudConfigured, inviteToFamily, leaveFamily, shareFamily, useCloud } from '@/features/cloud';
-import { formatCode } from '@/features/cloud/mapping';
+import { formatCode, inviteMessage } from '@/features/cloud/mapping';
 import { auth } from '@/features/session/store';
 import type { Space } from '@/features/types';
 import { format } from '@/lib/dates';
@@ -150,7 +150,7 @@ export function FamilySharing({ family, isAdmin }: { family: Space; isAdmin: boo
             size="sm"
             variant="secondary"
             onPress={() =>
-              void copyOrShare(`Join ${family.name} on Oursome with the code ${formatCode(invite.code)}. It works for 7 days.`)
+              void copyOrShare(inviteMessage(family.name, invite.code))
             }
           />
         ) : null}

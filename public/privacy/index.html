@@ -4,26 +4,36 @@
 <body><main>
 <header><a class="brand" href="../"><svg width="34" height="34" viewBox="0 0 100 100" aria-hidden="true"><path d="M 20.33 38.01 A 32 32 0 0 1 38.01 20.33" stroke="#E5B96D" stroke-width="17" stroke-linecap="round" fill="none"/><path d="M 61.99 20.33 A 32 32 0 0 1 79.67 38.01" stroke="#879D86" stroke-width="17" stroke-linecap="round" fill="none"/><path d="M 79.67 61.99 A 32 32 0 0 1 61.99 79.67" stroke="#8FA5B2" stroke-width="17" stroke-linecap="round" fill="none"/><path d="M 38.01 79.67 A 32 32 0 0 1 20.33 61.99" stroke="#A08DA4" stroke-width="17" stroke-linecap="round" fill="none"/><circle cx="50" cy="50" r="11" fill="#B95F49"/></svg> oursome<span>.</span></a><a class="button" href="../">Open the app</a></header>
 <h1>Privacy policy</h1>
-<p class="muted">Last updated 25 October 2026 · applies to the Oursome website and app</p>
+<p class="muted">Last updated 9 November 2026 · applies to the Oursome website and app</p>
 
-<div class="note"><strong>The short version:</strong> everything you add to Oursome, including your photos, stays on your phone or in your browser. We don't run a server that receives it, we don't track you, we don't show ads, and your photos are never used to train AI.</div>
+<div class="note"><strong>The short version:</strong> your plans, lists and photos stay on your phone. Only what you choose to share with your family, plus the account you need for that, is stored online so your family can see it. No ads, no tracking, no selling your data, and your photos are never used to train AI.</div>
 
-<h2>What Oursome stores, and where</h2>
-<p>Your name, email address, colour and time zone; the events, tasks, reminders, shopping lists, journal pages, photo albums and household details you create; and your settings. All of it is saved on your device: in the app's own storage on a phone, or in your browser's storage on the website.</p>
-<p><strong>Photos</strong> you choose for albums, the journal or your household cover are copied into that same on-device storage (with smaller versions for quick display). Oursome only sees the photos you pick; it never browses your photo library.</p>
-<p>Your password itself is never stored. Oursome keeps only a scrambled version of it (a salted hash) on your device, to check it when you sign in.</p>
+<h2>What stays on your device</h2>
+<p>Everything you mark <strong>Private</strong>, and all your <strong>photos</strong> (albums, journal photos and your household cover), are saved only on your device: in the app's own storage on a phone, or in your browser's storage on the website. Oursome only sees the photos you pick; it never browses your photo library.</p>
+
+<h2>What is stored online, and why</h2>
+<p>To share with your family, Oursome uses <strong>Google Firebase</strong> (Firebase Authentication and Cloud Firestore), run by Google as our data processor. It stores:</p>
+<ul>
+  <li><strong>Your account:</strong> your name, email address and an account ID. Your password is handled by Firebase Authentication; Oursome never sees or stores it.</li>
+  <li><strong>What you share with a family:</strong> items marked <strong>Shared</strong> in a family you've chosen to share (tasks, events, shopping lists, journal words and noticeboard notes), the family's name and its members' names and colours.</li>
+  <li><strong>Invite codes</strong> you create, which expire after 7 days.</li>
+</ul>
+<p>Only members of a family can read its shared items; this is enforced by the database's security rules, not just the app. Photos are not uploaded: a shared journal page shows its words to your family and its photo only on the device where it was added. If you never share a family, nothing but your account is stored online.</p>
 
 <h2>What Oursome doesn't do</h2>
 <ul>
   <li>No analytics, advertising, tracking or tracking cookies.</li>
-  <li>No selling or sharing of your information with anyone.</li>
+  <li>No selling or sharing of your information, other than with Google as described above to run family sharing.</li>
   <li>Your photos and content are never used to train AI models.</li>
-  <li>Nothing is public. Albums and other items are private unless you mark them shared, and shared means shared with your household on Oursome, not with the internet.</li>
+  <li>Nothing is public. Shared means shared with the members of your family on Oursome, not with the internet.</li>
   <li>The organiser and Smart Import understand what you type on your device; your text isn't sent anywhere.</li>
 </ul>
 
-<h2>Sharing with your family</h2>
-<p>Items marked <strong>Private</strong> are only for you; items marked <strong>Shared</strong> are for the people in your household. Today, sharing works on one device. If we switch on cloud accounts and family sync in future, this page will be updated first to explain exactly what is sent, where it's stored and who can see it, and you'll be told in the app before anything leaves your device.</p>
+<h2>Leaving a family and deleting your account</h2>
+<ul>
+  <li><strong>Stop sharing here</strong> (Our Space) takes you out of a shared family. Your copy stays on your device.</li>
+  <li><strong>Settings → Account → Delete account and data</strong> deletes your online account, takes you out of every shared family and erases everything on that device, photos included. Items you shared stay with the family you shared them with, as part of that family's records; the family's admin can remove them.</li>
+</ul>
 
 <h2>Exports and printing</h2>
 <p>Album PDFs and data exports are made on your device and saved where you choose. Oursome doesn't send them anywhere.</p>
@@ -31,7 +41,7 @@
 <h2>Your choices</h2>
 <ul>
   <li><strong>Export:</strong> Settings → Privacy &amp; data → Export my data saves your information as a file.</li>
-  <li><strong>Delete:</strong> Settings → Account → Delete account and data permanently erases your account and everything Oursome stored on that device, photos included. Deleting the app (or clearing the website's data in your browser) does the same.</li>
+  <li><strong>Delete:</strong> Settings → Account → Delete account and data, as described above. You can also email us to ask for your online data to be deleted.</li>
 </ul>
 
 <h2>Children</h2>

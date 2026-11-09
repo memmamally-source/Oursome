@@ -110,9 +110,18 @@ Oursome is free.
 
 ## App Privacy ("nutrition label")
 
-Answer **"No, we do not collect data from this app."** That's accurate for this build: everything is stored on the device, there's no analytics or ads, and the organiser runs on the device. The privacy manifest in `app.json` declares no tracking and no collected data.
+Family sharing (Firebase) is on, so answer **"Yes, we collect data from this app"** and declare exactly these, each **Linked to the user**, **not used for tracking**, purpose **App Functionality** only:
 
-> Change this before switching on cloud sharing (Firebase) or the Smart organiser (AI service). Both send data off the device, so the label, the privacy policy and the manifest must be updated first.
+| Category → type | Why |
+| --- | --- |
+| Contact Info → **Name** | Shown to family members |
+| Contact Info → **Email Address** | The account sign-in |
+| User Content → **Other User Content** | Items shared with a family (tasks, events, lists, journal words, notes) |
+| Identifiers → **User ID** | The account ID |
+
+Not collected: photos (never uploaded), location, contacts, health, financial info, browsing, usage data, diagnostics. The privacy manifest in `app.json` declares the same four types and no tracking.
+
+> The Smart organiser (AI service) is still off. Update this, the privacy policy and the manifest before switching it on.
 
 ## Age rating
 

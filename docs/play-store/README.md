@@ -114,9 +114,9 @@ Oursome is free.
 | Government app | No |
 | Financial features | None |
 | Health | None |
-| Data safety | **No data collected** and **no data shared**. Everything is stored on the device; nothing is sent to us or anyone else. Data is not encrypted in transit because none is transmitted. Users can delete their data in the app (Settings → Account → Delete account and data). |
+| Data safety | **Yes**, data is collected (family sharing). **Collected, not shared** (Google runs it as our processor): Personal info → **Name**, **Email address**, **User IDs**; App activity → **Other user-generated content** (items shared with a family). For each: required for the app to work? **No** for content (only when sharing a family), **Yes** for account details; purpose **App functionality** and **Account management**. **Encrypted in transit: Yes.** **Users can request deletion: Yes** (Settings → Account → Delete account and data, or email). Photos are never uploaded. |
 
-> Update the Data safety form, the privacy policy and the iOS privacy answers before switching on cloud sharing (Firebase) or the AI assistant, because both send data off the phone.
+> Family sharing is on. Update the Data safety form, the privacy policy and the iOS answers again before switching on the AI assistant.
 
 ## Updating the app later
 
