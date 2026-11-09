@@ -50,7 +50,10 @@ export default function EventEditor() {
   const [location, setLocation] = useState(existing?.location ?? params.location ?? '');
   const [notes, setNotes] = useState(existing?.notes ?? '');
   const [recurrence, setRecurrence] = useState(existing?.recurrence ?? (params.important ? { freq: 'yearly' as const } : null));
-  const [reminderMinutes, setReminderMinutes] = useState<number | null>(existing?.reminderMinutes ?? 30);
+  const [reminderMinutes, setReminderMinutes] = useState<number | null>(
+    // An event saved with no reminder keeps none (`null ?? 30` used to bring one back on every edit).
+    existing ? (existing.reminderMinutes ?? null) : params.allDay ? null : 30,
+  );
   const [visibility, setVisibility] = useState(existing?.visibility ?? 'private');
   const [important, setImportant] = useState(existing ? !!existing.isImportantDate : !!params.important);
   const [going, setGoing] = useState<string[]>(existing?.participantIds ?? []);
