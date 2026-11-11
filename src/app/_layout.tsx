@@ -77,6 +77,13 @@ function AppNavigator() {
     return () => clearTimeout(t);
   }, [signedIn, pendingInvite]);
   const hasOnboarded = useSettings((s) => s.hasOnboarded);
+  // A short how-to tour the first time someone is signed in (an invite comes first).
+  const hasSeenTour = useSettings((s) => s.hasSeenTour);
+  useEffect(() => {
+    if (!signedIn || hasSeenTour || pendingInvite) return;
+    const t = setTimeout(() => router.push('/tour'), 600);
+    return () => clearTimeout(t);
+  }, [signedIn, hasSeenTour, pendingInvite]);
   const base = isDark ? DarkTheme : DefaultTheme;
   const navTheme = {
     ...base,
@@ -122,6 +129,7 @@ function AppNavigator() {
           <Stack.Screen name="album/[id]/index" />
           <Stack.Screen name="album/[id]/edit" />
           <Stack.Screen name="premium" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="tour" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
         </Stack.Protected>
         {/* Invite links work signed in or out (see invite.tsx). */}
         <Stack.Screen name="invite" options={{ animation: 'fade' }} />

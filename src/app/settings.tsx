@@ -9,7 +9,7 @@ import { Linking, Platform, Pressable, View } from 'react-native';
 import { LogoMark } from '@/components/brand/Logo';
 import { NotificationSettings } from '@/components/settings/NotificationSettings';
 import { Avatar, Card, Divider, IconButton, Screen, Segmented, SettingRow, Text, TextField } from '@/components/ui';
-import { Brand, privacyUrl, supportUrl } from '@/config/brand';
+import { APP_STORE_URL, Brand, feedbackMailto, privacyUrl, PLAY_STORE_URL, rateUrl, supportUrl } from '@/config/brand';
 import { cloudConfigured } from '@/features/cloud';
 import { deleteAllLocalData, exportData } from '@/features/settings/account';
 import { useSettings } from '@/features/settings/store';
@@ -203,9 +203,49 @@ export default function SettingsScreen() {
       </Section>
 
       <Section title="Help">
-        <SettingRow icon="help-circle-outline" accent="sunshine" label="Help & support" detail="Answers to common questions" onPress={() => Linking.openURL(supportUrl)} />
+        <SettingRow
+          icon="map-outline"
+          accent="coral"
+          label="Take the tour"
+          detail="A quick look at how everything works"
+          onPress={() => router.push('/tour')}
+        />
         <Divider />
-        <SettingRow icon="mail-outline" accent="sky" label="Email us" detail={Brand.supportEmail} onPress={() => Linking.openURL(`mailto:${Brand.supportEmail}`)} />
+        <SettingRow
+          icon="help-circle-outline"
+          accent="sunshine"
+          label="Help & support"
+          detail="Answers to common questions"
+          onPress={() => Linking.openURL(supportUrl)}
+        />
+        <Divider />
+        <SettingRow
+          icon="chatbubble-ellipses-outline"
+          accent="sky"
+          label="Send feedback"
+          detail="Tell us what works and what doesn’t"
+          onPress={() => Linking.openURL(feedbackMailto(Constants.expoConfig?.version ?? '1.0.0', Platform.OS))}
+        />
+        <Divider />
+        <SettingRow
+          icon="star-outline"
+          accent="sunshine"
+          label="Rate Oursome"
+          detail={Platform.OS === 'ios' ? 'On the App Store' : Platform.OS === 'android' ? 'On Google Play' : 'In your app store'}
+          onPress={() =>
+            Linking.openURL(rateUrl(Platform.OS, typeof navigator !== 'undefined' ? navigator.userAgent : '')).catch(() =>
+              Linking.openURL(Platform.OS === 'ios' ? APP_STORE_URL : PLAY_STORE_URL),
+            )
+          }
+        />
+        <Divider />
+        <SettingRow
+          icon="mail-outline"
+          accent="sky"
+          label="Email us"
+          detail={Brand.supportEmail}
+          onPress={() => Linking.openURL(`mailto:${Brand.supportEmail}`)}
+        />
         <Divider />
         <SettingRow icon="document-text-outline" accent="mint" label="Privacy policy" onPress={() => Linking.openURL(privacyUrl)} />
       </Section>
