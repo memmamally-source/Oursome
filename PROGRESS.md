@@ -156,6 +156,14 @@ Decision (23 Oct 2026): launch as a website first, like Crossword Hub. We reuse 
 - **Settings:** profile name/colour, theme (auto/light/dark), Home sections, notification preferences + quiet hours (stored only), JSON data export, sign out, delete all local data.
 - Checks: `npm run check` → typecheck + lint + 94 unit tests (parser, importer, recurrence, layout, tasks, shopping, suggestions). Native iOS/Android bundles export cleanly. Every screen visually reviewed in light and dark via web screenshots (not on a physical device).
 
+## Testers Community feedback (11 Nov 2026)
+
+Their report found no crashes or bugs; it suggested store text, onboarding, rating and screenshots. Done:
+- `src/app/tour.tsx`: a how-to tour (the big +, calendar, tasks, shopping, albums, sharing, organiser), shown once after sign-in (`hasSeenTour` in settings) and from Settings → Help → Take the tour. Waits if an invite is pending.
+- Settings → Help: Send feedback (email with version and platform), Rate Oursome (store review page; `rateUrl` in `src/config/brand.ts`, tested).
+- Play listing: a longer keyword-rich description, a new short description, captioned screenshots in `docs/play-store/screenshots-captioned/`.
+Not done: an in-app review prompt (needs a native module), a community forum and social sharing (not wanted for a private app).
+
 ## Known gaps / outstanding
 
 - Not tested on a physical iPhone/Android device (all testing is the web build in Chromium).

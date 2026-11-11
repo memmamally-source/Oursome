@@ -33,6 +33,8 @@ export type NotificationPrefs = {
 type SettingsState = {
   theme: ThemePreference;
   hasOnboarded: boolean;
+  /** The how-to tour after signing in has been seen (or skipped). */
+  hasSeenTour: boolean;
   dashboard: Record<DashboardSection, boolean>;
   notifications: NotificationPrefs;
   dismissedSuggestions: string[];
@@ -50,6 +52,7 @@ type SettingsState = {
   setWeeklySummary: (on: boolean) => void;
   setTheme: (theme: ThemePreference) => void;
   completeOnboarding: () => void;
+  completeTour: () => void;
   toggleSection: (section: DashboardSection) => void;
   setNotifications: (patch: Partial<NotificationPrefs>) => void;
   dismissSuggestion: (id: string) => void;
@@ -61,6 +64,7 @@ type SettingsState = {
 const defaults = {
   theme: 'system' as ThemePreference,
   hasOnboarded: false,
+  hasSeenTour: false,
   dashboard: Object.fromEntries(dashboardSectionKeys.map((k) => [k, true])) as Record<DashboardSection, boolean>,
   notifications: {
     appointments: true,
@@ -86,6 +90,7 @@ export const useSettings = create<SettingsState>()(
       ...defaults,
       setTheme: (theme) => set({ theme }),
       completeOnboarding: () => set({ hasOnboarded: true }),
+      completeTour: () => set({ hasSeenTour: true }),
       toggleSection: (section) => set((s) => ({ dashboard: { ...s.dashboard, [section]: !s.dashboard[section] } })),
       setNotifications: (patch) => set((s) => ({ notifications: { ...s.notifications, ...patch } })),
       dismissSuggestion: (id) => set((s) => ({ dismissedSuggestions: [...s.dismissedSuggestions.slice(-50), id] })),
