@@ -47,6 +47,12 @@ for (const file of htmlFiles) {
     if (/^(https?:|mailto:|tel:|data:|#)/.test(ref)) continue;
     if (!resolveLocal(ref, file)) problems.push(`${rel}: broken link ${ref}`);
   }
+  // Owner instructions (16 Nov 2026): the company is Karoo Fox (Pty) Ltd (never
+  // describe it as a brand of EM Medical Group), and the album app ("In
+  // Pictures") must not appear anywhere on the website.
+  for (const banned of [/EM Medical/i, /In Pictures/i, /in-pictures/i, /scrapbook/i, /photo album app/i]) {
+    if (banned.test(html)) problems.push(`${rel}: contains banned text ${banned}`);
+  }
   if (rel === '404.html') continue;
   const h1s = (html.match(/<h1[\s>]/g) || []).length;
   if (h1s !== 1) problems.push(`${rel}: expected one <h1>, found ${h1s}`);

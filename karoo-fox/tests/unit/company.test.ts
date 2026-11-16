@@ -3,19 +3,12 @@ import assert from 'node:assert/strict';
 import { company, entityStatement, legalName } from '../../src/config/company.ts';
 import { readinessGaps, hasVisiblePlaceholders } from '../../src/lib/readiness.ts';
 
-test('before the CIPC amendment the site names EM Medical Group as the legal entity', () => {
-  assert.equal(company.nameAmendmentComplete, false);
-  assert.equal(legalName(), 'EM Medical Group (Pty) Ltd');
+test('the company is Karoo Fox (Pty) Ltd, and EM Medical Group is not mentioned', () => {
+  assert.equal(company.nameAmendmentComplete, true);
+  assert.equal(legalName(), 'Karoo Fox (Pty) Ltd');
   const s = entityStatement();
-  assert.match(s, /brand of EM Medical Group \(Pty\) Ltd/);
-  assert.match(s, /intends to change/);
-  assert.doesNotMatch(s, /operated by Karoo Fox \(Pty\) Ltd/);
-});
-
-test('after the amendment the statement switches to Karoo Fox (Pty) Ltd', () => {
-  const after = { ...company, nameAmendmentComplete: true };
-  assert.equal(legalName(after), 'Karoo Fox (Pty) Ltd');
-  assert.match(entityStatement(after), /operated by Karoo Fox \(Pty\) Ltd \(formerly EM Medical Group \(Pty\) Ltd\)/);
+  assert.equal(s, 'Karoo Fox (Pty) Ltd is a private company registered in South Africa.');
+  assert.doesNotMatch(s, /EM Medical/);
 });
 
 test('readiness reports missing details and a missing domain', () => {

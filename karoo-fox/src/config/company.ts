@@ -24,10 +24,10 @@ export const company: Company = {
   /** Public-facing brand. */
   brand: 'Karoo Fox',
 
-  /** The company's current registered name with the CIPC. */
+  /** The company's previous registered name (not shown on the site). */
   currentLegalName: 'EM Medical Group (Pty) Ltd',
 
-  /** The intended registered name once the CIPC name amendment is complete. */
+  /** The company's registered name. */
   futureLegalName: 'Karoo Fox (Pty) Ltd',
 
   /**
@@ -35,7 +35,8 @@ export const company: Company = {
    * registered name to Karoo Fox (Pty) Ltd. This switches every legal-entity
    * statement on the site to the new name.
    */
-  nameAmendmentComplete: false,
+  // Confirmed by the owner on 16 Nov 2026: the company name is now Karoo Fox (Pty) Ltd.
+  nameAmendmentComplete: true,
 
   /** Name reservation (approved by the CIPC; valid until 18 May 2027). */
   nameReservation: { name: 'KAROO FOX', reference: '9471244619', validUntil: '2027-05-18' },
@@ -76,7 +77,7 @@ export function legalName(c: Pick<Company, 'nameAmendmentComplete' | 'futureLega
 /** One-sentence statement of who operates Karoo Fox, accurate to the amendment status. */
 export function entityStatement(c: Pick<Company, 'nameAmendmentComplete' | 'futureLegalName' | 'currentLegalName' | 'brand'> = company): string {
   if (c.nameAmendmentComplete) {
-    return `${c.brand} is operated by ${c.futureLegalName} (formerly ${c.currentLegalName}), a private company registered in South Africa.`;
+    return `${c.futureLegalName} is a private company registered in South Africa.`;
   }
   return `${c.brand} is a brand of ${c.currentLegalName}, a private company registered in South Africa. The company intends to change its registered name to ${c.futureLegalName}.`;
 }

@@ -6,8 +6,8 @@ Nothing here has been bought, registered or submitted. Each step that costs mone
 
 ## 1. Legal entity (CIPC)
 
-- [ ] File the name amendment so that **EM Medical Group (Pty) Ltd** becomes **Karoo Fox (Pty) Ltd**. The reservation of KAROO FOX (reference **9471244619**) is valid until **18 May 2027**.
-- [ ] When the CIPC confirms the amendment, set `nameAmendmentComplete: true` in `src/config/company.ts`. Until then the site correctly says that Karoo Fox is a brand of EM Medical Group (Pty) Ltd that intends to change its name.
+- [x] Company name changed to **Karoo Fox (Pty) Ltd** (confirmed by the owner, 16 Nov 2026). The site names Karoo Fox (Pty) Ltd as the company everywhere (`nameAmendmentComplete: true`).
+- [ ] Keep the CIPC certificate showing the new name; Apple and Dun & Bradstreet will ask for it.
 - [ ] Add the **registration number** (`registrationNumber`). The registration number stays the same after a name change.
 - [ ] Add the **business address** (`address`). Use exactly the same address that will appear on the D-U-N-S record.
 - [ ] Name the **POPIA Information Officer** (`informationOfficer`). This is the head of the company unless the role is delegated. Register them with the Information Regulator if you haven't already.
@@ -66,8 +66,8 @@ Whichever provider you choose:
 
 Apple converts an existing Individual membership to an Organization through Apple Developer Support. Check Apple's current requirements when you apply; they generally include:
 
-- [ ] **A legal entity in the company's name.** Complete the CIPC amendment first, so Apple enrols *Karoo Fox (Pty) Ltd* rather than EM Medical Group (Pty) Ltd.
-- [ ] **A D-U-N-S number** for the company. Its legal name and address must match the CIPC record exactly. Look it up or request one free through Apple's D-U-N-S lookup tool. If the company already has a D-U-N-S number under EM Medical Group, ask Dun & Bradstreet to update the name after the amendment. Updates can take several days to weeks before Apple sees them.
+- [x] **A legal entity in the company's name:** Karoo Fox (Pty) Ltd.
+- [ ] **A D-U-N-S number** for the company. Its legal name and address must match the CIPC record exactly. Look it up or request one free through Apple's D-U-N-S lookup tool. If the company already has a D-U-N-S number under its previous name, ask Dun & Bradstreet to update it to Karoo Fox (Pty) Ltd. Updates can take several days to weeks before Apple sees them.
 - [ ] **Legal binding authority.** You must be able to sign for the company, for example as a director.
 - [ ] **A public website on the company's domain.** This site, live on the custom domain over HTTPS, with no preview banner. It must name the company and show contact details, support and privacy policy pages.
 - [ ] **A work email on the same domain**, for Apple to contact you.
@@ -81,7 +81,7 @@ Then, in App Store Connect, for each app:
 | Support URL | `https://<domain>/apps/<slug>/support/` |
 | Marketing URL | `https://<domain>/apps/<slug>/` |
 | Privacy Policy URL | The app's full policy, `privacyPolicyUrl` in `apps.ts`, until the full policy is hosted on this site |
-| Copyright | e.g. `2026 Karoo Fox (Pty) Ltd`, once the amendment is complete |
+| Copyright | `2026 Karoo Fox (Pty) Ltd` |
 
 ## 6. Google Play: Centurion Creatives → Karoo Fox
 
@@ -105,5 +105,5 @@ These are in the apps' own repositories, which were only read, never modified. T
 - **Crossword Hub:** its support page describes Duels and hint credits, while its status notes say they are off until Cloud Functions are deployed. The Karoo Fox site leaves them out until you confirm they're live.
 - **Oursome:** `PROGRESS.md` still says "No Firebase project yet", but its 9 Nov notes and privacy policy describe Firebase as on for family sharing.
 - **StePhD:** its content is AI-drafted and not medically reviewed, so the Karoo Fox site makes no expert-review claims and repeats the app's "educational purposes only / not affiliated with the USMLE, FSMB or NBME" disclaimer.
-- **The photo album app (In Pictures)** is left off the site for now, at the owner's request. To add it later, add an entry to `apps.ts` with `stage: 'planned'`. "Oursome" is still marked as a working name.
+- **The album app** is not on the website, at the owner's request; the build fails if it reappears. "Oursome" is still marked as a working name.
 - **Each app uses a different free-mail support address** (Gmail or Outlook). Consider moving them to `support@<domain>`, or app-specific aliases, after the email is set up, and update `supportEmail` in `apps.ts`.

@@ -7,9 +7,10 @@ Status as of 16 Nov 2026. Re-run `npm run check` after every change; all of it m
 | Check | Result |
 | --- | --- |
 | TypeScript (`astro check`, strictest settings) | ✅ 0 errors |
-| Unit tests: app-data rules, App Store statuses, legal wording before and after the CIPC amendment, readiness logic, URLs | ✅ passing |
+| Unit tests: app-data rules, App Store statuses, company name (Karoo Fox (Pty) Ltd, no EM Medical Group), readiness logic, URLs | ✅ passing |
 | HTML validation of every page (html-validate, recommended rules, no inline styles) | ✅ 32 pages |
 | Internal links and assets resolve | ✅ |
+| No page mentions EM Medical Group or the album app (build fails if one does) | ✅ |
 | One `<h1>` per page; title, description, canonical URL and Open Graph image on every page | ✅ |
 | Stable app URLs exist (page, support, privacy, data deletion for each app) | ✅ |
 | Every page in Chromium at 320, 390, 768 and 1280 px: no console errors, CSP violations, failed requests, broken images or horizontal scrolling | ✅ 32 pages × 4 widths |

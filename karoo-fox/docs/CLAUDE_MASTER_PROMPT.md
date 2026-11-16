@@ -1,3 +1,9 @@
+> **Owner updates after this brief (16 Nov 2026). These override the brief:**
+> - The company name is now **Karoo Fox (Pty) Ltd**. Do not describe Karoo Fox as a brand of EM Medical Group, and do not mention EM Medical Group on the website.
+> - The album app (In Pictures) is **not** on the website.
+> - Crossword Hub, Oursome and Research Tracker are on the App Store.
+> - All logo images are generated from `Karoo_Fox_Logo_High_Resolution_6144x4096.png`.
+
 # KAROO FOX — CLAUDE WEBSITE + LOGO IMPLEMENTATION BRIEF
 
 You are building the **official corporate website for Karoo Fox**, a South African software/app-development brand. Treat the supplied logo image as the APPROVED, CANONICAL brand reference; do not invent another fox or replace the logo with emojis, generic icons, stock art, or a newly generated mascot.
