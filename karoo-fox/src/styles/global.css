@@ -200,7 +200,7 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  min-height: 76px;
+  min-height: 88px;
 }
 
 .brand-link {
@@ -210,13 +210,13 @@ a:hover {
 }
 
 .brand-link img {
-  height: 60px;
+  height: 72px;
   width: auto;
 }
 
 @media (max-width: 760px) {
   .brand-link img {
-    height: 50px;
+    height: 56px;
   }
 }
 
@@ -348,21 +348,20 @@ a:hover {
 
 .hero__grid {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
   gap: clamp(2rem, 5vw, 4rem);
 }
 
 .hero__art {
   justify-self: center;
-  width: min(100%, 400px);
+  width: min(100%, 560px);
   background: var(--white);
 }
 
 .hero__art img {
   width: 100%;
   height: auto;
-  aspect-ratio: 1;
   object-fit: contain;
 }
 
@@ -373,7 +372,7 @@ a:hover {
 
   .hero__art {
     order: -1;
-    width: min(55%, 200px);
+    width: min(75%, 280px);
   }
 }
 

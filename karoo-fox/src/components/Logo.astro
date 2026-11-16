@@ -7,26 +7,30 @@
 import { href } from '../lib/url.ts';
 import logoSize from '../config/logo-size.json';
 interface Props {
-  /** Rendered height in CSS pixels (largest breakpoint). */
+  /** Rendered height in CSS pixels at the largest size. */
   height: number;
   alt?: string;
   class?: string;
   loading?: 'eager' | 'lazy';
+  /** Responsive `sizes`; defaults to the fixed rendered width. */
+  sizes?: string;
+  fetchpriority?: 'high' | 'auto';
 }
-const { height, alt = 'Karoo Fox', class: className, loading = 'eager' } = Astro.props;
+const { height, alt = 'Karoo Fox', class: className, loading = 'eager', sizes, fetchpriority } = Astro.props;
 const RATIO = logoSize.width / logoSize.height;
 const width = Math.round(height * RATIO);
-const widths = [160, 240, 320, 480];
+const widths = [160, 240, 320, 480, 640, 960, 1280];
 ---
 <img
   class={className}
-  src={href(`/brand/karoo-fox-logo-${widths.find((w) => w >= width * 2) ?? 480}.webp`)}
+  src={href(`/brand/karoo-fox-logo-${widths.find((w) => w >= width * 2) ?? 1280}.webp`)}
   srcset={widths.map((w) => `${href(`/brand/karoo-fox-logo-${w}.webp`)} ${w}w`).join(', ')}
-  sizes={`${width}px`}
+  sizes={sizes ?? `${width}px`}
   width={width}
   height={height}
   alt={alt}
   loading={loading}
+  fetchpriority={fetchpriority}
   decoding="async"
   data-white-canvas
 />
