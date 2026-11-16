@@ -15,7 +15,7 @@ The official website of **Karoo Fox**: the company, its apps, and one place for 
 
 | Need | Choice |
 | --- | --- |
-| Many similar pages (5 apps today, dozens later), each with stable support, privacy and deletion URLs | Astro generates all of them from one data file (`src/data/apps.ts`) |
+| Many similar pages (4 apps today, dozens later), each with stable support, privacy and deletion URLs | Astro generates all of them from one data file (`src/data/apps.ts`) |
 | GitHub Pages, low maintenance, fast, secure | Pure static HTML/CSS output with no JavaScript runtime and no server |
 | Non-developers can edit facts | Company details live in `src/config/company.ts`; app facts in `src/data/apps.ts`; news in Markdown |
 | Don't publish anything unverified | Placeholders are visible, `npm run readiness` lists every gap, and the deploy workflow refuses to publish until they're filled |
@@ -74,7 +74,7 @@ docs/                   Master prompt, launch checklist, QA checklist, brand gui
 | Website privacy notice | `/privacy/website/` |
 | News | `/news/`, `/news/<slug>/` |
 
-The slugs are `crossword-hub`, `oursome`, `research-tracker`, `stephd` and `photo-album`. **Never rename a slug** after it has been entered in App Store Connect or Play Console.
+The slugs are `crossword-hub`, `oursome`, `research-tracker` and `stephd`. **Never rename a slug** after it has been entered in App Store Connect or Play Console.
 
 ## Common edits
 
@@ -84,7 +84,7 @@ The slugs are `crossword-hub`, `oursome`, `research-tracker`, `stephd` and `phot
 ```ts
 { platform: 'ios', status: 'available', url: 'https://apps.apple.com/app/id6826843084' },
 ```
-Store buttons only appear for `available` releases. `unconfirmed` releases are hidden; Research Tracker's iPhone app is currently `unconfirmed`.
+Store buttons only appear for `available` releases that have a URL. An `available` release without a URL shows "On the App Store" with no link; this is Research Tracker today, until its listing URL is added. `unconfirmed` releases are hidden.
 
 **Add an app.** Add an entry to `apps` in `src/data/apps.ts`, put a 256×256 icon at `public/images/apps/<slug>.webp`, and run `npm run check`. All of its pages, the footer, the Support Centre and the sitemap update automatically.
 

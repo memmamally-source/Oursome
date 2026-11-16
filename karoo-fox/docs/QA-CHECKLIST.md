@@ -7,7 +7,7 @@ Status as of 16 Nov 2026. Re-run `npm run check` after every change; all of it m
 | Check | Result |
 | --- | --- |
 | TypeScript (`astro check`, strictest settings) | ✅ 0 errors |
-| Unit tests: app-data rules, legal wording before and after the CIPC amendment, readiness logic, URLs | ✅ 14 passing |
+| Unit tests: app-data rules, App Store statuses, legal wording before and after the CIPC amendment, readiness logic, URLs | ✅ passing |
 | HTML validation of every page (html-validate, recommended rules, no inline styles) | ✅ 32 pages |
 | Internal links and assets resolve | ✅ |
 | One `<h1>` per page; title, description, canonical URL and Open Graph image on every page | ✅ |
@@ -20,7 +20,7 @@ Status as of 16 Nov 2026. Re-run `npm run check` after every change; all of it m
 
 ## Checked by hand in this session
 
-- **Approved logo.** The logo matches the supplied PNGs in the header, hero and footer, and is not stretched (fixed aspect ratio). The faint grey box from the artwork's 254-white canvas was removed by snapping near-white pixels to pure white.
+- **Approved logo.** Every logo image is generated from `Karoo_Fox_Logo_High_Resolution_6144x4096.png` and was compared side by side with it. The header, hero and footer logos match it and are not stretched (fixed aspect ratio). The faint grey box from the artwork's 254-white canvas was removed by snapping near-white pixels to pure white.
 - **Logo size.** The logo is prominent but not oversized on a 390 px phone: the hero fox is 200 px.
 - **Favicon.** The transparent favicon keeps all cream details on light, mid-grey and navy backgrounds (`brand/review/favicon-check.png`).
 - **Social images.** The profile pictures keep the fox inside a circular crop, and the maskable icon keeps it inside the safe zone.
@@ -42,7 +42,7 @@ Status as of 16 Nov 2026. Re-run `npm run check` after every change; all of it m
 - [ ] **Email:** send to each of `hello@`, `support@` and `privacy@` and reply from them, once the mailboxes exist.
 - [ ] **Link previews:** check the Open Graph preview by pasting the live URL into WhatsApp, LinkedIn and X.
 - [ ] **Founder's name:** decide whether to name the founder on the About page. It is hidden for now; set `founder.show: true` in `src/config/company.ts` to show it.
-- [ ] **App facts:** before launch, re-check each app's status and store links in `src/data/apps.ts`. In particular, confirm Research Tracker's iPhone status and whether Crossword Hub's Duels are live.
+- [ ] **App facts:** before launch, re-check each app's status and store links in `src/data/apps.ts`. In particular, add Research Tracker's App Store URL, check that the Crossword Hub and Oursome App Store links open the right listings (Apple's site couldn't be reached from this session), and confirm whether Crossword Hub's Duels are live.
 
 ## Blocks public launch (`npm run readiness`)
 

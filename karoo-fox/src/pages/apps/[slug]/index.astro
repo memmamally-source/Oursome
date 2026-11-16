@@ -13,6 +13,7 @@ export const getStaticPaths = (() => apps.map((a) => ({ params: { slug: a.slug }
 const app = getApp(Astro.params.slug);
 const stageStatus = app.stage === 'available' ? 'available' : app.stage === 'preview' ? 'preview' : app.stage === 'planned' ? 'planned' : 'testing';
 const live = app.releases.filter((r) => r.status === 'available' || r.status === 'preview');
+const linked = live.filter((r) => r.url);
 const software = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
@@ -61,7 +62,7 @@ const software = {
         <p>{app.audience}</p>
         {app.disclaimer && <div class="notice"><p>{app.disclaimer}</p></div>}
         <div class="button-row">
-          {live.map((r) => {
+          {linked.map((r) => {
             const store = storeLink(r);
             return store ? <a class="button button--primary" href={store.url} rel="noopener">{store.label}</a> : <a class="button button--primary" href={r.url} rel="noopener">{r.status === 'preview' ? `Try the ${app.name} preview` : `Open ${app.name} on the web`}</a>;
           })}

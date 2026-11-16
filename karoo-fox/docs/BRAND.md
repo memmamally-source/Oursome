@@ -2,7 +2,7 @@
 
 ## Approved artwork
 
-The approved logo is the owner's supplied artwork in `brand/source/`, kept with its original filenames:
+The approved logo is the owner's supplied artwork in `brand/source/`, kept with its original filenames. **Every website and social image is generated from the high-resolution file** (`Karoo_Fox_Logo_High_Resolution_6144x4096.png`), as the owner asked, so they all match it exactly.
 
 | File | What it is |
 | --- | --- |
@@ -15,7 +15,7 @@ Do not redesign the fox, change its expression or colours, or substitute another
 
 ## Website and social files (generated)
 
-Running `npm run brand` regenerates these from the approved PNGs. It only removes blank canvas and resizes the images; it never redraws them. It also snaps the canvas's near-white pixels (values 252–254) to pure white, so the logo sits seamlessly on the white page. No artwork colour is anywhere near that range; the cream is #FFF6E9.
+Running `npm run brand` regenerates these from the high-resolution PNG. It only removes blank canvas and resizes the images; it never redraws them. It also snaps the canvas's near-white pixels (values 252–254) to pure white, so the logo sits seamlessly on the white page. No artwork colour is anywhere near that range; the cream is #FFF6E9.
 
 | Output | Use |
 | --- | --- |

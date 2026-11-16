@@ -26,6 +26,10 @@ const supportEmail = app.supportEmail ?? company.emails.support;
               <a href={store.url} rel="noopener">{store.label}</a>
             ) : r.url ? (
               <a href={r.url} rel="noopener">{r.status === 'preview' ? 'Open the preview' : 'Open in your browser'}</a>
+            ) : r.status === 'available' && r.platform === 'ios' ? (
+              <StatusBadge status="available" text="On the App Store" />
+            ) : r.status === 'available' && r.platform === 'android' ? (
+              <StatusBadge status="available" text="On Google Play" />
             ) : (
               <StatusBadge status={r.status} />
             )}

@@ -35,8 +35,11 @@ test('planned apps cannot show a live release, and released apps need a privacy 
   assert.ok(validateApp(noPolicy as App).some((p) => p.includes('need a privacy policy')));
 });
 
-test('the photo album app is listed as planned, with no store or web links', () => {
-  const photo = apps.find((a) => a.slug === 'photo-album')!;
-  assert.equal(photo.stage, 'planned');
-  assert.ok(photo.releases.every((r) => r.status === 'planned' && !r.url));
+
+test('App Store statuses confirmed by the owner (16 Nov 2026)', () => {
+  const ios = (slug: string) => apps.find((a) => a.slug === slug)!.releases.find((r) => r.platform === 'ios')!;
+  assert.equal(ios('crossword-hub').status, 'available');
+  assert.equal(ios('oursome').status, 'available');
+  assert.equal(ios('research-tracker').status, 'available');
+  assert.ok(!apps.some((a) => a.slug === 'photo-album' || a.slug === 'in-pictures'), 'photo album app is not listed for now');
 });

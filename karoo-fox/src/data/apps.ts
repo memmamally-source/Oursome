@@ -143,7 +143,7 @@ export const apps: App[] = [
     stage: 'available',
     releases: [
       { platform: 'web', status: 'available', url: 'https://oursome.org' },
-      { platform: 'ios', status: 'testing', note: 'iPhone app in TestFlight testing' },
+      { platform: 'ios', status: 'available', url: 'https://apps.apple.com/app/id6826843084' },
       { platform: 'android', status: 'testing', note: 'Android app in closed testing' },
     ],
     website: 'https://oursome.org',
@@ -160,7 +160,7 @@ export const apps: App[] = [
     hasAccounts: true,
     deletionSteps: ['Open Oursome.', 'Go to Settings → Account → Delete account and data, and confirm.'],
     faqs: [
-      { q: 'Is Oursome on the App Store or Google Play?', a: 'Not yet. The phone apps are in testing. You can use Oursome now in your browser at oursome.org.' },
+      { q: 'Where can I get Oursome?', a: 'Oursome is on the App Store for iPhone and on the web at oursome.org. The Android app is in testing.' },
       { q: 'Do I need an account?', a: 'No. An account is only needed if you want to share with your family.' },
     ],
     accent: '#B95F49',
@@ -189,7 +189,8 @@ export const apps: App[] = [
     stage: 'available',
     releases: [
       { platform: 'web', status: 'available', url: 'https://memmamally-source.github.io/First-project/' },
-      { platform: 'ios', status: 'unconfirmed' },
+      // On the App Store (confirmed by the owner, 16 Nov 2026). Add its listing URL when known.
+      { platform: 'ios', status: 'available' },
     ],
     privacyPolicyUrl: 'https://memmamally-source.github.io/First-project/privacy/',
     privacyPolicyDate: '2026-10-24',
@@ -255,33 +256,6 @@ export const apps: App[] = [
     accent: '#1D63D8',
     verifiedOn: '2026-11-16',
   },
-  {
-    slug: 'photo-album',
-    name: 'Photo album & scrapbook app',
-    category: 'Photos & memories',
-    tagline: 'Beautifully designed photo albums and scrapbooks, made simple.',
-    summary:
-      'A planned app to help individuals and families turn their photos into beautifully designed digital albums and scrapbooks using templates.',
-    description: [
-      'We are building an app that makes it easy for individuals and families to create beautifully designed digital photo albums and scrapbooks from their own photos, using ready-made templates.',
-      'The app is planned and not yet released, and its final name has not been chosen. We will announce it on this site when it is ready.',
-    ],
-    features: [],
-    audience: 'Individuals and families.',
-    stage: 'planned',
-    releases: [
-      { platform: 'ios', status: 'planned' },
-      { platform: 'android', status: 'planned' },
-    ],
-    privacyInBrief: [],
-    hasAccounts: false,
-    deletionSteps: [],
-    faqs: [
-      { q: 'When will it be available?', a: 'The app is planned and not yet released. We will announce it in News when it is ready.' },
-    ],
-    accent: '#4D7FA0',
-    verifiedOn: '2026-11-16',
-  },
 ];
 
 export const platformLabel: Record<Platform, string> = { web: 'Web', ios: 'iPhone', android: 'Android' };
@@ -326,7 +300,7 @@ export function validateApp(app: App): string[] {
   const problems: string[] = [];
   if (!/^[a-z0-9-]+$/.test(app.slug)) problems.push('slug must be lowercase letters, digits and hyphens');
   for (const r of app.releases) {
-    if ((r.status === 'available' || r.status === 'preview') && !r.url) problems.push(`${r.platform}: ${r.status} needs a url`);
+    if (r.platform === 'web' && (r.status === 'available' || r.status === 'preview') && !r.url) problems.push(`web: ${r.status} needs a url`);
     if (r.url && r.status !== 'available' && r.status !== 'preview') problems.push(`${r.platform}: only available/preview releases may link out`);
     if (r.url && !r.url.startsWith('https://')) problems.push(`${r.platform}: url must be https`);
   }

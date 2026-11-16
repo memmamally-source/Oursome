@@ -11,7 +11,7 @@ const groups = [
   { title: 'Planned', list: apps.filter((a) => a.stage === 'planned') },
 ].filter((g) => g.list.length > 0);
 ---
-<Base title="Apps" description="The Karoo Fox app portfolio: games, family organisation, research, education and photo albums.">
+<Base title="Apps" description="The Karoo Fox app portfolio: games, family organisation, research and education.">
   <PageHeader title="Our apps" eyebrow="Portfolio" lead="Software across games, family life, research, education and memories. Availability is shown per platform; we only list store links once an app is live." crumbs={[{ label: 'Apps' }]} />
   {groups.map((g) => (
     <section class="section" aria-label={g.title}>

@@ -14,7 +14,7 @@ const categories = [...new Set(apps.map((a) => a.category))];
     <div class="container split">
       <div class="stack">
         <h2>Why Karoo Fox exists</h2>
-        <p>Karoo Fox brings a growing portfolio of apps together under one name. Each app solves a specific problem for a specific group of people: puzzle lovers, families, researchers and medical students, with a photo album app for families planned next.</p>
+        <p>Karoo Fox brings a growing portfolio of apps together under one name. Each app solves a specific problem for a specific group of people: puzzle lovers, families, researchers and medical students.</p>
         {company.founder.show && <p>The company was founded by {company.founder.name}, a South African software developer, to give these apps a single, accountable home with consistent standards for design, privacy and support.</p>}
         <p>The name comes from the Karoo, the vast semi-desert at the heart of South Africa, and the fox: curious, resourceful and quick on its feet. It’s how we like to build software.</p>
       </div>
@@ -23,7 +23,7 @@ const categories = [...new Set(apps.map((a) => a.category))];
         <dl class="facts">
           <div><dt>Based in</dt><dd>{company.country}</dd></div>
           <div><dt>Serving</dt><dd>Users worldwide, including the United States, United Kingdom, Canada, Australia and South Africa</dd></div>
-          <div><dt>Apps</dt><dd>{apps.filter((a) => a.stage !== 'planned').length} apps released or in testing, {apps.filter((a) => a.stage === 'planned').length} planned, across {categories.length} categories</dd></div>
+          <div><dt>Apps</dt><dd>{apps.length} apps across {categories.length} categories, with more in development</dd></div>
           <div><dt>Platforms</dt><dd>Web, iPhone and Android</dd></div>
         </dl>
       </div>

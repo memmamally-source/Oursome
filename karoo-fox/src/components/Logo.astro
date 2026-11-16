@@ -1,10 +1,11 @@
 ---
 /**
  * The approved Karoo Fox logo (fox + wordmark), served as responsive WebP
- * generated from brand/source/Karoo_Fox_Logo_Website_Tight_4460x3216.png.
+ * generated from brand/source/Karoo_Fox_Logo_High_Resolution_6144x4096.png.
  * It has a white canvas: only place it on white backgrounds.
  */
 import { href } from '../lib/url.ts';
+import logoSize from '../config/logo-size.json';
 interface Props {
   /** Rendered height in CSS pixels (largest breakpoint). */
   height: number;
@@ -13,7 +14,7 @@ interface Props {
   loading?: 'eager' | 'lazy';
 }
 const { height, alt = 'Karoo Fox', class: className, loading = 'eager' } = Astro.props;
-const RATIO = 4460 / 3216;
+const RATIO = logoSize.width / logoSize.height;
 const width = Math.round(height * RATIO);
 const widths = [160, 240, 320, 480];
 ---

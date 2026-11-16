@@ -32,6 +32,9 @@ export function readinessGaps(c: Company = company, list: App[] = apps, siteUrl 
   }
   for (const app of list) {
     for (const r of app.releases) {
+      if (r.status === 'available' && !r.url) {
+        gaps.push({ area: app.name, item: `${r.platform === 'ios' ? 'App Store' : r.platform === 'android' ? 'Google Play' : 'Web'} listing URL`, why: 'Shown as available without a link until the URL is added to apps.ts.', blocksPublish: false, blocksApple: false });
+      }
       if (r.status === 'unconfirmed') {
         gaps.push({ area: app.name, item: `${r.platform} release status`, why: 'Hidden from the site until confirmed in apps.ts.', blocksPublish: false, blocksApple: false });
       }

@@ -3,8 +3,10 @@
  * brand/source/ (supplied by the owner; filenames preserved). Nothing is
  * redrawn: images are only cropped of blank canvas and resized (Lanczos).
  *
- *   brand/source/Karoo_Fox_Logo_Website_Tight_4460x3216.png → logo (fox + wordmark)
- *   brand/source/Karoo_Fox_Fox_Icon_2048x2048.png           → fox icon, favicons, profile icons
+ *   brand/source/Karoo_Fox_Logo_High_Resolution_6144x4096.png is the single source
+ *   for every image (the owner asked that all logos match this file):
+ *     - logo: the artwork with surrounding blank canvas trimmed
+ *     - fox icon, favicons, profile icons: the fox cut from the same file
  *
  * The source images have a white canvas, so they are used on white
  * backgrounds. The only transparent derivative is the favicon (browser tabs
@@ -36,8 +38,36 @@ async function whitenCanvas(file) {
   }
   return sharp(data, { raw: { width: info.width, height: info.height, channels: 3 } }).png({ compressionLevel: 1 }).toBuffer();
 }
-const LOGO = await whitenCanvas(src('Karoo_Fox_Logo_Website_Tight_4460x3216.png'));
-const ICON = await whitenCanvas(src('Karoo_Fox_Fox_Icon_2048x2048.png'));
+const HIRES = await whitenCanvas(src('Karoo_Fox_Logo_High_Resolution_6144x4096.png'));
+const WHITE_BG = { r: 255, g: 255, b: 255, alpha: 1 };
+
+// Logo: trim the blank canvas, then add an even 4% margin.
+const trimmed = await sharp(HIRES).trim({ background: '#ffffff', threshold: 8 }).png().toBuffer();
+const tm = await sharp(trimmed).metadata();
+const lm = Math.round(tm.width * 0.04);
+const LOGO = await sharp(trimmed).extend({ top: lm, bottom: lm, left: lm, right: lm, background: WHITE_BG }).png().toBuffer();
+const LOGO_SIZE = { width: tm.width + 2 * lm, height: tm.height + 2 * lm };
+fs.writeFileSync(path.join(root, 'src/config/logo-size.json'), JSON.stringify(LOGO_SIZE) + '\n');
+
+// Fox: the artwork above the wordmark. The tail dips to y≈2950 (in this 4×
+// file) between the letters, and the top of the "F" starts at y≈2930 on the
+// right, so the F's corner is blanked before trimming.
+const foxArea = await sharp(HIRES).extract({ left: 1800, top: 300, width: 2600, height: 2660 }).raw().toBuffer({ resolveWithObject: true });
+{
+  const { data, info } = foxArea;
+  for (let y = 2600; y < info.height; y++) for (let x = 1700; x < info.width; x++) {
+    const i = (y * info.width + x) * info.channels;
+    data[i] = data[i + 1] = data[i + 2] = 255;
+  }
+}
+const foxTrim = await sharp(foxArea.data, { raw: foxArea.info }).trim({ background: '#ffffff', threshold: 8 }).png().toBuffer();
+const fm = await sharp(foxTrim).metadata();
+// Square canvas with the fox centred (8% margin), like an app icon.
+const side = Math.round(Math.max(fm.width, fm.height) * 1.16);
+const ICON = await sharp(foxTrim)
+  .extend({ top: Math.floor((side - fm.height) / 2), bottom: Math.ceil((side - fm.height) / 2), left: Math.floor((side - fm.width) / 2), right: Math.ceil((side - fm.width) / 2), background: WHITE_BG })
+  .png()
+  .toBuffer();
 const out = path.join(root, 'public/brand');
 const review = path.join(root, 'brand/review');
 fs.mkdirSync(out, { recursive: true });
@@ -55,22 +85,22 @@ await write(sharp(LOGO).resize({ width: 1280 }).png({ compressionLevel: 9 }), 'p
 // ---- Fox icon ----
 // The icon source is a 2048 square with the fox centred on white. A tighter
 // square crop (blank canvas only) gives the fox more presence at small sizes.
-const tight = { left: 174, top: 182, width: 1700, height: 1700 };
-for (const w of [128, 256, 512]) {
-  await write(sharp(ICON).extract(tight).resize(w).webp({ quality: 92 }), `public/brand/karoo-fox-icon-${w}.webp`);
-}
-await write(sharp(ICON).extract(tight).resize(1024).png(), 'public/brand/karoo-fox-icon-1024.png');
 
-// App/home-screen icons on white (iOS rounds the corners itself).
-await write(sharp(ICON).resize(180), 'public/apple-touch-icon.png');
-await write(sharp(ICON).resize(192), 'public/icon-192.png');
-await write(sharp(ICON).resize(512), 'public/icon-512.png');
-// Maskable: keep the whole fox inside the 80% safe circle.
+for (const w of [128, 256, 512]) {
+  await write(sharp(ICON).resize(w).webp({ quality: 92 }), `public/brand/karoo-fox-icon-${w}.webp`);
+}
+await write(sharp(ICON).resize(1024).png(), 'public/brand/karoo-fox-icon-1024.png');
+
 const padded = async (size, scale) =>
   sharp({ create: { width: size, height: size, channels: 4, background: WHITE } })
     .composite([{ input: await sharp(ICON).resize(Math.round(size * scale)).png().toBuffer(), gravity: 'centre' }]);
 await write(await padded(512, 0.72), 'public/icon-maskable-512.png');
 
+// App/home-screen icons on white (iOS rounds the corners itself).
+await write((await padded(180, 0.84)).png(), 'public/apple-touch-icon.png');
+await write((await padded(192, 0.84)).png(), 'public/icon-192.png');
+await write((await padded(512, 0.84)).png(), 'public/icon-512.png');
+// Maskable: keep the whole fox inside the 80% safe circle.
 // ---- Social profile pictures (square; the fox stays inside a circular crop) ----
 for (const size of [400, 800, 1080]) {
   await write((await padded(size, 0.86)).png(), `public/brand/karoo-fox-profile-${size}.png`);
@@ -84,7 +114,7 @@ await write(
 );
 
 // ---- Favicon with a genuine transparent background ----
-const { data, info } = await sharp(ICON).extract(tight).resize(256).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+const { data, info } = await sharp(ICON).resize(256).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
 const W = info.width;
 const H = info.height;
 const isWhite = (i) => data[i] >= 246 && data[i + 1] >= 246 && data[i + 2] >= 246;
