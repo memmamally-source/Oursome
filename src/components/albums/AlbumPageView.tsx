@@ -58,10 +58,10 @@ export function FramedPhoto({ photo, crop, aspect, version }: { photo?: PhotoMet
   const url = useAlbumPhoto(photo?.id, version);
   // Photos already loaded appear at once (e.g. mid page-turn); late arrivals fade in.
   const [instant] = useState(() => !!photo && !!cachedPhotoUrl(photo.id, version));
-  if (!photo) return <View style={{ flex: 1, backgroundColor: '#E6DDD0' }} />;
+  if (!photo) return <View style={{ flex: 1, backgroundColor: '#E3EEF5' }} />;
   const r = imageRect(photo.width && photo.height ? photo.width / photo.height : 1, aspect, crop);
   return (
-    <View style={{ flex: 1, overflow: 'hidden', backgroundColor: '#E9E1D5' }}>
+    <View style={{ flex: 1, overflow: 'hidden', backgroundColor: '#E8F0F6' }}>
       {url ? (
         <Image
           source={{ uri: url }}
@@ -86,7 +86,7 @@ function Mounted({ frame, theme, children, W, H }: { frame: Frame; theme: Theme;
   const shadow = theme.dark
     ? {}
     : {
-        shadowColor: '#2A1E17',
+        shadowColor: '#102A43',
         shadowOpacity: style === 'plain' ? 0.08 : 0.2,
         shadowRadius: style === 'plain' ? 3 : 8,
         shadowOffset: { width: 0, height: style === 'plain' ? 1 : 4 },

@@ -207,3 +207,45 @@ describe('private data', () => {
     await assertFails(getDoc(doc(db('alex'), 'anything/else')));
   });
 });
+
+describe('sharing fixes (Nov 2026)', () => {
+  it('sharing again after “Stop sharing” needs a new household id (reusing the old one is refused)', async () => {
+    await household('alex', 'fam1');
+    await deleteDoc(doc(db('alex'), 'households/fam1/members/alex')); // Stop sharing
+    // The old bug: the same id again means writing to a household Alex is no longer in.
+    await assertFails(household('alex', 'fam1'));
+    // What the app does now: a fresh id.
+    await assertSucceeds(household('alex', 'fam1-k3p9x2m7q4zt'));
+  });
+
+  it('joining twice, or with your own code, is harmless', async () => {
+    await household();
+    const { code } = await createInvite(db('alex'), 'alex', 'h1');
+    await assertSucceeds(joinHousehold(db('jordan'), 'jordan', code, { name: 'Jordan', color: 'sky' }));
+    await assertSucceeds(joinHousehold(db('jordan'), 'jordan', code, { name: 'Jordan', color: 'sky' }));
+    await assertSucceeds(joinHousehold(db('alex'), 'alex', code, me));
+    const members = await getDocs(collection(db('alex'), 'households/h1/members'));
+    expect(members.docs.map((d) => [d.id, d.data().role]).sort()).toEqual([
+      ['alex', 'admin'],
+      ['jordan', 'member'],
+    ]);
+  });
+
+  it('an invite still works when the phone’s clock runs half an hour fast', async () => {
+    await household();
+    await assertSucceeds(createInvite(db('alex'), 'alex', 'h1', new Date(Date.now() + 30 * 60_000)));
+  });
+
+  it('a removed member loses access straight away, and other households stay private', async () => {
+    await household();
+    await household('sam', 'h2');
+    const { code } = await createInvite(db('alex'), 'alex', 'h1');
+    await joinHousehold(db('jordan'), 'jordan', code, { name: 'Jordan', color: 'sky' });
+    await putItem(db('alex'), 'alex', 'h1', { id: 't1', kind: 'task', data: { title: 'Bins' } });
+    await assertSucceeds(getDocs(collection(db('jordan'), 'households/h1/items')));
+    await assertFails(getDocs(collection(db('jordan'), 'households/h2/items')));
+    await deleteDoc(doc(db('alex'), 'households/h1/members/jordan'));
+    await assertFails(getDocs(collection(db('jordan'), 'households/h1/items')));
+    await assertFails(putItem(db('jordan'), 'jordan', 'h1', { id: 't2', kind: 'task', data: { title: 'Sneaky' } }));
+  });
+});

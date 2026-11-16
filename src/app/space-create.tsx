@@ -52,7 +52,7 @@ export default function CreateSpace() {
       />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
         {ideas.map((i) => (
-          <Chip key={i} label={i} accent="sunshine" selected={name === i} onPress={() => setName(i)} />
+          <Chip key={i} label={i} accent="coral" selected={name === i} onPress={() => setName(i)} />
         ))}
       </View>
     </ModalScreen>

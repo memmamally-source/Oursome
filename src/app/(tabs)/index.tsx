@@ -37,8 +37,9 @@ import { addDays, toDateKey } from '@/lib/dates';
 import { space } from '@/theme';
 
 /**
- * Home: the household's own space. A warm greeting over their cover, the
- * organiser, today, shopping, people and what's coming up, nothing more.
+ * Home answers "what's happening in our household today, and what do we need
+ * to do?": a compact greeting, then today, quick actions, shopping, what's
+ * coming up, recent household activity and the people.
  */
 export default function HomeScreen() {
   const now = useNow();
@@ -189,9 +190,9 @@ export default function HomeScreen() {
         {header}
         <View style={{ flexDirection: 'row', gap: space.xxl, alignItems: 'flex-start' }}>
           <View style={{ flex: 3, gap: space.xxl }}>
-            {stagger([firstSteps, <CaptureBox key="c" />, <QuickActions key="q" />, weeklyCard, suggestion, day])}
+            {stagger([firstSteps, day, suggestion, <QuickActions key="q" />, <CaptureBox key="c" />, weeklyCard])}
           </View>
-          <View style={{ flex: 2, gap: space.xxl }}>{stagger([peopleSection, shopping, coming, recent])}</View>
+          <View style={{ flex: 2, gap: space.xxl }}>{stagger([shopping, coming, recent, peopleSection])}</View>
         </View>
       </Screen>
     );
@@ -203,15 +204,16 @@ export default function HomeScreen() {
       <View style={{ gap: space.xxl }}>
         {stagger([
           firstSteps,
-          <CaptureBox key="c" />,
-          <QuickActions key="q" />,
-          weeklyCard,
-          suggestion,
+          // What's happening today, and what needs doing, comes first.
           day,
+          suggestion,
+          <QuickActions key="q" />,
           shopping,
-          peopleSection,
           coming,
           recent,
+          peopleSection,
+          weeklyCard,
+          <CaptureBox key="c" />,
         ])}
       </View>
     </Screen>

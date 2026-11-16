@@ -98,14 +98,8 @@ export const localAuth: AuthService = {
     if (emailError) return { ok: false, error: emailError };
     if (!password) return { ok: false, error: 'Please enter your password.' };
     const profile = useSession.getState().profile;
-    // Accounts live on the device, so signing in on a phone with none yet sets
-    // one up with these details (as a new phone, or an app reviewer, would expect).
-    if (!profile) {
-      const pwError = validatePassword(password);
-      if (pwError) return { ok: false, error: pwError };
-      return localAuth.signUp({ name: nameFromEmail(email), email, password });
-    }
-    if (profile.email !== email.trim().toLowerCase()) {
+    // A failed sign-in never creates an account.
+    if (!profile || profile.email !== email.trim().toLowerCase()) {
       return { ok: false, error: 'No account with that email on this device yet. Create one to get started.' };
     }
     const { credential } = useSession.getState();
@@ -127,6 +121,19 @@ export const localAuth: AuthService = {
     useSession.getState().setSignedIn(false);
   },
 };
+
+/**
+ * Accounts made before online accounts existed live only on the phone they were
+ * made on. When someone signs in on that phone with that account's email and
+ * password (checked here against the saved hash), the same account can be
+ * created online for them. Anyone else gets the normal "doesn't match" answer:
+ * a failed sign-in never makes an account by itself.
+ */
+export function deviceAccountMatches(email: string, password: string): boolean {
+  const { profile, credential } = useSession.getState();
+  if (!profile || profile.id !== 'me' || !credential) return false;
+  return profile.email === email.trim().toLowerCase() && checkPassword(password, credential);
+}
 
 /** The account service in use: Firebase when cloud sharing is configured, otherwise this device only. */
 async function service(): Promise<AuthService> {

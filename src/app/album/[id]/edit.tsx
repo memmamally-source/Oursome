@@ -448,7 +448,7 @@ function CropSurface({
   return (
     <View
       {...responder.panHandlers}
-      style={{ shadowColor: '#2A1E17', shadowOpacity: 0.16, shadowRadius: 14, shadowOffset: { width: 0, height: 6 } }}>
+      style={{ shadowColor: '#102A43', shadowOpacity: 0.16, shadowRadius: 14, shadowOffset: { width: 0, height: 6 } }}>
       <AlbumPageView page={page} album={album} photos={photos} width={width} onSlotPress={onSlotPress} selectedSlot={active} />
     </View>
   );

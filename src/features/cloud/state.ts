@@ -19,6 +19,7 @@ type CloudState = {
   syncedFor: (spaceId: string) => Map<string, string>;
   setSynced: (spaceId: string, synced: Map<string, string>) => void;
   setInvite: (spaceId: string, invite: { code: string; expiresAt: string }) => void;
+  clearInvite: (spaceId: string) => void;
 };
 
 /** Cloud sharing status for the screens, and the sync bookkeeping that must survive a reload. */
@@ -34,6 +35,11 @@ export const useCloud = create<CloudState>()(
       syncedFor: (spaceId) => new Map(Object.entries(get().synced[spaceId] ?? {})),
       setSynced: (spaceId, synced) => set((s) => ({ synced: { ...s.synced, [spaceId]: Object.fromEntries(synced) } })),
       setInvite: (spaceId, invite) => set((s) => ({ invites: { ...s.invites, [spaceId]: invite } })),
+      clearInvite: (spaceId) =>
+        set((s) => {
+          const { [spaceId]: _gone, ...rest } = s.invites;
+          return { invites: rest };
+        }),
     }),
     { name: 'oursome.cloud', version: 1, storage: persistStorage, partialize: (s) => ({ synced: s.synced, invites: s.invites, pendingInvite: s.pendingInvite }) },
   ),

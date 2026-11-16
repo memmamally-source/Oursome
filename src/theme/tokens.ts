@@ -3,20 +3,20 @@ import { Platform, type TextStyle, type ViewStyle } from 'react-native';
 import { Brand } from '@/config/brand';
 
 /**
- * Oursome design tokens: a warm, homely palette (linen, ivory, terracotta,
- * sage, honey, espresso) inspired by Scandinavian interiors and stationery.
+ * Oursome design tokens: calm blue and turquoise on cool white, with deep navy
+ * text. Colours live here (and in src/config/brand.ts); screens never hard-code them.
  *
- * Accent keys are roles, kept stable so every screen picks up the palette:
- *  coral    → terracotta: primary actions, selection, brand warmth
- *  mint     → sage: completion, shopping, calm positive feedback
- *  sunshine → honey: celebrations, important dates, highlights
- *  sky      → slate blue: appointments and calendar information
- *  lavender → heather: the organiser and personal planning
+ * Accent keys are roles, kept stable so saved data (a list's colour, a
+ * person's colour) still works after the redesign:
+ *  coral    → ocean blue: primary actions, selection, the brand
+ *  mint     → turquoise: completion, shopping, calm positive feedback
+ *  sunshine → amber: celebrations, important dates, highlights (used sparingly)
+ *  sky      → sky blue: appointments and calendar information
+ *  lavender → indigo: the organiser and personal planning
  *
  * Every accent has a `soft` tint for backgrounds, an `ink` shade for text on
  * that tint, and `on` for text/icons on the solid `base`. All pairs meet WCAG
- * AA (≥ 4.5:1). The terracotta fill is #A9533F (5.0:1 with ivory text); the
- * brand terracotta #B95F49 is used for the logo and decoration.
+ * AA (≥ 4.5:1); src/theme/__tests__/contrast.test.ts checks them.
  */
 export const accentKeys = ['coral', 'sunshine', 'sky', 'lavender', 'mint'] as const;
 export type AccentKey = (typeof accentKeys)[number];
@@ -35,7 +35,7 @@ export type Palette = {
   text: string;
   textSecondary: string;
   textTertiary: string;
-  /** Text on the primary (terracotta) fill. Prefer `accents[x].on` for other fills. */
+  /** Text on the primary (ocean blue) fill. Prefer `accents[x].on` for other fills. */
   onAccent: string;
   danger: string;
   dangerSoft: string;
@@ -48,52 +48,52 @@ const c = Brand.colors;
 
 export const lightPalette: Palette = {
   scheme: 'light',
-  background: c.linen,
-  surface: c.ivory,
-  surfaceAlt: '#F9F1E6',
-  surfaceSunken: '#ECE3D6',
-  border: '#E4D8C8',
-  borderStrong: '#CDBBA6',
-  text: c.espresso,
-  textSecondary: '#6E625A',
-  textTertiary: '#72665E',
-  onAccent: c.ivory,
-  danger: '#A63A24',
-  dangerSoft: '#F6DCD3',
-  overlay: 'rgba(51,43,39,0.42)',
-  shadow: '#5A3E2E',
+  background: c.cloud,
+  surface: c.white,
+  surfaceAlt: '#F2F8FC',
+  surfaceSunken: '#EAF2F8',
+  border: c.mist,
+  borderStrong: '#B9CCDA',
+  text: c.ink,
+  textSecondary: '#5B6B80',
+  textTertiary: '#5F6E82',
+  onAccent: c.white,
+  danger: '#B42318',
+  dangerSoft: '#FDE7E5',
+  overlay: 'rgba(16,42,67,0.45)',
+  shadow: c.navy,
   accents: {
-    coral: { base: '#A9533F', soft: '#F3DDD3', ink: '#8E3F2D', on: c.ivory },
-    sunshine: { base: c.honey, soft: '#F7E9CC', ink: '#7A5414', on: c.espresso },
-    sky: { base: '#8FA5B2', soft: '#E3E9EC', ink: '#3F5866', on: c.espresso },
-    lavender: { base: '#A08DA4', soft: '#ECE4EC', ink: '#5E4A63', on: c.espresso },
-    mint: { base: c.sage, soft: '#E2E9DF', ink: '#4A5E49', on: c.espresso },
+    coral: { base: c.ocean, soft: '#E3F0FA', ink: c.deepBlue, on: c.white },
+    sunshine: { base: '#F2B33D', soft: '#FDF2DA', ink: '#7A4F00', on: c.navy },
+    sky: { base: '#3FA2E4', soft: '#E2F1FB', ink: '#135E91', on: c.navy },
+    lavender: { base: '#5856D6', soft: '#ECEBFB', ink: '#3D3BA8', on: c.white },
+    mint: { base: c.turquoise, soft: '#DDF5F3', ink: '#0A6661', on: c.navy },
   },
 };
 
-/** Warm dark: a lamp-lit room rather than a cold inverted screen. */
+/** Night blue: calm and readable, never pure black. */
 export const darkPalette: Palette = {
   scheme: 'dark',
-  background: '#1E1A17',
-  surface: '#2A2420',
-  surfaceAlt: '#322B26',
-  surfaceSunken: '#191512',
-  border: '#3A322C',
-  borderStrong: '#56493F',
-  text: c.linen,
-  textSecondary: '#BDAFA3',
-  textTertiary: '#9A8D82',
-  onAccent: '#1E1A17',
-  danger: '#F09A82',
-  dangerSoft: '#3D2620',
+  background: '#0B1A2B',
+  surface: '#12253A',
+  surfaceAlt: '#172C44',
+  surfaceSunken: '#08131F',
+  border: '#22384F',
+  borderStrong: '#36506A',
+  text: '#EAF3FA',
+  textSecondary: '#A9BACB',
+  textTertiary: '#91A4B7',
+  onAccent: '#0B1A2B',
+  danger: '#FF8F80',
+  dangerSoft: '#3B1D1D',
   overlay: 'rgba(0,0,0,0.55)',
   shadow: '#000000',
   accents: {
-    coral: { base: '#D07A63', soft: '#3D2A24', ink: '#E9A792', on: '#1E1A17' },
-    sunshine: { base: c.honey, soft: '#3A3022', ink: '#F0CF95', on: '#1E1A17' },
-    sky: { base: '#9FB5C1', soft: '#243038', ink: '#BACBD4', on: '#1E1A17' },
-    lavender: { base: '#B8A5BC', soft: '#31283A', ink: '#D0C0D3', on: '#1E1A17' },
-    mint: { base: '#9DB39C', soft: '#27302A', ink: '#B9CDB8', on: '#1E1A17' },
+    coral: { base: '#4DA3E8', soft: '#123250', ink: '#A3D0F5', on: '#0B1A2B' },
+    sunshine: { base: '#F5C060', soft: '#3A2D12', ink: '#F8D894', on: '#0B1A2B' },
+    sky: { base: '#6BB8EE', soft: '#14324A', ink: '#A8D6F6', on: '#0B1A2B' },
+    lavender: { base: '#8E8CF2', soft: '#25264F', ink: '#C6C5FB', on: '#0B1A2B' },
+    mint: { base: '#2CCFC6', soft: '#0D3735', ink: '#8FE6E0', on: '#0B1A2B' },
   },
 };
 
@@ -110,18 +110,18 @@ export const space = {
 } as const;
 
 export const radius = {
-  sm: 10,
-  md: 14,
-  lg: 20,
-  xl: 26,
-  xxl: 32,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
   pill: 999,
 } as const;
 
 const nativeFonts = {
-  // Fraunces: an editorial serif with soft, warm curves for headings.
-  display: 'Fraunces_600SemiBold',
-  heading: 'Fraunces_600SemiBold',
+  // Nunito Sans throughout: clean and modern, the same family as the wordmark.
+  display: 'NunitoSans_800ExtraBold',
+  heading: 'NunitoSans_700Bold',
   body: 'NunitoSans_400Regular',
   bodyMedium: 'NunitoSans_600SemiBold',
   bodyBold: 'NunitoSans_700Bold',
@@ -130,17 +130,16 @@ const nativeFonts = {
 // Web: the same names are @font-face aliases (public/index.html) with system
 // fallbacks, so text renders immediately while the brand fonts load.
 const sansFallback = ", system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
-const serifFallback = ", 'Iowan Old Style', Georgia, 'Times New Roman', serif";
 
 export const fonts = (
   Platform.OS === 'web'
-    ? Object.fromEntries(Object.entries(nativeFonts).map(([k, v]) => [k, v + (v.startsWith('Fraunces') ? serifFallback : sansFallback)]))
+    ? Object.fromEntries(Object.entries(nativeFonts).map(([k, v]) => [k, v + sansFallback]))
     : nativeFonts
 ) as Record<keyof typeof nativeFonts, string>;
 
 const weights: Record<keyof typeof nativeFonts, TextStyle['fontWeight']> = {
-  display: '600',
-  heading: '600',
+  display: '800',
+  heading: '700',
   body: '400',
   bodyMedium: '600',
   bodyBold: '700',
@@ -164,9 +163,9 @@ export type TypeVariant =
   | 'number';
 
 export const typography: Record<TypeVariant, TextStyle> = {
-  display: { ...font('display'), fontSize: 34, lineHeight: 40, letterSpacing: -0.6 },
-  title: { ...font('display'), fontSize: 28, lineHeight: 34, letterSpacing: -0.4 },
-  heading: { ...font('heading'), fontSize: 21, lineHeight: 27, letterSpacing: -0.2 },
+  display: { ...font('display'), fontSize: 32, lineHeight: 38, letterSpacing: -0.8 },
+  title: { ...font('display'), fontSize: 26, lineHeight: 32, letterSpacing: -0.6 },
+  heading: { ...font('heading'), fontSize: 20, lineHeight: 26, letterSpacing: -0.3 },
   subheading: { ...font('heading'), fontSize: 17, lineHeight: 22 },
   body: { ...font('body'), fontSize: 16, lineHeight: 23 },
   bodyStrong: { ...font('bodyBold'), fontSize: 16, lineHeight: 23 },
@@ -179,17 +178,17 @@ export const typography: Record<TypeVariant, TextStyle> = {
     letterSpacing: 1.2,
     textTransform: 'uppercase',
   },
-  number: { ...font('display'), fontSize: 28, lineHeight: 32, letterSpacing: -0.5 },
+  number: { ...font('display'), fontSize: 26, lineHeight: 30, letterSpacing: -0.6 },
 };
 
 export function elevation(palette: Palette, level: 1 | 2 | 3 = 1): ViewStyle {
-  // Soft, warm shadows like paper resting on linen.
-  const opacity = palette.scheme === 'dark' ? 0.35 : [0, 0.07, 0.1, 0.14][level];
+  // Soft, cool shadows: just enough to lift a card.
+  const opacity = palette.scheme === 'dark' ? 0.35 : [0, 0.06, 0.09, 0.13][level];
   const radiusPx = [0, 10, 18, 28][level];
   const offset = [0, 3, 6, 12][level];
   return Platform.select<ViewStyle>({
     web: {
-      boxShadow: `0px ${offset}px ${radiusPx}px ${palette.scheme === 'dark' ? `rgba(0,0,0,${opacity})` : `rgba(90,62,46,${opacity})`}`,
+      boxShadow: `0px ${offset}px ${radiusPx}px ${palette.scheme === 'dark' ? `rgba(0,0,0,${opacity})` : `rgba(16,42,67,${opacity})`}`,
     } as ViewStyle,
     android: { elevation: level * 2, shadowColor: palette.shadow },
     default: {
@@ -226,7 +225,7 @@ export const motion = {
 } as const;
 
 /**
- * Props that give a screen the paper grain on web (see `[data-paper]` in
- * public/index.html). Native screens use the flat linen colour.
+ * Screen background props. The old paper grain is retired: every platform uses
+ * the flat background colour. Kept so screens don't need changing.
  */
-export const paperProps = (Platform.OS === 'web' ? { dataSet: { paper: 'true' } } : {}) as object;
+export const paperProps = {} as object;

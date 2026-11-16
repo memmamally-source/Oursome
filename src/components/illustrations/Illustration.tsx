@@ -13,7 +13,7 @@ export function Illustration({ name, width = 200 }: { name: IllustrationName; wi
   const { palette } = useTheme();
   const a = palette.accents;
   const surface = palette.surface;
-  const line = palette.scheme === 'dark' ? palette.border : '#F1E6DA';
+  const line = palette.scheme === 'dark' ? palette.border : '#E3EEF5';
   const height = (width * 160) / 200;
 
   return (

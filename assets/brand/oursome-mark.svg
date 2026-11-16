@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="-2 -2 104 104"><defs>
+    <linearGradient id="o-ring" x1="0.1" y1="0.9" x2="0.9" y2="0.1"><stop offset="0" stop-color="#1769AA"/><stop offset="1" stop-color="#12B8B0"/></linearGradient>
+    <linearGradient id="o-house" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" stop-color="#1769AA"/><stop offset="1" stop-color="#0F4C80"/></linearGradient>
+    <mask id="o-gap" maskUnits="userSpaceOnUse" x="-10" y="-10" width="120" height="120"><rect x="-10" y="-10" width="120" height="120" fill="#fff"/><path d="M 12.86 77.14 L 47.00 43.00 Q 50 40 53.00 43.00 L 87.14 77.14 A 46 46 0 0 1 12.86 77.14 Z" fill="#000" stroke="#000" stroke-width="7" stroke-linejoin="round"/></mask>
+    <mask id="o-win" maskUnits="userSpaceOnUse" x="-10" y="-10" width="120" height="120"><rect x="-10" y="-10" width="120" height="120" fill="#fff"/><rect x="40.70" y="61.50" width="8" height="8" rx="1.8" fill="#000"/><rect x="51.30" y="61.50" width="8" height="8" rx="1.8" fill="#000"/><rect x="40.70" y="72.10" width="8" height="8" rx="1.8" fill="#000"/><rect x="51.30" y="72.10" width="8" height="8" rx="1.8" fill="#000"/></mask>
+  </defs>
+  <path d="M 4 50 A 46 46 0 1 0 96 50 A 46 46 0 1 0 4 50 Z M 20 50 A 30 30 0 1 0 80 50 A 30 30 0 1 0 20 50 Z" fill-rule="evenodd" fill="url(#o-ring)" mask="url(#o-gap)"/>
+  <path d="M 12.86 77.14 L 47.00 43.00 Q 50 40 53.00 43.00 L 87.14 77.14 A 46 46 0 0 1 12.86 77.14 Z" fill="url(#o-house)" mask="url(#o-win)"/></svg>

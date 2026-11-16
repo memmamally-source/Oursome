@@ -195,7 +195,11 @@ export function mergeAccounts(
 /** Invite codes: 10 characters from an alphabet without look-alikes (no 0/O, 1/I/L). */
 const ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
 export function inviteCode(random: (n: number) => Uint8Array): string {
-  return [...random(10)].map((b) => ALPHABET[b % ALPHABET.length]).join('');
+  // Bytes from 248 up are skipped so every character is equally likely (248 = 8 × 31).
+  const limit = 256 - (256 % ALPHABET.length);
+  let code = '';
+  while (code.length < 10) for (const b of random(16)) if (b < limit && code.length < 10) code += ALPHABET[b % ALPHABET.length];
+  return code;
 }
 export const formatCode = (code: string) => `${code.slice(0, 5)}-${code.slice(5)}`;
 export const parseCode = (input: string) => input.toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -206,3 +210,17 @@ export const inviteLink = (code: string, site = 'https://oursome.org') => `${sit
 /** What the person invited receives. */
 export const inviteMessage = (familyName: string, code: string) =>
   `Join ${familyName} on Oursome: ${inviteLink(code)}\n\nOr open Oursome and go to Our Space → Join with a code: ${formatCode(parseCode(code))}. It works for 7 days.`;
+
+/** Plain words for cloud errors; never shows Firebase's own wording to people. */
+export function cloudErrorMessage(e: unknown): string {
+  const code = (e as { code?: string })?.code ?? '';
+  const msg = (e as Error)?.message ?? '';
+  if (code.includes('permission-denied'))
+    return 'Oursome wasn’t allowed to do that. Sign out and back in, then try again. If it keeps happening, email oursomeapp@outlook.com.';
+  if (code.includes('unavailable') || code.includes('deadline-exceeded') || code.includes('network'))
+    return 'Can’t reach the cloud right now. Check your connection and try again.';
+  if (code.includes('unauthenticated')) return 'Sign in again to keep sharing.';
+  // Our own messages (no Firebase code) are already written for people.
+  if (!code && msg && !/firebase|undefined|null|property/i.test(msg)) return msg;
+  return 'That didn’t work. Please try again.';
+}

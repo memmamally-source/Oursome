@@ -23,7 +23,7 @@ const steps: Step[] = [
     icon: 'add',
     accent: 'coral',
     title: 'The big + adds anything',
-    body: 'Tap the brown + at the bottom of the screen to add an event, a task, a shopping item or a note for the day.',
+    body: 'Tap the round + at the bottom of the screen to add an event, a task, a shopping item or a note for the day.',
   },
   {
     key: 'calendar',
@@ -42,7 +42,7 @@ const steps: Step[] = [
   {
     key: 'shopping',
     art: 'basket',
-    accent: 'sunshine',
+    accent: 'mint',
     title: 'Shopping lists',
     body: 'Tasks → Shopping. Items sort themselves by aisle, and you can tap a list’s name to rename it.',
   },
@@ -58,7 +58,7 @@ const steps: Step[] = [
         {
           key: 'share',
           art: 'together' as const,
-          accent: 'sunshine' as const,
+          accent: 'lavender' as const,
           title: 'Share with your family',
           body: 'Our Space → open your family → Share this family. Then make an invite code and send the link to the people you live with.',
         },
@@ -141,7 +141,7 @@ export default function Tour() {
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}>
-                  <Icon name={item.icon} size={56} color={item.key === 'plus' ? '#FFFFFF' : palette.accents[item.accent].ink} />
+                  <Icon name={item.icon} size={56} color={item.key === 'plus' ? palette.accents.coral.on : palette.accents[item.accent].ink} />
                 </View>
               ) : (
                 <Illustration name={item.art} width={200} />

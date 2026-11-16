@@ -3,6 +3,7 @@
  * of the password is kept on the device, never the password itself.
  * Pure JS so it works the same in the browser and on phones.
  */
+import { secureRandomBytes } from './random';
 
 const K = new Uint32Array([
   0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01,
@@ -67,11 +68,7 @@ export function hashPassword(password: string, salt: string): string {
 }
 
 export function newSalt(): string {
-  const bytes = new Uint8Array(16);
-  const c = (globalThis as { crypto?: { getRandomValues?: (a: Uint8Array) => Uint8Array } }).crypto;
-  if (c?.getRandomValues) c.getRandomValues(bytes);
-  else for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
-  return hex(bytes);
+  return hex(secureRandomBytes(16));
 }
 
 export function makeCredential(password: string): Credential {

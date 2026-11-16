@@ -227,3 +227,22 @@ describe('members and invites', () => {
     expect(parseCode(' abcde-23456 ')).toBe('ABCDE23456');
   });
 });
+
+describe('invite codes and cloud errors', () => {
+  it('makes 10-character codes from the full alphabet, skipping biased bytes', () => {
+    const { inviteCode } = jest.requireActual('../mapping') as typeof import('../mapping');
+    let calls = 0;
+    // First batch is all "biased" bytes (≥ 248), so they must all be skipped.
+    const code = inviteCode((n) => (calls++ === 0 ? new Uint8Array(n).fill(250) : Uint8Array.from({ length: n }, (_, i) => i)));
+    expect(code).toHaveLength(10);
+    expect(code).toBe('23456789AB');
+  });
+
+  it('never shows Firebase or JavaScript wording to people', () => {
+    const { cloudErrorMessage } = jest.requireActual('../mapping') as typeof import('../mapping');
+    expect(cloudErrorMessage({ code: 'permission-denied', message: 'Missing or insufficient permissions.' })).not.toMatch(/Missing|insufficient/);
+    expect(cloudErrorMessage(new TypeError("Cannot read property 'getRandomValues' of undefined"))).toBe('That didn’t work. Please try again.');
+    expect(cloudErrorMessage(new Error('That code has expired. Ask for a new one.'))).toBe('That code has expired. Ask for a new one.');
+    expect(cloudErrorMessage({ code: 'unavailable' })).toMatch(/connection/);
+  });
+});

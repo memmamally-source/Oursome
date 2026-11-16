@@ -1,4 +1,4 @@
-import { localAuth, nameFromEmail, useSession } from '../store';
+import { deviceAccountMatches, localAuth, nameFromEmail, useSession } from '../store';
 
 beforeEach(() => useSession.setState({ profile: null, credential: null, signedIn: false }));
 
@@ -29,18 +29,21 @@ describe('device-only accounts', () => {
     expect(JSON.stringify(useSession.getState().profile)).not.toMatch(/sunshine|hash|salt/);
   });
 
-  it('sets up the account when signing in on a phone that has none yet', async () => {
-    expect(await localAuth.signIn({ email: 'OursomeApp@outlook.com', password: 'Sunshine123' })).toEqual({ ok: true });
-    expect(useSession.getState().profile).toMatchObject({ email: 'oursomeapp@outlook.com', name: 'OursomeApp' });
-    await localAuth.signOut();
-    expect(await localAuth.signIn({ email: 'oursomeapp@outlook.com', password: 'nope12345' })).toMatchObject({ ok: false });
-    expect(await localAuth.signIn({ email: 'someone@else.com', password: 'Sunshine123' })).toMatchObject({ ok: false });
-    expect(await localAuth.signIn({ email: 'oursomeapp@outlook.com', password: 'Sunshine123' })).toEqual({ ok: true });
+  it('never creates an account from a failed sign-in', async () => {
+    expect(await localAuth.signIn({ email: 'OursomeApp@outlook.com', password: 'Sunshine123' })).toMatchObject({ ok: false });
+    expect(useSession.getState().profile).toBeNull();
+    expect(useSession.getState().signedIn).toBe(false);
+    expect(nameFromEmail('sam.rivera@example.com')).toBe('Sam');
   });
 
-  it('still needs a proper password to set one up', async () => {
-    expect(await localAuth.signIn({ email: 'a@b.co', password: 'short' })).toMatchObject({ ok: false });
-    expect(useSession.getState().profile).toBeNull();
-    expect(nameFromEmail('sam.rivera@example.com')).toBe('Sam');
+  it('recognises the account made on this phone for moving it online', async () => {
+    expect(deviceAccountMatches('alex@example.com', 'sunshine123')).toBe(false);
+    await localAuth.signUp({ name: 'Alex', email: 'Alex@Example.com', password: 'sunshine123' });
+    expect(deviceAccountMatches(' ALEX@example.com ', 'sunshine123')).toBe(true);
+    expect(deviceAccountMatches('alex@example.com', 'wrongpass1')).toBe(false);
+    expect(deviceAccountMatches('sam@example.com', 'sunshine123')).toBe(false);
+    // Once it's an online account (id is the cloud uid), it isn't a device account any more.
+    useSession.getState().updateProfile({ id: 'uid-123' });
+    expect(deviceAccountMatches('alex@example.com', 'sunshine123')).toBe(false);
   });
 });

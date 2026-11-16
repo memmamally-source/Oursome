@@ -22,10 +22,20 @@ export default function SignIn() {
     if (!result.ok) setError(result.error);
   };
 
+  const [sending, setSending] = useState(false);
   const reset = async () => {
-    const result = await auth.sendPasswordReset(email);
+    if (sending) return;
     setError(null);
-    setInfo(result.ok ? 'Check your inbox for a reset link.' : result.error);
+    if (!email.trim()) return setInfo('Type your email above first, then tap Forgot password.');
+    setSending(true);
+    const result = await auth.sendPasswordReset(email);
+    setSending(false);
+    // Never says whether the email has an account.
+    setInfo(
+      result.ok
+        ? `If there’s an Oursome account for ${email.trim()}, a reset link is on its way. It can take a few minutes; check your junk folder too.`
+        : result.error,
+    );
   };
 
   return (
@@ -66,7 +76,7 @@ export default function SignIn() {
       />
       <Pressable onPress={reset} accessibilityRole="button" hitSlop={8} style={{ alignSelf: 'flex-end' }}>
         <Text variant="callout" tone="coral">
-          Forgot password?
+          {sending ? 'Sending…' : 'Forgot password?'}
         </Text>
       </Pressable>
       {info ? (

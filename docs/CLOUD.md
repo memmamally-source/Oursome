@@ -74,6 +74,14 @@ They're tested against the Firebase emulator in [`firebase/tests/rules.test.ts`]
 
 Conflicts resolve as "last change wins" per item (a task, an event, a list item).
 
+## Sign-in emails (check once in the Firebase console)
+
+- **Authentication → Sign-in method:** Email/Password is on.
+- **Authentication → Settings → Authorised domains:** includes `oursome.org`.
+- **Project settings → General → Public-facing name:** `Oursome` (it's the name in the reset email).
+- **Authentication → Templates → Password reset:** the sender is `noreply@<project>.firebaseapp.com`. Outlook and Gmail sometimes file it as junk; the app tells people to check there. A custom sender domain (Templates → Customise domain) makes delivery more reliable.
+- The reset link opens Firebase's own page to choose a new password; then people sign in in the app as normal.
+
 ## Testing locally with the emulators
 
 ```sh
