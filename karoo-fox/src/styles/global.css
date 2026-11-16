@@ -382,6 +382,14 @@ a:hover {
   z-index: -1;
 }
 
+/* On dark backgrounds the fox's navy outlines need a light backdrop. */
+@media (prefers-color-scheme: dark) {
+  .hero__art::before {
+    inset: 2% -8% -6%;
+    background: radial-gradient(closest-side, #fbf6ee 97%, transparent 100%);
+  }
+}
+
 @media (max-width: 820px) {
   .hero__grid {
     grid-template-columns: 1fr;
@@ -393,26 +401,15 @@ a:hover {
   }
 }
 
-/* The fox: layered SVG ready for the app splash animation. */
-.fox-animated #ears,
-.fox-animated #head,
-.fox-animated #tail-body,
-.fox-animated #chest {
-  transform-box: fill-box;
-}
-
+/* The fox: traced layers with named features (#eye, #eye-far, #nose…) for animation. */
 @media (prefers-reduced-motion: no-preference) {
   .fox-animated svg {
     animation: fox-pop 0.9s cubic-bezier(0.2, 0.9, 0.25, 1.25) both;
     transform-origin: 50% 90%;
   }
 
-  .fox-animated #ears {
-    transform-origin: 50% 100%;
-    animation: fox-ears 1.4s ease-in-out 0.9s 1 both;
-  }
-
-  .fox-animated #eye {
+  .fox-animated #eye,
+  .fox-animated #eye-far {
     transform-box: fill-box;
     transform-origin: 50% 50%;
     animation: fox-blink 5s ease-in-out 2s infinite;
@@ -428,21 +425,6 @@ a:hover {
   to {
     opacity: 1;
     transform: none;
-  }
-}
-
-@keyframes fox-ears {
-  0%,
-  100% {
-    transform: none;
-  }
-
-  30% {
-    transform: rotate(-3deg);
-  }
-
-  60% {
-    transform: rotate(2deg);
   }
 }
 

@@ -1,7 +1,7 @@
 /**
  * Builds every logo variant, favicon and social image from two sources:
- *   src/brand/fox-mark.svg  – the fox (layered: tail-body, chest, ears, head, eye)
- *   src/brand/wordmark.json – "Karoo Fox" as outlined paths (Poppins SemiBold)
+ *   src/brand/fox-mark.svg  – the fox, traced from the original artwork (scripts/trace-logo)
+ *   src/brand/wordmark.json – "Karoo Fox", traced from the original artwork
  * Run `npm run brand` after changing either; the outputs are committed.
  */
 import fs from 'node:fs';
@@ -13,17 +13,17 @@ const brandDir = path.join(root, 'src/brand');
 const out = path.join(root, 'public/brand');
 fs.mkdirSync(out, { recursive: true });
 
-const NAVY = '#0B1F3F';
-const ORANGE = '#D9410C';
+const NAVY = '#031E3C'; // sampled from the original artwork
+const ORANGE = '#D83E02'; // sampled from the original artwork
 const CREAM = '#FBF6EE';
 
 const foxSvg = fs.readFileSync(path.join(brandDir, 'fox-mark.svg'), 'utf8');
 const foxInner = foxSvg.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '').trim();
-const FOX_W = 500;
+const FOX_W = 505;
 const FOX_H = 620;
 const wm = JSON.parse(fs.readFileSync(path.join(brandDir, 'wordmark.json'), 'utf8'));
 const wordmark = (karooFill = NAVY) =>
-  `<path fill="${karooFill}" d="${wm.karoo}"/><path fill="${ORANGE}" d="${wm.fox}"/>`;
+  `<path fill="${karooFill}" fill-rule="evenodd" d="${wm.karoo}"/><path fill="${ORANGE}" fill-rule="evenodd" d="${wm.fox}"/>`;
 
 const svg = (w, h, body, label = 'Karoo Fox') =>
   `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="${label}">${body}</svg>\n`;
@@ -42,16 +42,14 @@ function horizontal(karooFill) {
   return svg(w, foxH, fox(0, 0, s) + `<g transform="translate(${foxW + gap} ${wmY}) scale(${wmScale})">${wordmark(karooFill)}</g>`);
 }
 
-// Stacked lockup (as in the original artwork): fox centred above the wordmark.
+// Stacked lockup, positioned exactly as in the original artwork (both traced at
+// the original's scale: the fox crop sits 270 px right of and 605 px above the wordmark).
 function stacked(karooFill, bg) {
-  const wmScale = 1.09;
-  const wmW = wm.w * wmScale;
   const pad = 60;
-  const w = Math.ceil(wmW + pad * 2);
-  const foxX = (w - FOX_W) / 2;
-  const h = Math.ceil(pad + FOX_H + 50 + wm.h * wmScale + pad);
+  const w = Math.ceil(wm.w + pad * 2);
+  const h = Math.ceil(pad + 605 + wm.h + pad);
   const back = bg ? `<rect width="${w}" height="${h}" fill="${bg}"/>` : '';
-  return svg(w, h, back + fox(foxX, pad, 1) + `<g transform="translate(${pad} ${pad + FOX_H + 50}) scale(${wmScale})">${wordmark(karooFill)}</g>`);
+  return svg(w, h, back + fox(pad + 270, pad, 1) + `<g transform="translate(${pad} ${pad + 605})">${wordmark(karooFill)}</g>`);
 }
 
 // Square app-icon style tile (for touch icons and maskable icons).

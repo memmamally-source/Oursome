@@ -2,9 +2,18 @@
 
 ## Logo
 
-The logo is the curled, smiling fox with the wordmark **Karoo** in navy and **Fox** in burnt orange. The vector files here were redrawn from the logo artwork the owner supplied in chat on 16 Nov 2026. They are close to it, but they are a redraw, not the original file.
+The logo is the curled, smiling fox with the wordmark **Karoo** in navy and **Fox** in burnt orange. The original artwork the owner supplied (16 Nov 2026) is kept at `src/brand/original/karoo-fox-logo-original.jpg`, and it is the master reference.
 
-**Please add the original high-resolution file** at `src/brand/original/`, and the designer's vector file if you have one. If the original vector exists, replace `src/brand/fox-mark.svg` with it, keep the layer ids below, and run `npm run brand`.
+The vector files are traced directly from that original, colour layer by colour layer, with the tools in `scripts/trace-logo/`. They match its shapes, including the tail, the eye and the wordmark, so they can be used at any size. If a designer later supplies the source vector file, replace `src/brand/fox-mark.svg` and `src/brand/wordmark.json` with it and run `npm run brand`.
+
+To re-trace (needs Python 3 with numpy, scipy and Pillow):
+```bash
+python3 scripts/trace-logo/masks.py src/brand/original/karoo-fox-logo-original.jpg /tmp/fox
+node scripts/trace-logo/trace.cjs /tmp/fox src/brand/fox-mark.svg
+python3 scripts/trace-logo/wordmark.py src/brand/original/karoo-fox-logo-original.jpg /tmp/fox
+node scripts/trace-logo/trace-wordmark.cjs /tmp/fox src/brand/wordmark.json
+npm run brand
+```
 
 | File | Use |
 | --- | --- |
@@ -17,17 +26,17 @@ The logo is the curled, smiling fox with the wordmark **Karoo** in navy and **Fo
 | `public/icon-512.png`, `apple-touch-icon.png`, `icon-maskable-512.png` | Square icons on cream |
 | `public/og-image.png` | 1200×630 social-sharing image |
 
-Run `npm run brand` to regenerate them all from `src/brand/fox-mark.svg` and `src/brand/wordmark.json`. To regenerate the wordmark itself, run `node scripts/make-wordmark.mjs`; it uses Poppins SemiBold, which is under the SIL Open Font License.
+Run `npm run brand` to regenerate them all from `src/brand/fox-mark.svg` and `src/brand/wordmark.json`.
 
 ## Colours
 
 | Token | Hex | Use |
 | --- | --- | --- |
-| Fox orange | `#F95A10` | The fox; brand graphics only, not for text |
-| Wordmark orange | `#D9410C` | "Fox" in the wordmark |
+| Fox orange | `#F85A0C` | The fox; brand graphics only, not for text |
+| Wordmark orange | `#D83E02` | "Fox" in the wordmark |
 | Burnt orange (text) | `#B5370A` | Links and accents on cream (AA contrast) |
 | Button orange | `#C2410C` | Filled buttons with white text (AA contrast) |
-| Navy | `#0B1F3F` | Wordmark "Karoo", headings, footer |
+| Navy | `#031E3C` (logo) / `#0B1F3F` (site) | Wordmark "Karoo" / headings and footer |
 | Cream | `#FDF3EA` / `#FBF6EE` | Fox markings / page background |
 
 ## Type
@@ -38,23 +47,24 @@ Run `npm run brand` to regenerate them all from `src/brand/fox-mark.svg` and `sr
 
 ## Animating the fox (app start-up screens)
 
-`fox-mark.svg` is drawn in layers that can be animated separately:
+`fox-mark.svg` has these named parts:
 
 | Element id | Part |
 | --- | --- |
-| `tail-body` | The curled body and tail (contains `tail-tip`) |
-| `chest` | Cream and navy chest |
-| `ears` | Both ears |
-| `head` | Head, cheeks and nose (contains `eye`) |
+| `fox-body` | The whole orange and cream body: silhouette, shading layers, cream markings and the chin shadow |
+| `eye`, `eye-far` | The closed, smiling eyes |
+| `nose` | Nose |
+| `ear-left-edge`, `ear-right-inner` | The navy parts of the ears |
+| `chest-navy` | The navy chest |
 
-The website already uses a gentle version: the fox pops in, its ears twitch and it blinks occasionally (`.fox-animated` in `src/styles/global.css`). The animation is switched off for people who choose reduced motion.
+The website already uses a gentle version: the fox pops in and blinks now and then (`.fox-animated` in `src/styles/global.css`). The animation is switched off for people who choose reduced motion.
 
 Suggested splash sequence for the apps (about 1.2 s, then fade to the app):
 
-1. The body and tail scale up from 0.85 with a soft overshoot (0–450 ms).
-2. The head rises 12 px into place (200–600 ms).
-3. The ears flick (600–900 ms).
-4. One blink (900–1100 ms).
-5. The wordmark fades in below (700–1200 ms).
+1. The whole fox scales up from 0.85 with a soft overshoot (0–500 ms).
+2. One blink (`eye`, `eye-far`: scaleY to 0.4 and back, 700–900 ms).
+3. The wordmark fades in below (600–1100 ms).
 
-For React Native or Expo apps this can be built with `react-native-svg` and Reanimated using the same layer ids, or exported to Lottie from a design tool. Keep the static logo as the native splash image, so there is no blank frame before the animation starts.
+Because the fox is traced by colour rather than drawn as separate body parts, the ears, head and tail can't yet be moved independently. For movements like an ear flick or tail swish, ask a designer to supply the source file with those parts separated, or have the fox redrawn in parts from this trace.
+
+For React Native or Expo apps this can be built with `react-native-svg` and Reanimated using the ids above, or exported to Lottie from a design tool. Keep the static logo as the native splash image, so there is no blank frame before the animation starts.
