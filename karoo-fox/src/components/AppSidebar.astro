@@ -39,7 +39,7 @@ const supportEmail = app.supportEmail ?? company.emails.support;
     <ul class="link-list">
       <li><a href={href(p.support)}>Support and FAQs <span aria-hidden="true">→</span></a></li>
       <li><a href={href(p.privacy)}>Privacy policy <span aria-hidden="true">→</span></a></li>
-      <li><a href={href(p.deleteData)}>Delete your data <span aria-hidden="true">→</span></a></li>
+      {app.hasAccounts && <li><a href={href(p.deleteData)}>Delete your data <span aria-hidden="true">→</span></a></li>}
       {app.termsUrl && <li><a href={app.termsUrl} rel="noopener">Terms of use <span aria-hidden="true">↗</span></a></li>}
       {app.website && <li><a href={app.website} rel="noopener">Official website <span aria-hidden="true">↗</span></a></li>}
     </ul>

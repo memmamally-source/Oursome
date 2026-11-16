@@ -13,24 +13,32 @@ const app = getApp(Astro.params.slug);
 const p = appPaths(app.slug);
 ---
 <Base title={`${app.name} privacy policy`} description={`How ${app.name} handles your data: a summary and the full privacy policy.`}>
-  <PageHeader title={`${app.name} privacy`} eyebrow="Privacy" lead={`A plain-language summary of how ${app.name} uses data, with a link to the full policy.`} crumbs={[{ label: 'Apps', path: '/apps/' }, { label: app.name, path: p.page }, { label: 'Privacy' }]} />
+  <PageHeader title={`${app.name} privacy`} eyebrow="Privacy" lead={app.privacyPolicyUrl ? `A plain-language summary of how ${app.name} uses data, with a link to the full policy.` : `Privacy information for ${app.name}.`} crumbs={[{ label: 'Apps', path: '/apps/' }, { label: app.name, path: p.page }, { label: 'Privacy' }]} />
   <section class="section" aria-label="Privacy summary">
     <div class="narrow stack">
-      <div class="notice">
-        <p>The full {app.name} privacy policy{app.privacyPolicyDate ? <> (last updated {formatDate(app.privacyPolicyDate)})</> : null} is the authoritative version. If anything below differs from it, the full policy applies.</p>
-        <p><a class="button button--primary" href={app.privacyPolicyUrl} rel="noopener">Read the full {app.name} privacy policy</a></p>
-      </div>
-      <h2>In brief</h2>
-      <dl class="facts">
-        {app.privacyInBrief.map((f) => (
-          <div><dt>{f.label}</dt><dd>{f.value}</dd></div>
-        ))}
-      </dl>
-      <h2>Your choices</h2>
-      <p>You can ask what data we hold about you, correct it or have it deleted. See <a href={href(p.deleteData)}>how to delete your {app.name} data</a>.</p>
+      {app.privacyPolicyUrl ? (
+        <>
+          <div class="notice">
+            <p>The full {app.name} privacy policy{app.privacyPolicyDate ? <> (last updated {formatDate(app.privacyPolicyDate)})</> : null} is the authoritative version. If anything below differs from it, the full policy applies.</p>
+            <p><a class="button button--primary" href={app.privacyPolicyUrl} rel="noopener">Read the full {app.name} privacy policy</a></p>
+          </div>
+          <h2>In brief</h2>
+          <dl class="facts">
+            {app.privacyInBrief.map((f) => (
+              <div><dt>{f.label}</dt><dd>{f.value}</dd></div>
+            ))}
+          </dl>
+          <h2>Your choices</h2>
+          <p>You can ask what data we hold about you, correct it or have it deleted.{app.hasAccounts && <> See <a href={href(p.deleteData)}>how to delete your {app.name} data</a>.</>}</p>
+        </>
+      ) : (
+        <div class="notice">
+          <p>This app has not been released yet, so it does not collect any information. Its privacy policy will be published at this address before release.</p>
+        </div>
+      )}
       <h2>Contact</h2>
       <p>For privacy questions about {app.name}, email <Detail value={company.emails.privacy ?? app.supportEmail ?? null} label="Privacy email" email />.</p>
-      <p class="muted">Summary checked against the published policy on {formatDate(app.verifiedOn)}.</p>
+      {app.privacyPolicyUrl && <p class="muted">Summary checked against the published policy on {formatDate(app.verifiedOn)}.</p>}
     </div>
   </section>
 </Base>

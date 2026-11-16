@@ -8,6 +8,7 @@ const groups = [
   { title: 'Available now', list: apps.filter((a) => a.stage === 'available') },
   { title: 'Early access', list: apps.filter((a) => a.stage === 'preview') },
   { title: 'In development', list: apps.filter((a) => a.stage === 'in-development') },
+  { title: 'Planned', list: apps.filter((a) => a.stage === 'planned') },
 ].filter((g) => g.list.length > 0);
 ---
 <Base title="Apps" description="The Karoo Fox app portfolio: games, family organisation, research, education and photo albums.">

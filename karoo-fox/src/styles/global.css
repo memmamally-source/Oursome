@@ -1,16 +1,16 @@
 /* Karoo Fox — global styles. Colours come from the logo: burnt orange, cream, navy. */
 
 :root {
-  --cream: #fbf6ee;
-  --sand: #f3e9da;
+  /* Palette from the approved logo (brand kit): navy #061F3E, orange #F15A0A, cream #FFF6E9. */
+  --white: #ffffff;
+  --cream: #fff6e9;
   --surface: #ffffff;
-  --navy: #0b1f3f;
-  --navy-2: #16305c;
-  --ink: #0b1f3f;
-  --muted: #47536b;
-  --line: #e4d9c7;
-  --orange: #f95a10; /* brand graphic only */
-  --orange-ink: #b5370a; /* text and links on light backgrounds (AA) */
+  --navy: #061f3e;
+  --ink: #061f3e;
+  --muted: #475369;
+  --line: #eadfce;
+  --orange: #f15a0a; /* brand graphic only */
+  --orange-ink: #b5370a; /* text and links (AA on white and cream) */
   --button: #c2410c; /* filled buttons with white text (AA) */
   --button-hover: #a3360a;
   --focus: #1d63d8;
@@ -18,30 +18,12 @@
   --placeholder-ink: #6b4b00;
   --radius: 18px;
   --radius-sm: 10px;
-  --shadow: 0 1px 2px rgb(11 31 63 / 6%), 0 8px 24px rgb(11 31 63 / 7%);
+  --shadow: 0 1px 2px rgb(6 31 62 / 6%), 0 8px 24px rgb(6 31 62 / 7%);
   --max: 1160px;
   --font-body: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-head: 'Poppins', 'Inter Variable', system-ui, sans-serif;
+  /* The logo files have a white canvas, so the site is light-only and logos sit on white. */
   color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --cream: #0a1630;
-    --sand: #0f1e3d;
-    --surface: #13254a;
-    --ink: #f6efe4;
-    --muted: #b9c3d6;
-    --line: #243a63;
-    --orange-ink: #ff8f57;
-    --button: #c2410c;
-    --button-hover: #d9531c;
-    --focus: #8fb6ff;
-    --placeholder-bg: #4a3a0c;
-    --placeholder-ink: #ffe7a3;
-    --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 8px 24px rgb(0 0 0 / 25%);
-    color-scheme: dark;
-  }
 }
 
 *,
@@ -57,7 +39,7 @@ html {
 
 body {
   margin: 0;
-  background: var(--cream);
+  background: var(--white);
   color: var(--ink);
   font: 400 1.0625rem/1.65 var(--font-body);
   -webkit-font-smoothing: antialiased;
@@ -165,7 +147,7 @@ a:hover {
 }
 
 .section--sand {
-  background: var(--sand);
+  background: var(--cream);
 }
 
 .eyebrow {
@@ -209,9 +191,7 @@ a:hover {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: color-mix(in srgb, var(--cream) 92%, transparent);
-  backdrop-filter: saturate(1.4) blur(10px);
-  -webkit-backdrop-filter: saturate(1.4) blur(10px);
+  background: var(--white);
   border-bottom: 1px solid var(--line);
 }
 
@@ -220,7 +200,7 @@ a:hover {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  min-height: 68px;
+  min-height: 76px;
 }
 
 .brand-link {
@@ -230,8 +210,14 @@ a:hover {
 }
 
 .brand-link img {
-  height: 44px;
+  height: 60px;
   width: auto;
+}
+
+@media (max-width: 760px) {
+  .brand-link img {
+    height: 50px;
+  }
 }
 
 .nav-list {
@@ -252,7 +238,7 @@ a:hover {
 }
 
 .nav-list a:hover {
-  background: var(--sand);
+  background: var(--cream);
 }
 
 .nav-list a[aria-current='page'] {
@@ -297,7 +283,7 @@ a:hover {
     top: 100%;
     flex-direction: column;
     padding: 0.75rem 1rem 1.25rem;
-    background: var(--cream);
+    background: var(--white);
     border-bottom: 1px solid var(--line);
     box-shadow: var(--shadow);
   }
@@ -345,7 +331,7 @@ a:hover {
 }
 
 .button--secondary:hover {
-  background: var(--sand);
+  background: var(--cream);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -368,26 +354,16 @@ a:hover {
 }
 
 .hero__art {
-  position: relative;
   justify-self: center;
-  width: min(100%, 380px);
+  width: min(100%, 400px);
+  background: var(--white);
 }
 
-.hero__art::before {
-  content: '';
-  position: absolute;
-  inset: 8% -4% -2%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--orange) 16%, transparent), transparent);
-  z-index: -1;
-}
-
-/* On dark backgrounds the fox's navy outlines need a light backdrop. */
-@media (prefers-color-scheme: dark) {
-  .hero__art::before {
-    inset: 2% -8% -6%;
-    background: radial-gradient(closest-side, #fbf6ee 97%, transparent 100%);
-  }
+.hero__art img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
 }
 
 @media (max-width: 820px) {
@@ -397,46 +373,26 @@ a:hover {
 
   .hero__art {
     order: -1;
-    width: min(60%, 240px);
+    width: min(55%, 200px);
   }
 }
 
-/* The fox: traced layers with named features (#eye, #eye-far, #nose…) for animation. */
 @media (prefers-reduced-motion: no-preference) {
-  .fox-animated svg {
+  .hero__art img {
     animation: fox-pop 0.9s cubic-bezier(0.2, 0.9, 0.25, 1.25) both;
     transform-origin: 50% 90%;
-  }
-
-  .fox-animated #eye,
-  .fox-animated #eye-far {
-    transform-box: fill-box;
-    transform-origin: 50% 50%;
-    animation: fox-blink 5s ease-in-out 2s infinite;
   }
 }
 
 @keyframes fox-pop {
   from {
     opacity: 0;
-    transform: translateY(18px) scale(0.86);
+    transform: translateY(18px) scale(0.9);
   }
 
   to {
     opacity: 1;
     transform: none;
-  }
-}
-
-@keyframes fox-blink {
-  0%,
-  92%,
-  100% {
-    transform: none;
-  }
-
-  95% {
-    transform: scaleY(0.5);
   }
 }
 
@@ -508,7 +464,7 @@ a:hover {
 }
 
 .app-card:hover {
-  box-shadow: 0 2px 4px rgb(11 31 63 / 8%), 0 14px 32px rgb(11 31 63 / 12%);
+  box-shadow: 0 2px 4px rgb(6 31 62 / 8%), 0 14px 32px rgb(6 31 62 / 12%);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -528,7 +484,7 @@ a:hover {
   height: 64px;
   border-radius: 22%;
   flex: none;
-  box-shadow: 0 1px 3px rgb(11 31 63 / 18%);
+  box-shadow: 0 1px 3px rgb(6 31 62 / 18%);
 }
 
 .app-icon--lg {
@@ -589,7 +545,7 @@ a:hover {
   line-height: 1;
   padding: 0.4rem 0.65rem;
   border-radius: 999px;
-  background: var(--sand);
+  background: var(--cream);
   color: var(--ink);
   border: 1px solid var(--line);
 }
@@ -901,19 +857,21 @@ th {
 
 /* ---------- Footer ---------- */
 .site-footer {
-  background: var(--navy);
-  color: #d5dcea;
-  padding-block: 3.5rem 2rem;
+  background: var(--white);
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  padding-block: 3rem 0;
   margin-top: clamp(3rem, 6vw, 5rem);
   font-size: 0.95rem;
 }
 
 .site-footer a {
-  color: #fff;
+  color: var(--ink);
   text-decoration: none;
 }
 
 .site-footer a:hover {
+  color: var(--orange-ink);
   text-decoration: underline;
 }
 
@@ -927,7 +885,7 @@ th {
   font-size: 0.85rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #fff;
+  color: var(--ink);
   margin-bottom: 0.85rem;
 }
 
@@ -940,26 +898,21 @@ th {
 }
 
 .footer-logo {
-  height: 44px;
+  height: 72px;
   width: auto;
   margin-bottom: 1rem;
 }
 
 .footer-legal {
-  border-top: 1px solid rgb(255 255 255 / 14%);
+  background: var(--cream);
   margin-top: 2.5rem;
-  padding-top: 1.5rem;
+  padding-block: 1.5rem;
   font-size: 0.85rem;
-  color: #b9c3d6;
+  color: var(--muted);
 }
 
 .footer-legal p {
   margin-bottom: 0.4rem;
-}
-
-.site-footer .placeholder {
-  background: #fff3c4;
-  color: #3b2a00;
 }
 
 @media (max-width: 860px) {
@@ -1021,4 +974,9 @@ time {
   .skip-link {
     display: none;
   }
+}
+
+/* Long email addresses must wrap on narrow phones. */
+a[href^='mailto:'] {
+  overflow-wrap: anywhere;
 }

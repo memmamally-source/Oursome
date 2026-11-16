@@ -16,13 +16,19 @@ const subject = encodeURIComponent(`Delete my ${app.name} account and data`);
 const body = encodeURIComponent(`Please delete my ${app.name} account and associated data.\n\nEmail address used for my account:\n\n`);
 ---
 <Base title={`Delete your ${app.name} data`} description={`How to delete your ${app.name} account and data, in the app or by request.`}>
-  <PageHeader title={`Delete your ${app.name} data`} eyebrow="Your data" lead={app.hasAccounts ? `You can delete your ${app.name} account and its data yourself in the app, or ask us to do it for you.` : `${app.name} has no accounts and keeps your data on your device.`} crumbs={[{ label: 'Apps', path: '/apps/' }, { label: app.name, path: p.page }, { label: 'Delete your data' }]} />
+  <PageHeader title={`Delete your ${app.name} data`} eyebrow="Your data" lead={app.hasAccounts ? `You can delete your ${app.name} account and its data yourself in the app, or ask us to do it for you.` : `How to remove your ${app.name} data.`} crumbs={[{ label: 'Apps', path: '/apps/' }, { label: app.name, path: p.page }, { label: 'Delete your data' }]} />
   <section class="section" aria-label="Instructions">
     <div class="narrow stack">
-      <h2>{app.hasAccounts ? 'Delete your account in the app' : 'Remove your data'}</h2>
-      <ol>
-        {app.deletionSteps.map((s) => <li>{s}</li>)}
-      </ol>
+      {app.deletionSteps.length > 0 ? (
+        <>
+          <h2>{app.hasAccounts ? 'Delete your account in the app' : 'Remove your data'}</h2>
+          <ol>
+            {app.deletionSteps.map((s) => <li>{s}</li>)}
+          </ol>
+        </>
+      ) : (
+        <p>{app.name} has not been released yet, so we hold no data from it. Deletion instructions will be published here before release.</p>
+      )}
       {app.hasAccounts && (
         <>
           <p>Deleting your account removes your account and the data linked to it from our systems, as described in the <a href={href(p.privacy)}>{app.name} privacy policy</a>.</p>

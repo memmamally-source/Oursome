@@ -6,7 +6,7 @@ Nothing here has been bought, registered or submitted. Each step that costs mone
 
 ## 1. Legal entity (CIPC)
 
-- [ ] File the name amendment so that **EM Medical Group (Pty) Ltd** becomes **Karoo Fox (Pty) Ltd**. The reservation of KAROO FOX is valid until **18 May 2027**.
+- [ ] File the name amendment so that **EM Medical Group (Pty) Ltd** becomes **Karoo Fox (Pty) Ltd**. The reservation of KAROO FOX (reference **9471244619**) is valid until **18 May 2027**.
 - [ ] When the CIPC confirms the amendment, set `nameAmendmentComplete: true` in `src/config/company.ts`. Until then the site correctly says that Karoo Fox is a brand of EM Medical Group (Pty) Ltd that intends to change its name.
 - [ ] Add the **registration number** (`registrationNumber`). The registration number stays the same after a name change.
 - [ ] Add the **business address** (`address`). Use exactly the same address that will appear on the D-U-N-S record.
@@ -105,5 +105,5 @@ These are in the apps' own repositories, which were only read, never modified. T
 - **Crossword Hub:** its support page describes Duels and hint credits, while its status notes say they are off until Cloud Functions are deployed. The Karoo Fox site leaves them out until you confirm they're live.
 - **Oursome:** `PROGRESS.md` still says "No Firebase project yet", but its 9 Nov notes and privacy policy describe Firebase as on for family sharing.
 - **StePhD:** its content is AI-drafted and not medically reviewed, so the Karoo Fox site makes no expert-review claims and repeats the app's "educational purposes only / not affiliated with the USMLE, FSMB or NBME" disclaimer.
-- **In Pictures** has no support mailbox; it uses the company support email once that is set. "In Pictures" and "Oursome" are marked as working names.
+- **The photo album app** is listed as *planned* with no final name, as the brief requires. Its repository (`in-pictures`) has a public web preview at memmamally-source.github.io/in-pictures, which the Karoo Fox site does not link to. It gets a privacy policy and support details before release. "Oursome" is also marked as a working name.
 - **Each app uses a different free-mail support address** (Gmail or Outlook). Consider moving them to `support@<domain>`, or app-specific aliases, after the email is set up, and update `supportEmail` in `apps.ts`.

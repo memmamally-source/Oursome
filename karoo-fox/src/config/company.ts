@@ -9,7 +9,7 @@ export interface Company {
   currentLegalName: string;
   futureLegalName: string;
   nameAmendmentComplete: boolean;
-  nameReservation: { name: string; validUntil: string };
+  nameReservation: { name: string; reference: string; validUntil: string };
   registrationNumber: string | null;
   address: string[] | null;
   country: string;
@@ -38,7 +38,7 @@ export const company: Company = {
   nameAmendmentComplete: false,
 
   /** Name reservation (approved by the CIPC; valid until 18 May 2027). */
-  nameReservation: { name: 'KAROO FOX', validUntil: '2027-05-18' },
+  nameReservation: { name: 'KAROO FOX', reference: '9471244619', validUntil: '2027-05-18' },
 
   /** CIPC company registration number, e.g. "2015/123456/07". */
   registrationNumber: null,
@@ -62,7 +62,7 @@ export const company: Company = {
   informationOfficer: null,
 
   /** Founder shown on the About page. Set `show` to false to omit. */
-  founder: { name: 'Muhammad Emmamally', show: true },
+  founder: { name: 'Muhammad Emmamally', show: false }, // set show: true once the owner approves naming the founder publicly
 
   /** Year the Karoo Fox brand was established (copyright line). */
   since: 2026,

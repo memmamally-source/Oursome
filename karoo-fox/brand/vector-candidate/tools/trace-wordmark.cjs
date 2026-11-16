@@ -1,4 +1,4 @@
-// Traces the wordmark masks into src/brand/wordmark.json ({ w, h, karoo, fox }).
+// Traces the wordmark masks into brand/vector-candidate/wordmark.json ({ w, h, karoo, fox }).
 const potrace = require('potrace');
 const fs = require('fs');
 const path = require('path');
@@ -17,6 +17,6 @@ const nums = (d) => [...d.matchAll(/-?\d+\.?\d*/g)].map((m) => parseFloat(m[0]) 
     return d.replace(/-?\d+\.?\d*/g, (n) => String(Math.round((parseFloat(n) / S - (i++ % 2 === 0 ? x0 : y0)) * 10) / 10)).replace(/\s+/g, ' ').replace(/ ?([MCLZ]) ?/g, '$1');
   };
   const w = Math.ceil(Math.max(...xs) - x0), h = Math.ceil(Math.max(...ys) - y0);
-  fs.writeFileSync(outFile, JSON.stringify({ w, h, karoo: shift(raw.karoo), fox: shift(raw.fox), source: 'Traced from src/brand/original/karoo-fox-logo-original.jpg' }));
+  fs.writeFileSync(outFile, JSON.stringify({ w, h, karoo: shift(raw.karoo), fox: shift(raw.fox), source: "Traced from brand/source/Karoo_Fox_Logo_Original_Lossless.png" }));
   console.log(w, h);
 })();

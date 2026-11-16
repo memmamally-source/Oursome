@@ -4,7 +4,7 @@ import PageHeader from '../components/PageHeader.astro';
 import Detail from '../components/Detail.astro';
 import { company, entityStatement, legalName } from '../config/company.ts';
 import { apps } from '../data/apps.ts';
-import { appPaths, href } from '../lib/url.ts';
+import { appPaths, formatDate, href } from '../lib/url.ts';
 ---
 <Base title="Company information" description="Legal and registration information for Karoo Fox, and links to every privacy policy.">
   <PageHeader title="Company information" eyebrow="Legal" lead={entityStatement()} crumbs={[{ label: 'Company information' }]} />
@@ -22,11 +22,11 @@ import { appPaths, href } from '../lib/url.ts';
         <div><dt>Information Officer (POPIA)</dt><dd><Detail value={company.informationOfficer} label="Information Officer" /></dd></div>
       </dl>
       {!company.nameAmendmentComplete && (
-        <p class="muted">The name Karoo Fox has been reserved with the Companies and Intellectual Property Commission. Until the company’s registered name is formally changed, contracts and invoices are issued by {company.currentLegalName}.</p>
+        <p class="muted">The name {company.nameReservation.name} has been reserved with the Companies and Intellectual Property Commission (name reservation reference {company.nameReservation.reference}, valid until {formatDate(company.nameReservation.validUntil)}). The change of the company’s registered name to {company.futureLegalName} has not yet been completed; until it is, contracts and invoices are issued by {company.currentLegalName}.</p>
       )}
       <h2>Privacy policies</h2>
       <ul>
-        <li><a href={href('/privacy/')}>Karoo Fox website privacy notice</a></li>
+        <li><a href={href('/privacy/website/')}>Karoo Fox website privacy notice</a></li>
         {apps.map((a) => <li><a href={href(appPaths(a.slug).privacy)}>{a.name} privacy</a></li>)}
       </ul>
       <h2>Trademarks</h2>

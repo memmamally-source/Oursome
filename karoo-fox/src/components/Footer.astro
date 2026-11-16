@@ -3,6 +3,7 @@ import { company, entityStatement } from '../config/company.ts';
 import { apps } from '../data/apps.ts';
 import { appPaths, href } from '../lib/url.ts';
 import Detail from './Detail.astro';
+import Logo from './Logo.astro';
 const year = new Date().getFullYear();
 const copyrightYears = year > company.since ? `${company.since}–${year}` : `${company.since}`;
 ---
@@ -10,7 +11,7 @@ const copyrightYears = year > company.since ? `${company.since}–${year}` : `${
   <div class="container">
     <div class="footer-grid">
       <div>
-        <img class="footer-logo" src={href('/brand/logo-horizontal-light.svg')} alt="Karoo Fox" width="168" height="44" loading="lazy" />
+        <Logo class="footer-logo" height={72} loading="lazy" />
         <p>Independent software from South Africa, made for people everywhere.</p>
       </div>
       <div>
@@ -33,11 +34,13 @@ const copyrightYears = year > company.since ? `${company.since}–${year}` : `${
           <li><a href={href('/about/')}>About Karoo Fox</a></li>
           <li><a href={href('/news/')}>News</a></li>
           <li><a href={href('/legal/')}>Company information</a></li>
-          <li><a href={href('/privacy/')}>Website privacy</a></li>
+          <li><a href={href('/privacy/')}>Privacy</a></li>
         </ul>
       </div>
     </div>
-    <div class="footer-legal">
+  </div>
+  <div class="footer-legal">
+    <div class="container">
       <p>{entityStatement()}</p>
       <p>Registration number: <Detail value={company.registrationNumber} label="CIPC registration number" /></p>
       <p>© {copyrightYears} {company.nameAmendmentComplete ? company.futureLegalName : company.currentLegalName}. Karoo Fox and the fox logo are brand marks of the company. App Store is a service mark of Apple Inc. Google Play is a trademark of Google LLC.</p>

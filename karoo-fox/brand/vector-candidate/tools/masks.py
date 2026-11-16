@@ -1,7 +1,7 @@
 """Colour-layer masks for tracing the Karoo Fox logo from the original artwork.
 
-Usage: python3 scripts/trace-logo/masks.py src/brand/original/karoo-fox-logo-original.jpg <work-dir>
-Then:  node scripts/trace-logo/trace.cjs <work-dir> src/brand/fox-mark.svg && npm run brand
+Usage: python3 brand/vector-candidate/tools/masks.py brand/source/Karoo_Fox_Logo_Original_Lossless.png <work-dir>
+Then:  node brand/vector-candidate/tools/trace.cjs <work-dir> brand/vector-candidate/fox-mark.svg
 Needs Python 3 with numpy, scipy and Pillow. The crop below is the fox in the 1536×1024 original.
 """
 import numpy as np

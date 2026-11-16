@@ -5,7 +5,9 @@ The official website of **Karoo Fox**: the company, its apps, and one place for 
 - Static site built with [Astro](https://astro.build) 7, TypeScript and plain CSS. It ships no JavaScript to visitors.
 - It has no database, accounts, cookies, analytics, forms or third-party requests. Fonts are self-hosted.
 - It is hosted free on GitHub Pages, and a custom domain can be added later.
-- It has a strict Content-Security-Policy, passes WCAG 2.1 AA checks (axe), works in light and dark mode, and is responsive from 320 px up.
+- It has a strict Content-Security-Policy, passes WCAG 2.1 AA checks (axe), and is responsive from 320 px up.
+- It uses the owner's approved logo PNGs exactly; they are only resized, never redrawn (see [docs/BRAND.md](docs/BRAND.md)). Because the artwork has a white canvas, the site is light-only and every logo sits on white.
+- It was built from the brief in [docs/CLAUDE_MASTER_PROMPT.md](docs/CLAUDE_MASTER_PROMPT.md).
 
 > **Status: preview.** Company details such as the registration number, address, domain and email are placeholders. They show highlighted on the pages, and the site tells search engines not to index it until they are filled in. See [docs/LAUNCH-CHECKLIST.md](docs/LAUNCH-CHECKLIST.md).
 
@@ -27,14 +29,14 @@ npm install
 npm run dev          # http://localhost:4321
 npm run check        # typecheck, unit tests, build, HTML/link/metadata checks, browser + accessibility tests
 npm run readiness    # what must be supplied before publishing (SITE_URL=https://… to check the domain too)
-npm run brand        # regenerate logos, favicons and the social image from src/brand/
+npm run brand        # regenerate web/social images and favicons from the approved PNGs in brand/source/
 ```
 
 `npm run check` must pass before every commit. It covers:
 - **Unit tests:** the app-data rules, the company legal wording and the readiness logic.
 - **`astro check`:** strict TypeScript.
 - **`scripts/verify-build.mjs`:** HTML validation (no inline styles), internal links and assets, one `<h1>` per page, and title, description, canonical URL and Open Graph image on every page. It also confirms that every stable app URL exists.
-- **`tests/browser.mjs`:** loads every page in Chromium at 375 px and 1280 px, in light and dark mode. It fails on console errors, CSP violations, failed requests, horizontal scrolling or axe WCAG 2.1 AA violations.
+- **`tests/browser.mjs`:** loads every page in Chromium at 320, 390, 768 and 1280 px. It fails on console errors, CSP violations, failed requests, images that don't load, horizontal scrolling, a logo placed on a non-white background, or axe WCAG 2.1 AA violations.
 
 ## Structure
 
@@ -42,13 +44,15 @@ npm run brand        # regenerate logos, favicons and the social image from src/
 src/config/company.ts   Legal names, registration, address, emails (placeholders = null)
 src/data/apps.ts        The app portfolio: status per platform, features, privacy summary, deletion steps
 src/content/news/       Announcements (Markdown, one file per post)
-src/brand/              Logo sources: fox-mark.svg (layered) and wordmark.json
 src/pages/              Routes (see below)
 src/styles/global.css   Design tokens and all styles
+brand/source/           APPROVED logo artwork (owner-supplied, original filenames)
+brand/vector-candidate/ SVG reproduction for review (not approved, not used on the site)
+brand/review/           Visual check of the transparent favicon
 public/                 Generated brand assets, favicons, app icons
 scripts/                Brand generator, build verifier, readiness report, static server
 tests/                  Unit tests and browser tests
-docs/                   Launch checklist and brand guide
+docs/                   Master prompt, launch checklist, QA checklist, brand guide
 ```
 
 ### URLs
@@ -66,10 +70,11 @@ docs/                   Launch checklist and brand guide
 | Delete your data (all apps) | `/support/data-deletion/` |
 | Contact | `/contact/` |
 | Company information | `/legal/` |
-| Website privacy notice | `/privacy/` |
+| Privacy hub (all apps) | `/privacy/` |
+| Website privacy notice | `/privacy/website/` |
 | News | `/news/`, `/news/<slug>/` |
 
-The slugs are `crossword-hub`, `oursome`, `research-tracker`, `stephd` and `in-pictures`. **Never rename a slug** after it has been entered in App Store Connect or Play Console.
+The slugs are `crossword-hub`, `oursome`, `research-tracker`, `stephd` and `photo-album`. **Never rename a slug** after it has been entered in App Store Connect or Play Console.
 
 ## Common edits
 

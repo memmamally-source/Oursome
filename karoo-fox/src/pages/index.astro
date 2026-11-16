@@ -4,12 +4,11 @@ import AppCard from '../components/AppCard.astro';
 import Icon from '../components/Icon.astro';
 import { apps } from '../data/apps.ts';
 import { href } from '../lib/url.ts';
-import foxSvg from '../brand/fox-mark.svg?raw';
 
 const values = [
   { icon: 'shield', title: 'Privacy by design', text: 'None of our apps show advertising or sell data. Where we can, your data stays on your device.' },
   { icon: 'heart', title: 'Made with care', text: 'Calm, considered design that respects your time and attention, on the web and on your phone.' },
-  { icon: 'chat', title: 'Support you can reach', text: 'Every app has a support page, a monitored mailbox and clear instructions for deleting your data.' },
+  { icon: 'chat', title: 'Support you can reach', text: 'Every app has its own support page, privacy page and clear instructions for deleting your data.' },
   { icon: 'globe', title: 'For people everywhere', text: 'Built in South Africa for users in the United States, the United Kingdom, Canada, Australia and beyond.' },
 ] as const;
 ---
@@ -18,14 +17,25 @@ const values = [
     <div class="container hero__grid">
       <div>
         <p class="eyebrow">Independent software company</p>
-        <h1>Thoughtful apps for everyday life, learning and play.</h1>
-        <p class="lead">Karoo Fox designs and builds software people enjoy using, from daily puzzles and family organisers to tools for researchers and medical students.</p>
+        <h1>Thoughtful software for everyday life.</h1>
+        <p class="lead">Karoo Fox is a South African software brand creating useful apps for learning, organising, playing and preserving memories.</p>
         <div class="button-row">
           <a class="button button--primary" href={href('/apps/')}>Explore our apps</a>
           <a class="button button--secondary" href={href('/support/')}>Get support</a>
         </div>
       </div>
-      <div class="hero__art fox-animated" aria-hidden="true" set:html={foxSvg} />
+      <div class="hero__art">
+        <img
+          src={href('/brand/karoo-fox-icon-512.webp')}
+          srcset={`${href('/brand/karoo-fox-icon-256.webp')} 256w, ${href('/brand/karoo-fox-icon-512.webp')} 512w, ${href('/brand/karoo-fox-icon-1024.png')} 1024w`}
+          sizes="(max-width: 820px) 200px, 400px"
+          width="400"
+          height="400"
+          alt="The Karoo Fox mascot: a friendly orange fox curled up with its tail wrapped around it"
+          fetchpriority="high"
+          data-white-canvas
+        />
+      </div>
     </div>
   </section>
 

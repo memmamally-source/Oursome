@@ -58,9 +58,9 @@ for (const file of htmlFiles) {
 }
 
 // Stable URLs referenced from App Store Connect / Play Console.
-const required = ['/', '/apps/', '/about/', '/support/', '/support/data-deletion/', '/contact/', '/privacy/', '/legal/', '/news/', ...apps.flatMap((a) => Object.values(appPaths(a.slug)))];
+const required = ['/', '/apps/', '/about/', '/support/', '/support/data-deletion/', '/contact/', '/privacy/', '/privacy/website/', '/legal/', '/news/', ...apps.flatMap((a) => Object.values(appPaths(a.slug)))];
 for (const p of required) if (!fs.existsSync(path.join(dist, p, 'index.html'))) problems.push(`missing required page ${p}`);
-for (const f of ['sitemap-index.xml', 'robots.txt', 'favicon.svg', 'og-image.png', 'apple-touch-icon.png', 'site.webmanifest', '404.html', 'app-accents.css']) {
+for (const f of ['sitemap-index.xml', 'robots.txt', 'favicon.ico', 'favicon-32.png', 'brand/karoo-fox-logo-320.webp', 'brand/karoo-fox-icon-512.webp', 'og-image.png', 'apple-touch-icon.png', 'site.webmanifest', '404.html', 'app-accents.css']) {
   if (!fs.existsSync(path.join(dist, f))) problems.push(`missing ${f}`);
 }
 for (const a of apps) if (!fs.existsSync(path.join(dist, 'images/apps', `${a.slug}.webp`))) problems.push(`missing icon for ${a.slug}`);

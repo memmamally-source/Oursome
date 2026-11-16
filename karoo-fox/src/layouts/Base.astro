@@ -45,7 +45,7 @@ const organization = {
   name: company.brand,
   legalName: legalName(),
   url: new URL(href('/'), Astro.site).href,
-  logo: new URL(href('/brand/logo-stacked-2000.png'), Astro.site).href,
+  logo: new URL(href('/brand/karoo-fox-logo-1280.png'), Astro.site).href,
   ...(company.emails.general ? { email: company.emails.general } : {}),
   ...(company.address ? { address: { '@type': 'PostalAddress', streetAddress: company.address.join(', '), addressCountry: 'ZA' } } : { address: { '@type': 'PostalAddress', addressCountry: 'ZA' } }),
 };
@@ -62,15 +62,15 @@ const jsonLd = [organization, ...structuredData];
     <meta name="description" content={description} />
     <meta name="robots" content={robots} />
     <link rel="canonical" href={canonical} />
-    <link rel="icon" href={href('/favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={href('/favicon.ico')} sizes="16x16 32x32 48x48" />
     <link rel="icon" href={href('/favicon-32.png')} sizes="32x32" type="image/png" />
+    <link rel="icon" href={href('/favicon-48.png')} sizes="48x48" type="image/png" />
     <link rel="apple-touch-icon" href={href('/apple-touch-icon.png')} />
     <link rel="manifest" href={href('/site.webmanifest')} />
     <link rel="sitemap" href={href('/sitemap-index.xml')} />
     <link rel="stylesheet" href={href('/app-accents.css')} />
-    <meta name="theme-color" content="#FBF6EE" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0A1630" media="(prefers-color-scheme: dark)" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#FFFFFF" />
+    <meta name="color-scheme" content="light" />
     <meta property="og:site_name" content={company.brand} />
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={fullTitle} />
@@ -79,7 +79,7 @@ const jsonLd = [organization, ...structuredData];
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="The Karoo Fox logo: a friendly orange fox beside the words Karoo Fox." />
+    <meta property="og:image:alt" content="The Karoo Fox logo: a friendly curled orange fox above the words Karoo Fox." />
     <meta property="og:locale" content="en_GB" />
     <meta name="twitter:card" content="summary_large_image" />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />

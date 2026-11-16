@@ -10,7 +10,7 @@ import { appPaths, href } from '../../lib/url.ts';
     <div class="narrow">
       <ul class="link-list card">
         {apps.map((app) => (
-          <li><a href={href(appPaths(app.slug).deleteData)}>{app.name}{app.hasAccounts ? '' : ' (no accounts; data stays on your device)'} <span aria-hidden="true">→</span></a></li>
+          <li><a href={href(appPaths(app.slug).deleteData)}>{app.name}{app.privacyPolicyUrl ? '' : ' (not released; no data held)'} <span aria-hidden="true">→</span></a></li>
         ))}
       </ul>
     </div>

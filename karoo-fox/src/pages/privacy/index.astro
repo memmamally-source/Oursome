@@ -1,0 +1,43 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Detail from '../../components/Detail.astro';
+import { apps } from '../../data/apps.ts';
+import { company } from '../../config/company.ts';
+import { appPaths, formatDate, href } from '../../lib/url.ts';
+---
+<Base title="Privacy" description="Privacy policies for every Karoo Fox app and for this website, each at its own stable address.">
+  <PageHeader title="Privacy" eyebrow="Privacy hub" lead="Each app has its own privacy page at a stable address. None of our apps show advertising or sell personal data." crumbs={[{ label: 'Privacy' }]} />
+  <section class="section" aria-label="Privacy pages">
+    <div class="container">
+      <div class="table-wrap card">
+        <table>
+          <caption class="visually-hidden">Privacy pages for each app</caption>
+          <thead>
+            <tr><th scope="col">App</th><th scope="col">Privacy page</th><th scope="col">Full policy</th><th scope="col">Your data</th></tr>
+          </thead>
+          <tbody>
+            {apps.map((app) => {
+              const p = appPaths(app.slug);
+              return (
+                <tr>
+                  <th scope="row"><a href={href(p.page)}>{app.name}</a></th>
+                  <td><a href={href(p.privacy)}>{app.name} privacy</a></td>
+                  <td>{app.privacyPolicyUrl ? <a href={app.privacyPolicyUrl} rel="noopener">Policy{app.privacyPolicyDate ? ` (${formatDate(app.privacyPolicyDate)})` : ''}</a> : <span class="muted">Not released yet</span>}</td>
+                  <td>{app.hasAccounts ? <a href={href(p.deleteData)}>Delete your data</a> : <span class="muted">No account data</span>}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <section class="section section--sand" aria-labelledby="site-privacy">
+    <div class="narrow stack">
+      <h2 id="site-privacy">This website</h2>
+      <p>The Karoo Fox website sets no cookies and uses no analytics, advertising or forms. Read the <a href={href('/privacy/website/')}>website privacy notice</a>.</p>
+      <p>Privacy questions: <Detail value={company.emails.privacy} label="Privacy email" email /></p>
+    </div>
+  </section>
+</Base>

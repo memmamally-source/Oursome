@@ -1,99 +1,164 @@
 /**
- * Builds every logo variant, favicon and social image from two sources:
- *   src/brand/fox-mark.svg  – the fox, traced from the original artwork (scripts/trace-logo)
- *   src/brand/wordmark.json – "Karoo Fox", traced from the original artwork
- * Run `npm run brand` after changing either; the outputs are committed.
+ * Builds every website and social image from the APPROVED raster artwork in
+ * brand/source/ (supplied by the owner; filenames preserved). Nothing is
+ * redrawn: images are only cropped of blank canvas and resized (Lanczos).
+ *
+ *   brand/source/Karoo_Fox_Logo_Website_Tight_4460x3216.png → logo (fox + wordmark)
+ *   brand/source/Karoo_Fox_Fox_Icon_2048x2048.png           → fox icon, favicons, profile icons
+ *
+ * The source images have a white canvas, so they are used on white
+ * backgrounds. The only transparent derivative is the favicon (browser tabs
+ * can be dark): its background is removed by flood fill from the edges, so
+ * the fox's cream details stay opaque, and only the outer anti-aliased edge
+ * is converted to partial transparency. Check it with `npm run brand` output
+ * brand/review/favicon-check.png.
+ *
+ * Run `npm run brand` after replacing a source file; outputs are committed.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import sharp from 'sharp';
 
 const root = path.resolve(import.meta.dirname, '..');
-const brandDir = path.join(root, 'src/brand');
+const src = (f) => path.join(root, 'brand/source', f);
+/**
+ * The artwork's canvas is near-white (252–254) rather than pure white, which
+ * shows as a faint box on a white page. Snap only neutral near-white pixels
+ * (all channels ≥ 248, spread ≤ 4) to 255. The fox's cream (#FFF6E9, blue
+ * 233) and every other artwork colour are far outside that range.
+ */
+async function whitenCanvas(file) {
+  const { data, info } = await sharp(file).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  for (let i = 0; i < data.length; i += 3) {
+    const lo = Math.min(data[i], data[i + 1], data[i + 2]);
+    const hi = Math.max(data[i], data[i + 1], data[i + 2]);
+    if (lo >= 248 && hi - lo <= 4) data[i] = data[i + 1] = data[i + 2] = 255;
+  }
+  return sharp(data, { raw: { width: info.width, height: info.height, channels: 3 } }).png({ compressionLevel: 1 }).toBuffer();
+}
+const LOGO = await whitenCanvas(src('Karoo_Fox_Logo_Website_Tight_4460x3216.png'));
+const ICON = await whitenCanvas(src('Karoo_Fox_Fox_Icon_2048x2048.png'));
 const out = path.join(root, 'public/brand');
+const review = path.join(root, 'brand/review');
 fs.mkdirSync(out, { recursive: true });
+fs.mkdirSync(review, { recursive: true });
+const WHITE = { r: 255, g: 255, b: 255, alpha: 1 };
+const write = (img, file) => img.toFile(path.join(root, file));
 
-const NAVY = '#031E3C'; // sampled from the original artwork
-const ORANGE = '#D83E02'; // sampled from the original artwork
-const CREAM = '#FBF6EE';
+// ---- Logo (fox + wordmark), responsive widths for the header and hero ----
+export const LOGO_WIDTHS = [160, 240, 320, 480, 640, 960, 1280];
+for (const w of LOGO_WIDTHS) {
+  await write(sharp(LOGO).resize({ width: w, kernel: 'lanczos3' }).webp({ quality: 92 }), `public/brand/karoo-fox-logo-${w}.webp`);
+}
+await write(sharp(LOGO).resize({ width: 1280 }).png({ compressionLevel: 9 }), 'public/brand/karoo-fox-logo-1280.png');
 
-const foxSvg = fs.readFileSync(path.join(brandDir, 'fox-mark.svg'), 'utf8');
-const foxInner = foxSvg.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '').trim();
-const FOX_W = 505;
-const FOX_H = 620;
-const wm = JSON.parse(fs.readFileSync(path.join(brandDir, 'wordmark.json'), 'utf8'));
-const wordmark = (karooFill = NAVY) =>
-  `<path fill="${karooFill}" fill-rule="evenodd" d="${wm.karoo}"/><path fill="${ORANGE}" fill-rule="evenodd" d="${wm.fox}"/>`;
+// ---- Fox icon ----
+// The icon source is a 2048 square with the fox centred on white. A tighter
+// square crop (blank canvas only) gives the fox more presence at small sizes.
+const tight = { left: 174, top: 182, width: 1700, height: 1700 };
+for (const w of [128, 256, 512]) {
+  await write(sharp(ICON).extract(tight).resize(w).webp({ quality: 92 }), `public/brand/karoo-fox-icon-${w}.webp`);
+}
+await write(sharp(ICON).extract(tight).resize(1024).png(), 'public/brand/karoo-fox-icon-1024.png');
 
-const svg = (w, h, body, label = 'Karoo Fox') =>
-  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" role="img" aria-label="${label}">${body}</svg>\n`;
+// App/home-screen icons on white (iOS rounds the corners itself).
+await write(sharp(ICON).resize(180), 'public/apple-touch-icon.png');
+await write(sharp(ICON).resize(192), 'public/icon-192.png');
+await write(sharp(ICON).resize(512), 'public/icon-512.png');
+// Maskable: keep the whole fox inside the 80% safe circle.
+const padded = async (size, scale) =>
+  sharp({ create: { width: size, height: size, channels: 4, background: WHITE } })
+    .composite([{ input: await sharp(ICON).resize(Math.round(size * scale)).png().toBuffer(), gravity: 'centre' }]);
+await write(await padded(512, 0.72), 'public/icon-maskable-512.png');
 
-const fox = (x, y, scale) => `<g transform="translate(${x} ${y}) scale(${scale})">${foxInner}</g>`;
-
-// Horizontal lockup (site header): fox left, wordmark right.
-function horizontal(karooFill) {
-  const foxH = 310;
-  const s = foxH / FOX_H;
-  const foxW = FOX_W * s;
-  const wmScale = 118 / wm.h;
-  const gap = 36;
-  const w = Math.ceil(foxW + gap + wm.w * wmScale);
-  const wmY = foxH - wm.h * wmScale - 18;
-  return svg(w, foxH, fox(0, 0, s) + `<g transform="translate(${foxW + gap} ${wmY}) scale(${wmScale})">${wordmark(karooFill)}</g>`);
+// ---- Social profile pictures (square; the fox stays inside a circular crop) ----
+for (const size of [400, 800, 1080]) {
+  await write((await padded(size, 0.86)).png(), `public/brand/karoo-fox-profile-${size}.png`);
 }
 
-// Stacked lockup, positioned exactly as in the original artwork (both traced at
-// the original's scale: the fox crop sits 270 px right of and 605 px above the wordmark).
-function stacked(karooFill, bg) {
-  const pad = 60;
-  const w = Math.ceil(wm.w + pad * 2);
-  const h = Math.ceil(pad + 605 + wm.h + pad);
-  const back = bg ? `<rect width="${w}" height="${h}" fill="${bg}"/>` : '';
-  return svg(w, h, back + fox(pad + 270, pad, 1) + `<g transform="translate(${pad} ${pad + 605})">${wordmark(karooFill)}</g>`);
+// ---- Open Graph / link preview: the full logo centred on white ----
+const ogLogo = await sharp(LOGO).resize({ height: 520 }).png().toBuffer();
+await write(
+  sharp({ create: { width: 1200, height: 630, channels: 3, background: WHITE } }).composite([{ input: ogLogo, gravity: 'centre' }]).png(),
+  'public/og-image.png',
+);
+
+// ---- Favicon with a genuine transparent background ----
+const { data, info } = await sharp(ICON).extract(tight).resize(256).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+const W = info.width;
+const H = info.height;
+const isWhite = (i) => data[i] >= 246 && data[i + 1] >= 246 && data[i + 2] >= 246;
+const bg = new Uint8Array(W * H);
+const stack = [];
+for (let x = 0; x < W; x++) stack.push(x, 0, x, H - 1);
+for (let y = 0; y < H; y++) stack.push(0, y, W - 1, y);
+while (stack.length) {
+  const y = stack.pop();
+  const x = stack.pop();
+  if (x < 0 || y < 0 || x >= W || y >= H) continue;
+  const p = y * W + x;
+  if (bg[p] || !isWhite(p * 4)) continue;
+  bg[p] = 1;
+  stack.push(x + 1, y, x - 1, y, x, y + 1, x, y - 1);
 }
-
-// Square app-icon style tile (for touch icons and maskable icons).
-function tile(size, bg, foxShare = 0.7) {
-  const s = (size * foxShare) / FOX_H;
-  const x = (size - FOX_W * s) / 2;
-  const y = (size - FOX_H * s) / 2;
-  return svg(size, size, `<rect width="${size}" height="${size}" fill="${bg}"/>` + fox(x, y, s));
+for (let p = 0; p < W * H; p++) {
+  const i = p * 4;
+  if (bg[p]) {
+    data[i + 3] = 0;
+    continue;
+  }
+  // Edge pixels next to the background: un-blend from white (colour-to-alpha).
+  const x = p % W;
+  const y = (p / W) | 0;
+  const touchesBg = [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => {
+    const nx = x + dx;
+    const ny = y + dy;
+    return nx >= 0 && ny >= 0 && nx < W && ny < H && bg[ny * W + nx];
+  });
+  if (!touchesBg) continue;
+  const a = Math.max(255 - data[i], 255 - data[i + 1], 255 - data[i + 2]) / 255;
+  if (a < 0.6) {
+    const alpha = Math.max(a, 0.02);
+    for (let c = 0; c < 3; c++) data[i + c] = Math.round(255 - (255 - data[i + c]) / alpha);
+    data[i + 3] = Math.round(alpha * 255);
+  }
 }
+const transparent = sharp(data, { raw: { width: W, height: H, channels: 4 } });
+const fav = async (size) => transparent.clone().resize(size, size, { kernel: 'lanczos3' }).png().toBuffer();
+const favs = { 16: await fav(16), 32: await fav(32), 48: await fav(48) };
+fs.writeFileSync(path.join(root, 'public/favicon-32.png'), favs[32]);
+fs.writeFileSync(path.join(root, 'public/favicon-48.png'), favs[48]);
+// favicon.ico with embedded PNGs (16, 32, 48).
+const entries = [16, 32, 48];
+const header = Buffer.alloc(6 + 16 * entries.length);
+header.writeUInt16LE(0, 0);
+header.writeUInt16LE(1, 2);
+header.writeUInt16LE(entries.length, 4);
+let offset = header.length;
+entries.forEach((s, n) => {
+  const e = 6 + n * 16;
+  header.writeUInt8(s, e);
+  header.writeUInt8(s, e + 1);
+  header.writeUInt16LE(1, e + 4);
+  header.writeUInt16LE(32, e + 6);
+  header.writeUInt32LE(favs[s].length, e + 8);
+  header.writeUInt32LE(offset, e + 12);
+  offset += favs[s].length;
+});
+fs.writeFileSync(path.join(root, 'public/favicon.ico'), Buffer.concat([header, ...entries.map((s) => favs[s])]));
 
-const files = {
-  'logo-horizontal.svg': horizontal(NAVY),
-  'logo-horizontal-light.svg': horizontal(CREAM), // for dark backgrounds
-  'logo-stacked.svg': stacked(NAVY),
-  'logo-stacked-light.svg': stacked(CREAM),
-  'fox-mark.svg': foxSvg,
-  'wordmark.svg': svg(wm.w, wm.h, wordmark()),
-};
-for (const [name, content] of Object.entries(files)) fs.writeFileSync(path.join(out, name), content);
-fs.writeFileSync(path.join(root, 'public/favicon.svg'), foxSvg);
-
-const png = (input, file, w, h) =>
-  sharp(Buffer.from(input), { density: 300 }).resize(w, h, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toFile(path.join(root, file));
-
-await Promise.all([
-  png(foxSvg, 'public/favicon-32.png', 32, 32),
-  png(foxSvg, 'public/favicon-48.png', 48, 48),
-  png(tile(180, CREAM, 0.74), 'public/apple-touch-icon.png', 180, 180),
-  png(tile(512, CREAM, 0.74), 'public/icon-512.png', 512, 512),
-  png(tile(512, CREAM, 0.56), 'public/icon-maskable-512.png', 512, 512),
-  png(tile(192, CREAM, 0.74), 'public/icon-192.png', 192, 192),
-  png(stacked(NAVY, '#FFFFFF'), 'public/brand/logo-stacked-2000.png', 2000, null),
-  png(horizontal(NAVY), 'public/brand/logo-horizontal-1200.png', 1200, null),
-]);
-
-// Social sharing image, 1200×630: horizontal logo centred on cream.
-const ogLogo = await sharp(Buffer.from(horizontal(NAVY)), { density: 300 }).resize(860).png().toBuffer();
-const meta = await sharp(ogLogo).metadata();
-await sharp({ create: { width: 1200, height: 630, channels: 3, background: CREAM } })
+// Review sheet: the transparent favicon on light, mid and dark backgrounds, enlarged.
+const big = await transparent.clone().resize(256).png().toBuffer();
+await sharp({ create: { width: 3 * 276, height: 276, channels: 3, background: '#ffffff' } })
   .composite([
-    { input: Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><rect y="606" width="1200" height="24" fill="${ORANGE}"/></svg>`), left: 0, top: 0 },
-    { input: ogLogo, left: Math.round((1200 - meta.width) / 2), top: Math.round((606 - meta.height) / 2) },
+    { input: { create: { width: 276, height: 276, channels: 3, background: '#ffffff' } }, left: 0, top: 0 },
+    { input: { create: { width: 276, height: 276, channels: 3, background: '#8a8f99' } }, left: 276, top: 0 },
+    { input: { create: { width: 276, height: 276, channels: 3, background: '#061f3e' } }, left: 552, top: 0 },
+    { input: big, left: 10, top: 10 },
+    { input: big, left: 286, top: 10 },
+    { input: big, left: 562, top: 10 },
   ])
   .png()
-  .toFile(path.join(root, 'public/og-image.png'));
+  .toFile(path.join(review, 'favicon-check.png'));
 
-console.log('Brand assets written to public/ and public/brand/');
+console.log('Brand assets written to public/ and public/brand/ (review sheet: brand/review/favicon-check.png)');

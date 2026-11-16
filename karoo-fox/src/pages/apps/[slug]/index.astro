@@ -11,7 +11,7 @@ import { appPaths, href } from '../../../lib/url.ts';
 export const getStaticPaths = (() => apps.map((a) => ({ params: { slug: a.slug } }))) satisfies GetStaticPaths;
 
 const app = getApp(Astro.params.slug);
-const stageStatus = app.stage === 'available' ? 'available' : app.stage === 'preview' ? 'preview' : 'planned';
+const stageStatus = app.stage === 'available' ? 'available' : app.stage === 'preview' ? 'preview' : app.stage === 'planned' ? 'planned' : 'testing';
 const live = app.releases.filter((r) => r.status === 'available' || r.status === 'preview');
 const software = {
   '@context': 'https://schema.org',
@@ -49,10 +49,14 @@ const software = {
         <h2>About {app.name}</h2>
         {app.description.map((para) => <p>{para}</p>)}
         {app.provisionalName && <p class="muted">“{app.name}” is a working name and may change before the store release.</p>}
-        <h2>Features</h2>
-        <ul class="check-list">
-          {app.features.map((f) => <li>{f}</li>)}
-        </ul>
+        {app.features.length > 0 && (
+          <>
+            <h2>Features</h2>
+            <ul class="check-list">
+              {app.features.map((f) => <li>{f}</li>)}
+            </ul>
+          </>
+        )}
         <h2>Who it’s for</h2>
         <p>{app.audience}</p>
         {app.disclaimer && <div class="notice"><p>{app.disclaimer}</p></div>}

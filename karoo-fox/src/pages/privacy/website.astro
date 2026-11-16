@@ -1,16 +1,16 @@
 ---
-import Base from '../layouts/Base.astro';
-import PageHeader from '../components/PageHeader.astro';
-import Detail from '../components/Detail.astro';
-import { company, legalName } from '../config/company.ts';
-import { apps } from '../data/apps.ts';
-import { appPaths, formatDate, href } from '../lib/url.ts';
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Detail from '../../components/Detail.astro';
+import { company, legalName } from '../../config/company.ts';
+import { apps } from '../../data/apps.ts';
+import { appPaths, formatDate, href } from '../../lib/url.ts';
 
 /** Update when this notice changes. */
 const updated = '2026-11-16';
 ---
 <Base title="Website privacy notice" description="How the Karoo Fox website handles personal information.">
-  <PageHeader title="Website privacy notice" eyebrow="Privacy" lead="This notice covers this website only. Each app has its own privacy policy." crumbs={[{ label: 'Website privacy' }]} />
+  <PageHeader title="Website privacy notice" eyebrow="Privacy" lead="This notice covers this website only. Each app has its own privacy policy." crumbs={[{ label: 'Privacy', path: '/privacy/' }, { label: 'Website' }]} />
   <section class="section" aria-label="Notice">
     <div class="narrow prose">
       <p class="muted">Last updated {formatDate(updated)}</p>

@@ -9,7 +9,7 @@ interface Props {
 }
 const { app, headingLevel = 'h3' } = Astro.props;
 const Heading = headingLevel;
-const stageStatus = app.stage === 'available' ? 'available' : app.stage === 'preview' ? 'preview' : 'planned';
+const stageStatus = app.stage === 'available' ? 'available' : app.stage === 'preview' ? 'preview' : app.stage === 'planned' ? 'planned' : 'testing';
 // Only platforms people can use today; testing/planned ones are shown on the app page.
 const platforms = publicReleases(app)
   .filter((r) => r.status === 'available' || r.status === 'preview')

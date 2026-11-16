@@ -46,11 +46,11 @@ export interface App {
   features: string[];
   audience: string;
   /** Overall stage shown on cards. */
-  stage: 'available' | 'preview' | 'in-development';
+  stage: 'available' | 'preview' | 'in-development' | 'planned';
   releases: Release[];
   website?: string;
-  /** The app's own published policy (authoritative until hosted here). */
-  privacyPolicyUrl: string;
+  /** The app's own published policy (authoritative until hosted here). Absent for unreleased apps. */
+  privacyPolicyUrl?: string;
   privacyPolicyDate?: string;
   /** The app's own support page, if it has one. */
   supportPageUrl?: string;
@@ -256,44 +256,28 @@ export const apps: App[] = [
     verifiedOn: '2026-11-16',
   },
   {
-    slug: 'in-pictures',
-    name: 'In Pictures',
-    provisionalName: true,
+    slug: 'photo-album',
+    name: 'Photo album & scrapbook app',
     category: 'Photos & memories',
-    tagline: 'Turn your photos into beautifully designed albums and scrapbooks.',
+    tagline: 'Beautifully designed photo albums and scrapbooks, made simple.',
     summary:
-      'A photo album and scrapbook maker in development: choose an occasion, add your photos and get a designed album you can refine and export.',
+      'A planned app to help individuals and families turn their photos into beautifully designed digital albums and scrapbooks using templates.',
     description: [
-      'In Pictures helps individuals and families turn photos into designed albums and scrapbooks. Pick an occasion, answer a few questions, add photos and choose a style; the app lays out the pages for you to refine.',
-      'It is in development and available as an early web preview. Everything stays on your device: there are no accounts, and photos are never uploaded.',
+      'We are building an app that makes it easy for individuals and families to create beautifully designed digital photo albums and scrapbooks from their own photos, using ready-made templates.',
+      'The app is planned and not yet released, and its final name has not been chosen. We will announce it on this site when it is ready.',
     ],
-    features: [
-      'Occasion-based planning with photo checklists',
-      'Automatic page layout in a choice of album and scrapbook styles',
-      'Editor with undo and redo; duplicate and blur detection',
-      'PDF export, including print-ready output',
-      'Backups saved to your device',
-    ],
+    features: [],
     audience: 'Individuals and families.',
-    stage: 'in-development',
+    stage: 'planned',
     releases: [
-      { platform: 'web', status: 'preview', url: 'https://memmamally-source.github.io/in-pictures/' },
       { platform: 'ios', status: 'planned' },
       { platform: 'android', status: 'planned' },
     ],
-    privacyPolicyUrl: 'https://memmamally-source.github.io/in-pictures/#/privacy',
-    privacyInBrief: [
-      { label: 'Your photos', value: 'Stay on your device and are never uploaded.' },
-      { label: 'Account', value: 'None needed; there are no accounts.' },
-      { label: 'Analytics, advertising and tracking', value: 'None.' },
-    ],
+    privacyInBrief: [],
     hasAccounts: false,
-    deletionSteps: [
-      'In Pictures keeps everything in your browser on your device; nothing is held by us.',
-      'To remove it, delete your albums in the app or clear this site’s data in your browser settings.',
-    ],
+    deletionSteps: [],
     faqs: [
-      { q: 'When will the phone apps be available?', a: 'iPhone and Android apps are planned. We will announce them here when they are ready.' },
+      { q: 'When will it be available?', a: 'The app is planned and not yet released. We will announce it in News when it is ready.' },
     ],
     accent: '#4D7FA0',
     verifiedOn: '2026-11-16',
@@ -315,6 +299,7 @@ export const stageLabel: Record<App['stage'], string> = {
   available: 'Available now',
   preview: 'Early access',
   'in-development': 'In development',
+  planned: 'Planned',
 };
 
 /** Releases safe to show publicly (unverified ones are hidden). */
@@ -345,7 +330,10 @@ export function validateApp(app: App): string[] {
     if (r.url && r.status !== 'available' && r.status !== 'preview') problems.push(`${r.platform}: only available/preview releases may link out`);
     if (r.url && !r.url.startsWith('https://')) problems.push(`${r.platform}: url must be https`);
   }
-  if (!app.privacyPolicyUrl.startsWith('https://')) problems.push('privacy policy url must be https');
+  const released = app.releases.some((r) => r.status === 'available' || r.status === 'preview');
+  if (released && !app.privacyPolicyUrl) problems.push('released apps need a privacy policy url');
+  if (app.privacyPolicyUrl && !app.privacyPolicyUrl.startsWith('https://')) problems.push('privacy policy url must be https');
+  if (app.stage === 'planned' && released) problems.push('planned apps must not have live releases');
   if (app.hasAccounts && app.deletionSteps.length === 0) problems.push('apps with accounts need deletion steps');
   if (app.stage === 'available' && !app.releases.some((r) => r.status === 'available')) problems.push('stage "available" needs at least one available release');
   return problems;

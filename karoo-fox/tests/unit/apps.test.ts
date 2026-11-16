@@ -27,3 +27,16 @@ test('validateApp rejects store links on unreleased platforms', () => {
   const bad: App = { ...apps[0]!, releases: [{ platform: 'android', status: 'testing', url: 'https://play.google.com/x' }], stage: 'preview' };
   assert.ok(validateApp(bad).some((p) => p.includes('only available/preview')));
 });
+
+test('planned apps cannot show a live release, and released apps need a privacy policy', () => {
+  const planned: App = { ...apps[0]!, stage: 'planned', releases: [{ platform: 'web', status: 'available', url: 'https://x.test' }] };
+  assert.ok(validateApp(planned).some((p) => p.includes('planned apps must not have live releases')));
+  const { privacyPolicyUrl: _omit, ...noPolicy } = apps[0]!;
+  assert.ok(validateApp(noPolicy as App).some((p) => p.includes('need a privacy policy')));
+});
+
+test('the photo album app is listed as planned, with no store or web links', () => {
+  const photo = apps.find((a) => a.slug === 'photo-album')!;
+  assert.equal(photo.stage, 'planned');
+  assert.ok(photo.releases.every((r) => r.status === 'planned' && !r.url));
+});
