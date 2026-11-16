@@ -1,0 +1,63 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../../layouts/Base.astro';
+import PageHeader from '../../../components/PageHeader.astro';
+import Detail from '../../../components/Detail.astro';
+import { apps, getApp } from '../../../data/apps.ts';
+import { company } from '../../../config/company.ts';
+import { appPaths, href } from '../../../lib/url.ts';
+
+export const getStaticPaths = (() => apps.map((a) => ({ params: { slug: a.slug } }))) satisfies GetStaticPaths;
+
+const app = getApp(Astro.params.slug);
+const p = appPaths(app.slug);
+const supportEmail = app.supportEmail ?? company.emails.support;
+const generalFaqs = [
+  { q: `How do I delete my ${app.name} data?`, a: `See the data-deletion page for step-by-step instructions.`, link: p.deleteData },
+  { q: 'Where is the privacy policy?', a: `The ${app.name} privacy policy explains what data the app uses and why.`, link: p.privacy },
+];
+const faqPage = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: app.faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+};
+---
+<Base title={`${app.name} support`} description={`Help, FAQs and contact details for ${app.name} by Karoo Fox.`} structuredData={app.faqs.length ? [faqPage] : []}>
+  <PageHeader title={`${app.name} support`} eyebrow="Support" lead={`Answers to common questions about ${app.name}, and how to reach us.`} crumbs={[{ label: 'Support', path: '/support/' }, { label: app.name, path: p.page }, { label: 'Support' }]} />
+  <section class="section" aria-label="Support">
+    <div class="container split">
+      <div>
+        <h2>Frequently asked questions</h2>
+        <div class="faq">
+          {app.faqs.map((f) => (
+            <details>
+              <summary>{f.q}</summary>
+              <div><p>{f.a}</p></div>
+            </details>
+          ))}
+          {generalFaqs.map((f) => (
+            <details>
+              <summary>{f.q}</summary>
+              <div><p>{f.a} <a href={href(f.link)}>Open it</a>.</p></div>
+            </details>
+          ))}
+        </div>
+      </div>
+      <div class="stack">
+        <div class="card">
+          <h2 class="h3">Contact {app.name} support</h2>
+          <p>Email us and we’ll reply as soon as we can. Please include your device, the app version and what you were trying to do.</p>
+          <p><strong>Email:</strong> <Detail value={supportEmail} label="Support email" email /></p>
+          {app.supportPageUrl && <p>More help: <a href={app.supportPageUrl} rel="noopener">{app.name} help pages</a></p>}
+        </div>
+        <div class="card">
+          <h2 class="h3">Privacy and your data</h2>
+          <ul class="link-list">
+            <li><a href={href(p.privacy)}>Privacy policy <span aria-hidden="true">→</span></a></li>
+            <li><a href={href(p.deleteData)}>Delete your data <span aria-hidden="true">→</span></a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>

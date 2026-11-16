@@ -1,0 +1,39 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Detail from '../components/Detail.astro';
+import { company, legalName } from '../config/company.ts';
+import { apps } from '../data/apps.ts';
+import { appPaths, formatDate, href } from '../lib/url.ts';
+
+/** Update when this notice changes. */
+const updated = '2026-11-16';
+---
+<Base title="Website privacy notice" description="How the Karoo Fox website handles personal information.">
+  <PageHeader title="Website privacy notice" eyebrow="Privacy" lead="This notice covers this website only. Each app has its own privacy policy." crumbs={[{ label: 'Website privacy' }]} />
+  <section class="section" aria-label="Notice">
+    <div class="narrow prose">
+      <p class="muted">Last updated {formatDate(updated)}</p>
+      <h2>Who we are</h2>
+      <p>This website is operated by {legalName()}, trading as {company.brand}, a private company registered in South Africa (registration number <Detail value={company.registrationNumber} label="CIPC registration number" />). We are the responsible party for personal information processed through this website under South Africa’s Protection of Personal Information Act (POPIA).</p>
+      <h2>What this website collects</h2>
+      <ul>
+        <li><strong>No cookies, analytics or advertising.</strong> This website does not set cookies, does not use analytics or tracking tools and does not show advertising.</li>
+        <li><strong>No forms or accounts.</strong> You cannot sign in or submit information on this website.</li>
+        <li><strong>Hosting logs.</strong> The website is hosted on GitHub Pages. Like any web host, GitHub processes technical information such as your IP address to deliver pages and keep the service secure. See <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHub’s privacy statement</a>.</li>
+        <li><strong>Emails you send us.</strong> If you email us, we use your email address and message to reply and keep a record of the conversation for as long as needed to help you.</li>
+      </ul>
+      <h2>Fonts and external content</h2>
+      <p>All fonts and images are served from this website. Links to app stores and app websites take you to services with their own privacy policies.</p>
+      <h2>Your rights</h2>
+      <p>You may ask us for access to, correction of or deletion of personal information we hold about you, and you may object to its processing. Email <Detail value={company.emails.privacy} label="Privacy email" email />. You also have the right to complain to the Information Regulator of South Africa (inforegulator.org.za), or to the data-protection authority where you live.</p>
+      <h2>Our apps</h2>
+      <p>Our apps collect different information depending on what they do. Read the policy for the app you use:</p>
+      <ul>
+        {apps.map((a) => <li><a href={href(appPaths(a.slug).privacy)}>{a.name}</a></li>)}
+      </ul>
+      <h2>Changes</h2>
+      <p>We will update this notice if the website changes how it handles information, and change the date above.</p>
+    </div>
+  </section>
+</Base>

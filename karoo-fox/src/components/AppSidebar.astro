@@ -1,0 +1,48 @@
+---
+import type { App } from '../data/apps.ts';
+import { platformLabel, publicReleases, storeLink } from '../data/apps.ts';
+import { company } from '../config/company.ts';
+import { appPaths, href } from '../lib/url.ts';
+import StatusBadge from './StatusBadge.astro';
+import Detail from './Detail.astro';
+interface Props {
+  app: App;
+}
+const { app } = Astro.props;
+const p = appPaths(app.slug);
+const releases = publicReleases(app);
+const supportEmail = app.supportEmail ?? company.emails.support;
+---
+<aside class="side-panel" aria-label={`${app.name} at a glance`}>
+  <div class="card">
+    <h2 class="h3">Availability</h2>
+    <ul class="availability">
+      {releases.map((r) => {
+        const store = storeLink(r);
+        return (
+          <li>
+            <span>{platformLabel[r.platform]}</span>
+            {store ? (
+              <a href={store.url} rel="noopener">{store.label}</a>
+            ) : r.url ? (
+              <a href={r.url} rel="noopener">{r.status === 'preview' ? 'Open the preview' : 'Open in your browser'}</a>
+            ) : (
+              <StatusBadge status={r.status} />
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+  <div class="card">
+    <h2 class="h3">Help and legal</h2>
+    <ul class="link-list">
+      <li><a href={href(p.support)}>Support and FAQs <span aria-hidden="true">→</span></a></li>
+      <li><a href={href(p.privacy)}>Privacy policy <span aria-hidden="true">→</span></a></li>
+      <li><a href={href(p.deleteData)}>Delete your data <span aria-hidden="true">→</span></a></li>
+      {app.termsUrl && <li><a href={app.termsUrl} rel="noopener">Terms of use <span aria-hidden="true">↗</span></a></li>}
+      {app.website && <li><a href={app.website} rel="noopener">Official website <span aria-hidden="true">↗</span></a></li>}
+    </ul>
+    <p class="muted">Email: <Detail value={supportEmail} label="Support email" email /></p>
+  </div>
+</aside>

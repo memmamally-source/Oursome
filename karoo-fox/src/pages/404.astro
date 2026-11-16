@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import { href } from '../lib/url.ts';
+---
+<Base title="Page not found" description="The page you were looking for could not be found." noindex>
+  <section class="section">
+    <div class="narrow">
+      <p class="eyebrow">404</p>
+      <h1>This page has wandered off</h1>
+      <p class="lead">The link may be out of date, or the page may have moved.</p>
+      <div class="button-row">
+        <a class="button button--primary" href={href('/')}>Go to the home page</a>
+        <a class="button button--secondary" href={href('/support/')}>Support Centre</a>
+      </div>
+    </div>
+  </section>
+</Base>

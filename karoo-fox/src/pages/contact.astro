@@ -1,0 +1,43 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Detail from '../components/Detail.astro';
+import { company, legalName } from '../config/company.ts';
+import { href } from '../lib/url.ts';
+---
+<Base title="Contact" description="How to contact Karoo Fox for app support, privacy requests and business enquiries.">
+  <PageHeader title="Contact us" eyebrow="Get in touch" lead="We read every message. For help with a specific app, the Support Centre is the fastest route." crumbs={[{ label: 'Contact' }]} />
+  <section class="section" aria-label="Contact details">
+    <div class="container grid">
+      <div class="card contact-item">
+        <h2 class="h3">App support</h2>
+        <p class="muted">Problems, questions or feedback about one of our apps.</p>
+        <p><Detail value={company.emails.support} label="Support email" email /></p>
+        <p><a href={href('/support/')}>Visit the Support Centre</a></p>
+      </div>
+      <div class="card contact-item">
+        <h2 class="h3">Privacy and data requests</h2>
+        <p class="muted">Access, correction or deletion of your personal information.</p>
+        <p><Detail value={company.emails.privacy} label="Privacy email" email /></p>
+        <p><a href={href('/support/data-deletion/')}>Delete your data</a></p>
+      </div>
+      <div class="card contact-item">
+        <h2 class="h3">Business and partnerships</h2>
+        <p class="muted">Partnerships, press and other enquiries.</p>
+        <p><Detail value={company.emails.general} label="Business email" email /></p>
+        {company.phone && <p>Phone: <a href={`tel:${company.phone.replace(/\s/g, '')}`}>{company.phone}</a></p>}
+      </div>
+    </div>
+  </section>
+  <section class="section section--sand" aria-labelledby="company-details">
+    <div class="narrow">
+      <h2 id="company-details">Company details</h2>
+      <dl class="facts">
+        <div><dt>Company</dt><dd>{legalName()}</dd></div>
+        <div><dt>Trading as</dt><dd>{company.brand}</dd></div>
+        <div><dt>Registration number</dt><dd><Detail value={company.registrationNumber} label="CIPC registration number" /></dd></div>
+        <div><dt>Address</dt><dd>{company.address ? <address>{company.address.map((l) => <>{l}<br /></>)}{company.country}</address> : <Detail value={null} label="Business address" />}</dd></div>
+      </dl>
+    </div>
+  </section>
+</Base>

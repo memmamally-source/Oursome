@@ -1,0 +1,23 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { getNews, isoDate } from '../../lib/news.ts';
+import { formatDate, href } from '../../lib/url.ts';
+const posts = getNews();
+---
+<Base title="News" description="Announcements from Karoo Fox: new apps, releases and company news.">
+  <PageHeader title="News" eyebrow="Announcements" lead="New apps, releases and company updates." crumbs={[{ label: 'News' }]} />
+  <section class="section" aria-label="Posts">
+    <div class="narrow">
+      <ul class="news-list">
+        {posts.map((post) => (
+          <li class="card">
+            <time datetime={isoDate(post.frontmatter.date)} class="muted">{formatDate(isoDate(post.frontmatter.date))}</time>
+            <h2 class="h3"><a href={href(`/news/${post.slug}/`)}>{post.frontmatter.title}</a></h2>
+            <p class="muted">{post.frontmatter.summary}</p>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,68 @@
+# Builds, tests and publishes the Karoo Fox website to GitHub Pages.
+#
+# This file takes effect once the karoo-fox/ folder is the root of its own
+# repository (see README.md → "Move to its own repository").
+# One-time setup: Settings → Pages → Build and deployment → Source: GitHub Actions.
+name: Deploy website
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      allow_placeholders:
+        description: Publish even though company details are still placeholders (preview only)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - id: pages
+        uses: actions/configure-pages@v5
+        if: github.event_name != 'pull_request'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Build and test
+        run: npm run check
+        env:
+          SITE_URL: ${{ steps.pages.outputs.origin || 'http://localhost:4321' }}
+          BASE_PATH: ${{ steps.pages.outputs.base_path && format('{0}/', steps.pages.outputs.base_path) || '/' }}
+      - name: Publishing readiness
+        if: github.event_name != 'pull_request'
+        run: npm run readiness
+        env:
+          SITE_URL: ${{ steps.pages.outputs.origin }}
+          ALLOW_PLACEHOLDERS: ${{ inputs.allow_placeholders && '1' || '' }}
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
+        with:
+          path: dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

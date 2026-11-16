@@ -1,0 +1,56 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import Detail from '../../components/Detail.astro';
+import { apps } from '../../data/apps.ts';
+import { company } from '../../config/company.ts';
+import { appPaths, href } from '../../lib/url.ts';
+---
+<Base title="Support Centre" description="Help, privacy policies and data-deletion instructions for every Karoo Fox app.">
+  <PageHeader title="Support Centre" eyebrow="Help" lead="Choose an app for FAQs, contact details, its privacy policy and how to delete your data." crumbs={[{ label: 'Support' }]} />
+  <section class="section" aria-label="Apps">
+    <div class="container">
+      <div class="table-wrap card">
+        <table>
+          <caption class="visually-hidden">Support links for each app</caption>
+          <thead>
+            <tr><th scope="col">App</th><th scope="col">Support</th><th scope="col">Privacy</th><th scope="col">Your data</th><th scope="col">Email</th></tr>
+          </thead>
+          <tbody>
+            {apps.map((app) => {
+              const p = appPaths(app.slug);
+              return (
+                <tr>
+                  <th scope="row"><a href={href(p.page)}>{app.name}</a></th>
+                  <td><a href={href(p.support)}>Help and FAQs</a></td>
+                  <td><a href={href(p.privacy)}>Privacy policy</a></td>
+                  <td><a href={href(p.deleteData)}>Delete data</a></td>
+                  <td><Detail value={app.supportEmail ?? company.emails.support} label="Support email" email /></td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <section class="section section--sand" aria-labelledby="general-help">
+    <div class="container split">
+      <div>
+        <h2 id="general-help">General questions</h2>
+        <div class="faq">
+          <details><summary>Who makes these apps?</summary><div><p>All the apps listed here are developed by Karoo Fox. See <a href={href('/about/')}>About Karoo Fox</a>.</p></div></details>
+          <details><summary>Why does a store listing show a different developer name?</summary><div><p>We are moving our apps to the Karoo Fox name. During this transition, some App Store and Google Play listings may still show a previous developer name.</p></div></details>
+          <details><summary>How do I delete my data?</summary><div><p>Every app has its own instructions. Start at <a href={href('/support/data-deletion/')}>Delete your data</a>.</p></div></details>
+          <details><summary>How do I report a security issue?</summary><div><p>Please email our support team with the details. Do not include personal data you don’t need to share.</p></div></details>
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="h3">Still need help?</h2>
+        <p>Email the app’s support address above, or contact Karoo Fox directly.</p>
+        <p><strong>Support:</strong> <Detail value={company.emails.support} label="Support email" email /></p>
+        <p><a href={href('/contact/')}>All contact options</a></p>
+      </div>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,11 @@
+---
+/** Renders a verified value, or a visible placeholder when it has not been supplied yet. */
+interface Props {
+  value: string | null | undefined;
+  label: string;
+  /** Render the value as a mailto link. */
+  email?: boolean;
+}
+const { value, label, email = false } = Astro.props;
+---
+{value ? (email ? <a href={`mailto:${value}`}>{value}</a> : <span>{value}</span>) : <span class="placeholder">[{label} to be supplied]</span>}

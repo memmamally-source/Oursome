@@ -1,0 +1,50 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import Icon from '../components/Icon.astro';
+import { apps } from '../data/apps.ts';
+import { company, entityStatement } from '../config/company.ts';
+import { href } from '../lib/url.ts';
+
+const categories = [...new Set(apps.map((a) => a.category))];
+---
+<Base title="About" description="Karoo Fox is an independent South African software company that builds apps for people around the world.">
+  <PageHeader title="About Karoo Fox" eyebrow="Who we are" lead="An independent software company from South Africa, building apps for people around the world." crumbs={[{ label: 'About' }]} />
+  <section class="section" aria-label="Our story">
+    <div class="container split">
+      <div class="stack">
+        <h2>Why Karoo Fox exists</h2>
+        <p>Karoo Fox brings a growing portfolio of apps together under one name. Each app solves a specific problem for a specific group of people: puzzle lovers, families, researchers, medical students and anyone who wants to keep their memories in a beautiful album.</p>
+        {company.founder.show && <p>The company was founded by {company.founder.name}, a South African software developer, to give these apps a single, accountable home with consistent standards for design, privacy and support.</p>}
+        <p>The name comes from the Karoo, the vast semi-desert at the heart of South Africa, and the fox: curious, resourceful and quick on its feet. It’s how we like to build software.</p>
+      </div>
+      <div class="card">
+        <h2 class="h3">At a glance</h2>
+        <dl class="facts">
+          <div><dt>Based in</dt><dd>{company.country}</dd></div>
+          <div><dt>Serving</dt><dd>Users worldwide, including the United States, United Kingdom, Canada, Australia and South Africa</dd></div>
+          <div><dt>Apps</dt><dd>{apps.length} apps across {categories.length} categories</dd></div>
+          <div><dt>Platforms</dt><dd>Web, iPhone and Android</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+  <section class="section section--sand" aria-labelledby="principles">
+    <div class="container">
+      <h2 id="principles">Our principles</h2>
+      <div class="grid grid--4">
+        <div class="card"><div class="value-icon"><Icon name="shield" /></div><h3>Respect for privacy</h3><p class="muted">No advertising in our apps, no selling of data, and as little data collection as each app needs.</p></div>
+        <div class="card"><div class="value-icon"><Icon name="spark" /></div><h3>Quality over quantity</h3><p class="muted">We release when an app is ready, and say plainly when something is still in testing.</p></div>
+        <div class="card"><div class="value-icon"><Icon name="layers" /></div><h3>Built to last</h3><p class="muted">Modern, maintainable technology on the web, iPhone and Android.</p></div>
+        <div class="card"><div class="value-icon"><Icon name="chat" /></div><h3>Accountable</h3><p class="muted">One company behind every app, with clear support, privacy and contact details.</p></div>
+      </div>
+    </div>
+  </section>
+  <section class="section" aria-labelledby="company-heading">
+    <div class="narrow stack">
+      <h2 id="company-heading">The company</h2>
+      <p>{entityStatement()}</p>
+      <p>Registration details, addresses and contacts are on our <a href={href('/legal/')}>company information</a> page.</p>
+    </div>
+  </section>
+</Base>

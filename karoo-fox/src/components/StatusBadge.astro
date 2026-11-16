@@ -1,0 +1,9 @@
+---
+import { statusLabel, type ReleaseStatus } from '../data/apps.ts';
+interface Props {
+  status: ReleaseStatus;
+  text?: string;
+}
+const { status, text } = Astro.props;
+---
+<span class={`badge badge--${status}`}>{text ?? statusLabel[status]}</span>

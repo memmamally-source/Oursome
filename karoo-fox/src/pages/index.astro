@@ -1,0 +1,76 @@
+---
+import Base from '../layouts/Base.astro';
+import AppCard from '../components/AppCard.astro';
+import Icon from '../components/Icon.astro';
+import { apps } from '../data/apps.ts';
+import { href } from '../lib/url.ts';
+import foxSvg from '../brand/fox-mark.svg?raw';
+
+const values = [
+  { icon: 'shield', title: 'Privacy by design', text: 'None of our apps show advertising or sell data. Where we can, your data stays on your device.' },
+  { icon: 'heart', title: 'Made with care', text: 'Calm, considered design that respects your time and attention, on the web and on your phone.' },
+  { icon: 'chat', title: 'Support you can reach', text: 'Every app has a support page, a monitored mailbox and clear instructions for deleting your data.' },
+  { icon: 'globe', title: 'For people everywhere', text: 'Built in South Africa for users in the United States, the United Kingdom, Canada, Australia and beyond.' },
+] as const;
+---
+<Base title="Karoo Fox" description="Karoo Fox is an independent South African software company building thoughtful apps for everyday life, learning and play.">
+  <section class="hero">
+    <div class="container hero__grid">
+      <div>
+        <p class="eyebrow">Independent software company</p>
+        <h1>Thoughtful apps for everyday life, learning and play.</h1>
+        <p class="lead">Karoo Fox designs and builds software people enjoy using, from daily puzzles and family organisers to tools for researchers and medical students.</p>
+        <div class="button-row">
+          <a class="button button--primary" href={href('/apps/')}>Explore our apps</a>
+          <a class="button button--secondary" href={href('/support/')}>Get support</a>
+        </div>
+      </div>
+      <div class="hero__art fox-animated" aria-hidden="true" set:html={foxSvg} />
+    </div>
+  </section>
+
+  <section class="section section--sand" aria-labelledby="apps-heading">
+    <div class="container">
+      <p class="eyebrow">Our apps</p>
+      <h2 id="apps-heading">One company, a growing family of apps</h2>
+      <p class="lead">Each app has its own page with features, availability, support and its privacy policy.</p>
+      <div class="grid">
+        {apps.map((app) => <AppCard app={app} />)}
+      </div>
+      <div class="button-row">
+        <a class="button button--secondary" href={href('/apps/')}>View the full portfolio</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="values-heading">
+    <div class="container">
+      <p class="eyebrow">How we work</p>
+      <h2 id="values-heading">What you can expect from Karoo Fox</h2>
+      <div class="grid grid--4">
+        {values.map((v) => (
+          <div class="card">
+            <div class="value-icon"><Icon name={v.icon} /></div>
+            <h3>{v.title}</h3>
+            <p class="muted">{v.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--flush-top" aria-labelledby="help-heading">
+    <div class="container">
+      <div class="cta-band">
+        <div>
+          <h2 id="help-heading">Need help with one of our apps?</h2>
+          <p>Support, privacy policies and data-deletion instructions for every app, in one place.</p>
+        </div>
+        <div class="button-row">
+          <a class="button button--primary" href={href('/support/')}>Support Centre</a>
+          <a class="button button--secondary" href={href('/contact/')}>Contact us</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>

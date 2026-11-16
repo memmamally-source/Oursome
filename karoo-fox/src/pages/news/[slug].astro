@@ -1,0 +1,29 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { getNews, isoDate } from '../../lib/news.ts';
+import { formatDate } from '../../lib/url.ts';
+
+export const getStaticPaths = (() => getNews().map((post) => ({ params: { slug: post.slug } }))) satisfies GetStaticPaths;
+
+const post = getNews().find((p) => p.slug === Astro.params.slug)!;
+const date = isoDate(post.frontmatter.date);
+const article = {
+  '@context': 'https://schema.org',
+  '@type': 'NewsArticle',
+  headline: post.frontmatter.title,
+  datePublished: date,
+  publisher: { '@type': 'Organization', name: 'Karoo Fox' },
+};
+---
+<Base title={post.frontmatter.title} description={post.frontmatter.summary} ogType="article" structuredData={[article]}>
+  <PageHeader title={post.frontmatter.title} eyebrow="News" crumbs={[{ label: 'News', path: '/news/' }, { label: post.frontmatter.title }]}>
+    <p class="muted"><time datetime={date}>{formatDate(date)}</time></p>
+  </PageHeader>
+  <section class="section" aria-label="Article">
+    <div class="narrow prose">
+      <post.Content />
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,33 @@
+---
+import type { App } from '../data/apps.ts';
+import { platformLabel, publicReleases, stageLabel } from '../data/apps.ts';
+import { appPaths, href } from '../lib/url.ts';
+import StatusBadge from './StatusBadge.astro';
+interface Props {
+  app: App;
+  headingLevel?: 'h2' | 'h3';
+}
+const { app, headingLevel = 'h3' } = Astro.props;
+const Heading = headingLevel;
+const stageStatus = app.stage === 'available' ? 'available' : app.stage === 'preview' ? 'preview' : 'planned';
+// Only platforms people can use today; testing/planned ones are shown on the app page.
+const platforms = publicReleases(app)
+  .filter((r) => r.status === 'available' || r.status === 'preview')
+  .map((r) => platformLabel[r.platform])
+  .join(' · ');
+---
+<article class={`card app-card accent-${app.slug}`}>
+  <div class="app-card__head">
+    <img class="app-icon" src={href(`/images/apps/${app.slug}.webp`)} alt="" width="64" height="64" loading="lazy" decoding="async" />
+    <div>
+      <Heading><a href={href(appPaths(app.slug).page)}>{app.name}</a></Heading>
+      <p class="app-card__category">{app.category}</p>
+    </div>
+  </div>
+  <p>{app.summary}</p>
+  <ul class="badges" aria-label="Status">
+    <li><StatusBadge status={stageStatus} text={stageLabel[app.stage]} /></li>
+    {platforms && <li><span class="badge">{platforms}</span></li>}
+  </ul>
+  <span class="app-card__more" aria-hidden="true">Learn more →</span>
+</article>

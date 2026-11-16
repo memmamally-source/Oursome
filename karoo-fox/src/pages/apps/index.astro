@@ -1,0 +1,25 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import AppCard from '../../components/AppCard.astro';
+import { apps } from '../../data/apps.ts';
+
+const groups = [
+  { title: 'Available now', list: apps.filter((a) => a.stage === 'available') },
+  { title: 'Early access', list: apps.filter((a) => a.stage === 'preview') },
+  { title: 'In development', list: apps.filter((a) => a.stage === 'in-development') },
+].filter((g) => g.list.length > 0);
+---
+<Base title="Apps" description="The Karoo Fox app portfolio: games, family organisation, research, education and photo albums.">
+  <PageHeader title="Our apps" eyebrow="Portfolio" lead="Software across games, family life, research, education and memories. Availability is shown per platform; we only list store links once an app is live." crumbs={[{ label: 'Apps' }]} />
+  {groups.map((g) => (
+    <section class="section" aria-label={g.title}>
+      <div class="container">
+        <h2>{g.title}</h2>
+        <div class="grid">
+          {g.list.map((app) => <AppCard app={app} />)}
+        </div>
+      </div>
+    </section>
+  ))}
+</Base>

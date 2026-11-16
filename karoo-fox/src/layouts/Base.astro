@@ -1,0 +1,98 @@
+---
+import '@fontsource-variable/inter';
+import '@fontsource/poppins/600.css';
+import '@fontsource/poppins/700.css';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { company, legalName } from '../config/company.ts';
+import { hasVisiblePlaceholders } from '../lib/readiness.ts';
+import { href } from '../lib/url.ts';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Extra JSON-LD objects for this page. */
+  structuredData?: Record<string, unknown>[];
+  noindex?: boolean;
+  ogType?: 'website' | 'article';
+}
+
+const { title, description, structuredData = [], noindex = false, ogType = 'website' } = Astro.props;
+const fullTitle = title === company.brand ? `${company.brand} — Thoughtful software for everyday life` : `${title} · ${company.brand}`;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL(href('/og-image.png'), Astro.site).href;
+const placeholders = hasVisiblePlaceholders();
+// Pages are hidden from search engines while company details are placeholders.
+const robots = noindex || placeholders ? 'noindex, nofollow' : 'index, follow';
+const isProd = import.meta.env.PROD;
+const csp = [
+  "default-src 'self'",
+  "script-src 'none'",
+  "style-src 'self'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "connect-src 'none'",
+  "form-action 'none'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  'upgrade-insecure-requests',
+].join('; ');
+
+const organization = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: company.brand,
+  legalName: legalName(),
+  url: new URL(href('/'), Astro.site).href,
+  logo: new URL(href('/brand/logo-stacked-2000.png'), Astro.site).href,
+  ...(company.emails.general ? { email: company.emails.general } : {}),
+  ...(company.address ? { address: { '@type': 'PostalAddress', streetAddress: company.address.join(', '), addressCountry: 'ZA' } } : { address: { '@type': 'PostalAddress', addressCountry: 'ZA' } }),
+};
+const jsonLd = [organization, ...structuredData];
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {isProd && <meta http-equiv="Content-Security-Policy" content={csp} />}
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content={robots} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={href('/favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={href('/favicon-32.png')} sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href={href('/apple-touch-icon.png')} />
+    <link rel="manifest" href={href('/site.webmanifest')} />
+    <link rel="sitemap" href={href('/sitemap-index.xml')} />
+    <link rel="stylesheet" href={href('/app-accents.css')} />
+    <meta name="theme-color" content="#FBF6EE" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0A1630" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+    <meta property="og:site_name" content={company.brand} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="The Karoo Fox logo: a friendly orange fox beside the words Karoo Fox." />
+    <meta property="og:locale" content="en_GB" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    {placeholders && (
+      <aside class="preview-banner" aria-label="Preview notice">Preview: some company details are still being confirmed and are highlighted on the page.</aside>
+    )}
+    <Header />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

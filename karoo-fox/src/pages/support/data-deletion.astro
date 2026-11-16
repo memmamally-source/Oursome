@@ -1,0 +1,18 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { apps } from '../../data/apps.ts';
+import { appPaths, href } from '../../lib/url.ts';
+---
+<Base title="Delete your data" description="How to delete your account and data from any Karoo Fox app.">
+  <PageHeader title="Delete your data" eyebrow="Your data" lead="Choose the app you use. Each page explains how to delete your account in the app, or how to ask us to do it." crumbs={[{ label: 'Support', path: '/support/' }, { label: 'Delete your data' }]} />
+  <section class="section" aria-label="Apps">
+    <div class="narrow">
+      <ul class="link-list card">
+        {apps.map((app) => (
+          <li><a href={href(appPaths(app.slug).deleteData)}>{app.name}{app.hasAccounts ? '' : ' (no accounts; data stays on your device)'} <span aria-hidden="true">→</span></a></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Base>

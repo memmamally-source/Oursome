@@ -1,0 +1,70 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Base from '../../../layouts/Base.astro';
+import Breadcrumbs from '../../../components/Breadcrumbs.astro';
+import AppSidebar from '../../../components/AppSidebar.astro';
+import StatusBadge from '../../../components/StatusBadge.astro';
+import { apps, getApp, stageLabel, storeLink } from '../../../data/apps.ts';
+import { company } from '../../../config/company.ts';
+import { appPaths, href } from '../../../lib/url.ts';
+
+export const getStaticPaths = (() => apps.map((a) => ({ params: { slug: a.slug } }))) satisfies GetStaticPaths;
+
+const app = getApp(Astro.params.slug);
+const stageStatus = app.stage === 'available' ? 'available' : app.stage === 'preview' ? 'preview' : 'planned';
+const live = app.releases.filter((r) => r.status === 'available' || r.status === 'preview');
+const software = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: app.name,
+  applicationCategory: app.category,
+  description: app.summary,
+  operatingSystem: live.map((r) => (r.platform === 'ios' ? 'iOS' : r.platform === 'android' ? 'Android' : 'Web')).join(', ') || undefined,
+  url: new URL(href(appPaths(app.slug).page), Astro.site).href,
+  publisher: { '@type': 'Organization', name: company.brand },
+  ...(app.website ? { sameAs: [app.website] } : {}),
+};
+---
+<Base title={app.name} description={`${app.name} by Karoo Fox: ${app.summary}`} structuredData={[software]}>
+  <header class={`page-header accent-${app.slug}`}>
+    <div class="container">
+      <Breadcrumbs items={[{ label: 'Apps', path: '/apps/' }, { label: app.name }]} />
+      <div class="app-hero">
+        <img class="app-icon app-icon--lg" src={href(`/images/apps/${app.slug}.webp`)} alt={`${app.name} app icon`} width="112" height="112" />
+        <div>
+          <p class="eyebrow">{app.category}</p>
+          <h1>{app.name}</h1>
+          <p class="lead">{app.tagline}</p>
+          <ul class="badges">
+            <li><StatusBadge status={stageStatus} text={stageLabel[app.stage]} /></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="section" aria-label="About the app">
+    <div class="container app-layout">
+      <div class="stack">
+        <h2>About {app.name}</h2>
+        {app.description.map((para) => <p>{para}</p>)}
+        {app.provisionalName && <p class="muted">“{app.name}” is a working name and may change before the store release.</p>}
+        <h2>Features</h2>
+        <ul class="check-list">
+          {app.features.map((f) => <li>{f}</li>)}
+        </ul>
+        <h2>Who it’s for</h2>
+        <p>{app.audience}</p>
+        {app.disclaimer && <div class="notice"><p>{app.disclaimer}</p></div>}
+        <div class="button-row">
+          {live.map((r) => {
+            const store = storeLink(r);
+            return store ? <a class="button button--primary" href={store.url} rel="noopener">{store.label}</a> : <a class="button button--primary" href={r.url} rel="noopener">{r.status === 'preview' ? `Try the ${app.name} preview` : `Open ${app.name} on the web`}</a>;
+          })}
+          <a class="button button--secondary" href={href(appPaths(app.slug).support)}>Get support</a>
+        </div>
+      </div>
+      <AppSidebar app={app} />
+    </div>
+  </section>
+</Base>
