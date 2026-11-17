@@ -147,7 +147,7 @@ Leave "Sign-in required" unticked, since there is no demo account to give.
 
 Upload the PNGs in [`screenshots-6.3in/`](screenshots-6.3in) (1206 × 2622) to the **iPhone** slot. App Store Connect's iPhone slot now accepts only 1206 × 2622 or 1179 × 2556, as the Research Tracker found. [`screenshots/`](screenshots) holds the same set at 1320 × 2868 in case the 6.9-inch slot is offered. All are RGB PNGs without transparency, as Apple requires.
 
-They were taken from the app at iPhone sizes with the notch and home-bar areas emulated (top 62 pt, bottom 34 pt), using made-up sample content and illustrated photos, with a 9:41 status bar drawn in. Order: Home, album reader, calendar, tasks, shopping list, Our Space, album editor. iPad isn't needed because `supportsTablet` is `false`.
+Version 1.1.0 set (new blue design): each shows the app at iPhone size (notch and home bar emulated, 9:41 status bar) inside a phone frame with a short caption, using made-up sample content and illustrated photos. Order: Home, calendar, tasks, shopping list, album, album editor, Our Space. iPad isn't needed because `supportsTablet` is `false`.
 
 To regenerate them after design changes, ask Claude: the scripts drive the built website in Chromium at those sizes.
 

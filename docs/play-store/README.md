@@ -69,7 +69,7 @@ When Play Console shows **Apply for production** (after the 14 days), answer its
 | Short description (80 max) | Shared family calendar, chores, shopping lists and photo albums. No ads. |
 | App icon | `icon-512.png` (512 × 512) |
 | Feature graphic | `feature-graphic-1024x500.png` |
-| Phone screenshots | `screenshots-captioned/1-home.png` … `7-space.png` (1080 × 1920, with captions) |
+| Phone screenshots | `screenshots-captioned/android-1-home.png` … `android-7-space.png` (1080 × 1920, with captions, new design) |
 | Category | Lifestyle |
 | Contact email | oursomeapp@outlook.com |
 | Website | https://oursome.org |
@@ -124,7 +124,7 @@ EASY TO START
 Oursome is free. Made for parents, couples, flatmates and busy households who want less time organising and more time together.
 ```
 
-**Screenshots:** upload the captioned set in `screenshots-captioned/` (1 to 7, in order) in place of the plain ones. Each one names the feature it shows.
+**Screenshots:** upload the captioned set in `screenshots-captioned/` (android-1 to android-7, in order) in place of the old ones. Each one names the feature it shows. `screenshots/` holds the same screens without captions.
 
 ## App content answers (Policy → App content)
 
