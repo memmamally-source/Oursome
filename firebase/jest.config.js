@@ -7,6 +7,6 @@ module.exports = {
   testEnvironment: 'node',
   testMatch: ['<rootDir>/firebase/tests/**/*.test.ts'],
   transform: { '^.+\\.tsx?$': ['babel-jest', { presets: ['babel-preset-expo'] }] },
-  moduleNameMapper: { '^@/(.*)$': '<rootDir>/src/$1' },
+  moduleNameMapper: { '^@/(.*)$': '<rootDir>/src/$1', '^expo-crypto$': '<rootDir>/firebase/tests/expo-crypto-node.js' },
   testTimeout: 20000,
 };

@@ -12,7 +12,7 @@ type Request = {
   message?: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  /** Shown in terracotta, for deletions and leaving. */
+  /** Shown in the danger colour, for deletions and leaving. */
   destructive?: boolean;
   resolve: (ok: boolean) => void;
 };

@@ -29,7 +29,7 @@ export function AuthShell({
           width: 260,
           height: 260,
           borderRadius: 130,
-          backgroundColor: palette.accents.sunshine.soft,
+          backgroundColor: palette.accents.sky.soft,
         }}
       />
       <View

@@ -353,67 +353,7 @@ function ListsView() {
         </Card>
       ) : null}
 
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md }}>
-        {lists.map((l) => {
-          const tone = palette.accents[l.color];
-          const open = items.filter((i) => i.listId === l.id && !i.purchased);
-          const done = items.filter((i) => i.listId === l.id && i.purchased).length;
-          const total = open.length + done;
-          return (
-            <PressableScale
-              key={l.id}
-              onPress={() => router.push({ pathname: '/shopping/[id]', params: { id: l.id } })}
-              accessibilityLabel={`${l.name}, ${open.length} items left`}
-              style={{
-                width: '47.5%',
-                flexGrow: 1,
-                backgroundColor: tone.soft,
-                borderRadius: radius.xl,
-                padding: space.lg,
-                gap: space.sm,
-                minHeight: 150,
-              }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <View
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 14,
-                    backgroundColor: tone.base,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                  <Icon name={l.icon} size={20} color={tone.on} />
-                </View>
-                <Icon
-                  name={l.visibility === 'shared' ? 'people' : 'lock-closed'}
-                  size={15}
-                  color={tone.ink}
-                  accessibilityLabel={l.visibility === 'shared' ? 'Shared' : 'Private'}
-                />
-              </View>
-              <Text variant="subheading" numberOfLines={1}>
-                {l.name}
-              </Text>
-              <Text variant="caption" color={tone.ink} numberOfLines={2}>
-                {open.length
-                  ? open
-                      .slice(0, 3)
-                      .map((i) => i.name)
-                      .join(', ') + (open.length > 3 ? '…' : '')
-                  : 'All done'}
-              </Text>
-              <View style={{ marginTop: 'auto', height: 6, borderRadius: 3, backgroundColor: palette.surface, overflow: 'hidden' }}>
-                <View style={{ width: total ? `${(done / total) * 100}%` : '0%', height: '100%', backgroundColor: tone.base }} />
-              </View>
-              <Text variant="caption" color={tone.ink} style={{ fontFamily: fonts.bodyBold }}>
-                {open.length} to get
-              </Text>
-            </PressableScale>
-          );
-        })}
-      </View>
-
+      {/* At the top, so the keyboard never covers what you're typing. */}
       {creating ? (
         <Card style={{ gap: space.md }}>
           <Text variant="subheading">New list</Text>
@@ -487,7 +427,70 @@ function ListsView() {
             <Button label="Cancel" variant="ghost" accent="lavender" onPress={() => setCreating(false)} />
           </View>
         </Card>
-      ) : lists.length ? (
+      ) : null}
+
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md }}>
+        {lists.map((l) => {
+          const tone = palette.accents[l.color];
+          const open = items.filter((i) => i.listId === l.id && !i.purchased);
+          const done = items.filter((i) => i.listId === l.id && i.purchased).length;
+          const total = open.length + done;
+          return (
+            <PressableScale
+              key={l.id}
+              onPress={() => router.push({ pathname: '/shopping/[id]', params: { id: l.id } })}
+              accessibilityLabel={`${l.name}, ${open.length} items left`}
+              style={{
+                width: '47.5%',
+                flexGrow: 1,
+                backgroundColor: tone.soft,
+                borderRadius: radius.xl,
+                padding: space.lg,
+                gap: space.sm,
+                minHeight: 150,
+              }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 14,
+                    backgroundColor: tone.base,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Icon name={l.icon} size={20} color={tone.on} />
+                </View>
+                <Icon
+                  name={l.visibility === 'shared' ? 'people' : 'lock-closed'}
+                  size={15}
+                  color={tone.ink}
+                  accessibilityLabel={l.visibility === 'shared' ? 'Shared' : 'Private'}
+                />
+              </View>
+              <Text variant="subheading" numberOfLines={1}>
+                {l.name}
+              </Text>
+              <Text variant="caption" color={tone.ink} numberOfLines={2}>
+                {open.length
+                  ? open
+                      .slice(0, 3)
+                      .map((i) => i.name)
+                      .join(', ') + (open.length > 3 ? '…' : '')
+                  : 'All done'}
+              </Text>
+              <View style={{ marginTop: 'auto', height: 6, borderRadius: 3, backgroundColor: palette.surface, overflow: 'hidden' }}>
+                <View style={{ width: total ? `${(done / total) * 100}%` : '0%', height: '100%', backgroundColor: tone.base }} />
+              </View>
+              <Text variant="caption" color={tone.ink} style={{ fontFamily: fonts.bodyBold }}>
+                {open.length} to get
+              </Text>
+            </PressableScale>
+          );
+        })}
+      </View>
+
+      {!creating && lists.length ? (
         <Button
           label="New list"
           icon="add"

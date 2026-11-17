@@ -11,7 +11,7 @@ import { nativeDriver, reducedMotionNow, useReducedMotion } from '@/theme/motion
 
 /**
  * The orb: Oursome's small companion and the centre of the logo. A soft
- * terracotta sphere that appears briefly and purposefully: it bounces to
+* brand-blue sphere that appears briefly and purposefully: it bounces to
  * celebrate, rolls in during onboarding and breathes in empty states. It
  * never takes taps (pointerEvents none) and never moves when motion is
  * reduced or celebrations are switched off.
@@ -21,9 +21,9 @@ export function OrbSprite({ size = 44 }: { size?: number }) {
     <Svg width={size} height={size} viewBox="0 0 100 100" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
       <Defs>
         <RadialGradient id="orbBody" cx="38%" cy="32%" r="70%">
-          <Stop offset="0" stopColor="#E39A82" />
-          <Stop offset="0.55" stopColor="#B95F49" />
-          <Stop offset="1" stopColor="#8E3F2D" />
+          <Stop offset="0" stopColor="#7CC4F2" />
+          <Stop offset="0.55" stopColor="#1769AA" />
+          <Stop offset="1" stopColor="#0F4C80" />
         </RadialGradient>
       </Defs>
       <Circle cx="50" cy="50" r="46" fill="url(#orbBody)" />
@@ -42,7 +42,7 @@ function Shadow({ size, lift }: { size: number; lift: Animated.AnimatedInterpola
         width: size * 0.8,
         height: size * 0.16,
         borderRadius: size,
-        backgroundColor: '#5A3E2E',
+        backgroundColor: '#102A43',
         opacity: typeof lift === 'number' ? 0.18 : lift.interpolate({ inputRange: [0, 1], outputRange: [0.2, 0.05] }),
         transform: [{ scaleX: typeof lift === 'number' ? 1 : lift.interpolate({ inputRange: [0, 1], outputRange: [1, 0.45] }) }],
         marginTop: 2,

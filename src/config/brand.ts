@@ -17,19 +17,28 @@ export const Brand = {
   /** The website; the privacy policy and support pages live under it (App Store listing URLs). */
   siteUrl: 'https://oursome.org',
   colors: {
-    /** Warm linen: the main background. */
-    linen: '#F4EEE5',
-    /** Soft ivory: raised surfaces, cards, sheets. */
-    ivory: '#FFF9F0',
-    /** Brand terracotta (logo, decoration). Interactive fills use the AA-safe #A9533F. */
-    terracotta: '#B95F49',
-    sage: '#879D86',
-    honey: '#E5B96D',
-    /** Supporting tones for calendars and the organiser. */
-    slate: '#8FA5B2',
-    heather: '#A08DA4',
-    /** Warm espresso: main text. */
-    espresso: '#332B27',
+    /** Deep navy: wordmark, headings and the darkest brand tone. */
+    navy: '#102A43',
+    /** Ocean blue: primary actions and the mark's ring. */
+    ocean: '#1769AA',
+    /** Deeper blue for the house in the mark and pressed states. */
+    deepBlue: '#0F4C80',
+    /** Turquoise: the brand's bright accent. */
+    turquoise: '#12B8B0',
+    /** Soft teal for highlights and illustrations. */
+    teal: '#59D5CF',
+    /** Cool white: the main background. */
+    cloud: '#F7FBFE',
+    /** Pure white: cards and sheets. */
+    white: '#FFFFFF',
+    /** Pale blue for subtle highlights. */
+    pale: '#E5F5FB',
+    /** Main text. */
+    ink: '#142B45',
+    /** Secondary text. */
+    slate: '#64748B',
+    /** Borders and dividers. */
+    mist: '#DFEAF1',
   },
 } as const;
 

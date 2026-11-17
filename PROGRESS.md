@@ -164,6 +164,18 @@ Their report found no crashes or bugs; it suggested store text, onboarding, rati
 - Play listing: a longer keyword-rich description, a new short description, captioned screenshots in `docs/play-store/screenshots-captioned/`.
 Not done: an in-app review prompt (needs a native module), a community forum and social sharing (not wanted for a private app).
 
+## Version 1.1.0: rebrand and real-user bug fixes (16 Nov 2026)
+
+**Sign-in ("only works if you create an account")**: accounts made before online accounts (1.0.0/1.0.1) only existed on the phone, so Firebase didn't know them; sign-in failed and no reset email could come. Now, signing in on that phone with that account's email and password (checked against the saved hash) creates the same account online; anyone else just gets "don't match" (a failed sign-in never creates an account). Reset gives the same answer whether or not the email has an account. Signing out after signing in shows "Welcome back", not the introduction. The local-only mode no longer creates an account from a sign-in either.
+
+**Sharing**: (1) `crypto.getRandomValues` doesn't exist in React Native: invite codes, salts and new household ids now come from `src/lib/random.ts` (Web Crypto, or the phone's generator through expo-crypto; no Math.random fallback), and it's installed as `crypto.getRandomValues` at startup. Invite codes are now unbiased. (2) "Missing or insufficient permissions" came from sharing again after "Stop sharing": the same household id was reused, and only members may write to it. Each share now makes a fresh household id. Joining twice (or with your own code) is a no-op instead of a permission error; invites end an hour early so a fast phone clock still passes the 7-day rule; a stale invite is cleared on stop/re-share; errors are shown in plain words (`cloudErrorMessage`). No rule changes were needed.
+
+**Shopping list name hidden while typing**: the new-list form was at the bottom of the page, and with the keyboard up the floating tab bar sat on it (reproduced at 390 × 470). The form now opens at the top, and the tab bar hides while the keyboard is up (`useKeyboardVisible`).
+
+**Rebrand** (see docs/brand/README.md): blue/turquoise tokens with dark mode, the O-and-home logo, all icons, a compact Home header (date, greeting, next up, counts, household), Home sections reordered (today first), Nunito Sans everywhere, no paper grain, cooler shadows and tighter corners, Our Space in indigo, website pages rebranded.
+
+Tests: 298 unit tests (contrast, secure random, invite codes, error wording, sign-in rules), 19 emulator rules tests (incl. re-share, double join, clock skew, revocation, isolation), and a 23-step browser run through the emulators (device-account move, wrong password, reset link, sessions, share → stop → share, join twice). Not tried on a phone yet.
+
 ## Known gaps / outstanding
 
 - Not tested on a physical iPhone/Android device (all testing is the web build in Chromium).

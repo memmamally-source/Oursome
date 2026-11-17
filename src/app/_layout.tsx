@@ -14,8 +14,12 @@ import { ReminderEngine } from '@/features/reminders/engine';
 import { useSession } from '@/features/session/store';
 import { useSettings } from '@/features/settings/store';
 import { useAppFonts } from '@/hooks/useAppFonts';
+import { installRandomValues } from '@/lib/random';
 import { useHydrated } from '@/hooks/useHydrated';
 import { ThemeProvider, useTheme } from '@/theme';
+
+// Phones have no crypto.getRandomValues; invite codes and Firebase need a secure one.
+installRandomValues();
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -28,14 +32,14 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
     if (Platform.OS === 'web') (globalThis as { __oursomeRecoverChunk?: (m: string) => void }).__oursomeRecoverChunk?.(error.message);
   }, [error]);
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: '#F4EEE5', gap: 12 }}>
-      <Text style={{ fontSize: 22, fontWeight: '800', color: '#332B27' }}>Something went wrong</Text>
-      <Text style={{ fontSize: 16, color: '#6B6D7B', textAlign: 'center' }}>Your information is safe. Let’s try that again.</Text>
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: '#F7FBFE', gap: 12 }}>
+      <Text style={{ fontSize: 22, fontWeight: '800', color: '#102A43' }}>Something went wrong</Text>
+      <Text style={{ fontSize: 16, color: '#64748B', textAlign: 'center' }}>Your information is safe. Let’s try that again.</Text>
       <Pressable
         onPress={retry}
         accessibilityRole="button"
-        style={{ marginTop: 8, backgroundColor: '#A9533F', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 999 }}>
-        <Text style={{ fontSize: 16, fontWeight: '700', color: '#FFF9F0' }}>Try again</Text>
+        style={{ marginTop: 8, backgroundColor: '#1769AA', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 999 }}>
+        <Text style={{ fontSize: 16, fontWeight: '700', color: '#FFFFFF' }}>Try again</Text>
       </Pressable>
     </View>
   );
@@ -77,6 +81,10 @@ function AppNavigator() {
     return () => clearTimeout(t);
   }, [signedIn, pendingInvite]);
   const hasOnboarded = useSettings((s) => s.hasOnboarded);
+  // Someone who has signed in has been through the welcome: after signing out they see "Welcome back", not the introduction.
+  useEffect(() => {
+    if (signedIn && !hasOnboarded) useSettings.getState().completeOnboarding();
+  }, [signedIn, hasOnboarded]);
   // A short how-to tour the first time someone is signed in (an invite comes first).
   const hasSeenTour = useSettings((s) => s.hasSeenTour);
   useEffect(() => {

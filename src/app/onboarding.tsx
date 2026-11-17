@@ -24,7 +24,7 @@ const slides: { key: string; art: Art; accent: AccentKey; title: string; body: s
   {
     key: 'together',
     art: 'together',
-    accent: 'sunshine',
+    accent: 'mint',
     title: 'Better together',
     body: 'Share calendars, chores and shopping with the people you live with. Private things stay private.',
   },
@@ -60,7 +60,7 @@ function JournalArt() {
   return (
     <View style={{ flexDirection: 'row' }}>
       <View style={[page, { borderTopLeftRadius: 8, borderBottomLeftRadius: 8, transform: [{ rotate: '-3deg' }] }]}>
-        <View style={{ height: 52, borderRadius: 4, backgroundColor: palette.accents.sunshine.soft }} />
+        <View style={{ height: 52, borderRadius: 4, backgroundColor: palette.accents.mint.soft }} />
         {line(60)}
         {line(44)}
       </View>

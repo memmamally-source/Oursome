@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { Pressable, View } from 'react-native';
 
 import { Wordmark } from '@/components/brand/Logo';
-import { homeGreeting, ordinal, seasonOf, type Occasion } from '@/features/home/occasions';
+import { homeGreeting, ordinal, type Occasion } from '@/features/home/occasions';
 import { useSettings } from '@/features/settings/store';
 import type { EventOccurrence, IconName, Space } from '@/features/types';
 import { format, formatTime, timeKeyOf } from '@/lib/dates';
@@ -14,7 +14,6 @@ import { Avatar, AvatarStack } from '../ui/primitives';
 import { Reveal } from '../ui/Reveal';
 import { Text } from '../ui/Text';
 
-import { HouseholdCover, type CoverKey } from './HouseholdCover';
 
 type Props = {
   now: Date;
@@ -66,29 +65,68 @@ function occasionText(o: Occasion): string {
   return `${o.title} is ${when}`;
 }
 
-/** The top of Home: the household's cover, a warm greeting and today at a glance. */
+/** The top of Home: a compact greeting, today at a glance and the household. */
 export function HomeHeader({ now, today, name, color = 'coral', household, events, toDo, overdue, next, occasions, showLogo }: Props) {
   const { palette } = useTheme();
   const celebrations = useSettings((s) => s.celebrations);
   const first = name?.split(' ')[0];
-  const { hello, line } = homeGreeting(now, first, household?.name);
+  const { hello } = homeGreeting(now, first, household?.name);
   const occasion = occasions[0];
   const celebrateToday = celebrations && occasion?.when === 'today';
+  const profileButton = (size: number) => (
+    <Pressable onPress={() => router.push('/settings')} accessibilityRole="button" accessibilityLabel="Profile and settings" hitSlop={8}>
+      <Avatar name={name ?? 'You'} accent={color} size={size} ring />
+    </Pressable>
+  );
 
   return (
-    <View style={{ gap: space.lg, marginBottom: space.xl }}>
+    <View style={{ gap: space.md, marginBottom: space.xl }}>
       {showLogo ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Wordmark size={24} />
-          <Pressable
-            onPress={() => router.push('/settings')}
-            accessibilityRole="button"
-            accessibilityLabel="Profile and settings"
-            hitSlop={8}>
-            <Avatar name={name ?? 'You'} accent={color} size={40} ring />
-          </Pressable>
+          <Wordmark size={22} />
+          {profileButton(38)}
         </View>
       ) : null}
+
+      <View
+        style={[
+          {
+            backgroundColor: palette.surface,
+            borderRadius: radius.xl,
+            borderWidth: 1,
+            borderColor: palette.border,
+            padding: space.lg,
+            gap: space.sm,
+          },
+          elevation(palette, 1),
+        ]}>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.md }}>
+          {/* Re-keyed each day, so the greeting gently re-appears when the day changes. */}
+          <Reveal key={today} style={{ flex: 1, gap: 2 }}>
+            <Text variant="overline" color={palette.accents.coral.ink}>
+              {format(now, 'EEEE d MMMM')}
+            </Text>
+            <Text variant="heading" accessibilityRole="header">
+              {hello}
+            </Text>
+          </Reveal>
+          {showLogo ? null : profileButton(40)}
+        </View>
+        <Text variant="callout" tone="secondary">
+          {next
+            ? `Next up: ${next.event.title} at ${formatTime(timeKeyOf(next.start))}.`
+            : events || toDo
+              ? 'Nothing else on the calendar today.'
+              : 'A calm day. Make some memories.'}
+        </Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.sm, marginTop: 2 }}>
+          <Stat icon="calendar-outline" accent="sky" label={`${events} on today`} onPress={() => router.navigate('/calendar')} />
+          <Stat icon="checkmark-circle-outline" accent="mint" label={`${toDo} to do`} onPress={() => router.navigate('/tasks')} />
+          {overdue ? (
+            <Stat icon="alert-circle-outline" accent="coral" label={`${overdue} overdue`} onPress={() => router.navigate('/tasks')} />
+          ) : null}
+        </View>
+      </View>
 
       {occasion ? (
         <Reveal>
@@ -117,83 +155,37 @@ export function HomeHeader({ now, today, name, color = 'coral', household, event
         </Reveal>
       ) : null}
 
-      <View
-        style={[
-          { borderRadius: radius.xxl, overflow: 'hidden', borderWidth: 1, borderColor: palette.border, minHeight: 230 },
-          elevation(palette, 1),
-        ]}>
-        <HouseholdCover cover={(household?.cover as CoverKey) ?? 'hearth'} photo={household?.photo} season={seasonOf(now)} />
-        {!showLogo ? (
-          <Pressable
-            onPress={() => router.push('/settings')}
-            accessibilityRole="button"
-            accessibilityLabel="Profile and settings"
-            hitSlop={8}
-            style={{ position: 'absolute', top: space.lg, right: space.lg, zIndex: 1 }}>
-            <Avatar name={name ?? 'You'} accent={color} size={44} ring />
-          </Pressable>
-        ) : null}
-        <View style={{ padding: space.xl, gap: space.md, flex: 1 }}>
-          {/* Re-keyed each day, so the greeting gently re-appears when the day changes. */}
-          <Reveal key={today} style={{ gap: 4, maxWidth: 520 }}>
-            <Text variant="overline" color={palette.accents.coral.ink}>
-              {format(now, 'EEEE d MMMM')}
+      <Pressable
+        onPress={() => router.push('/household')}
+        accessibilityRole="button"
+        accessibilityLabel={household ? `${household.name}. Household settings` : 'Set up your household'}
+        style={({ pressed }) => ({
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: space.md,
+          paddingVertical: space.sm,
+          paddingHorizontal: space.md,
+          borderRadius: radius.lg,
+          backgroundColor: palette.accents.coral.soft,
+          opacity: pressed ? 0.8 : 1,
+        })}>
+        {household?.members.length ? (
+          <AvatarStack people={household.members} size={26} />
+        ) : (
+          <Icon name="home-outline" size={20} color={palette.accents.coral.ink} />
+        )}
+        <View style={{ flex: 1 }}>
+          <Text variant="callout" color={palette.accents.coral.ink} style={{ fontFamily: fonts.bodyBold }} numberOfLines={1}>
+            {household?.name ?? 'Set up your household'}
+          </Text>
+          {household?.motto ? (
+            <Text variant="caption" tone="secondary" numberOfLines={1}>
+              {household.motto}
             </Text>
-            <Text variant="display" accessibilityRole="header">
-              {hello}
-            </Text>
-            <Text variant="body" tone="secondary">
-              {line}
-            </Text>
-          </Reveal>
-
-          <Reveal delay={90}>
-            <Text variant="callout" tone="secondary">
-              {next
-                ? `Next up: ${next.event.title} at ${formatTime(timeKeyOf(next.start))}.`
-                : events || toDo
-                  ? 'Nothing else on the calendar today.'
-                  : 'A calm day. Make some memories.'}
-            </Text>
-          </Reveal>
-
-          <View style={{ flex: 1 }} />
-
-          <Reveal delay={160} style={{ gap: space.md }}>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space.sm }}>
-              <Stat icon="calendar-outline" accent="sky" label={`${events} on today`} onPress={() => router.navigate('/calendar')} />
-              <Stat icon="checkmark-circle-outline" accent="mint" label={`${toDo} to do`} onPress={() => router.navigate('/tasks')} />
-              {overdue ? (
-                <Stat icon="alert-circle-outline" accent="coral" label={`${overdue} overdue`} onPress={() => router.navigate('/tasks')} />
-              ) : null}
-            </View>
-            <Pressable
-              onPress={() => router.push('/household')}
-              accessibilityRole="button"
-              accessibilityLabel={household ? `${household.name}. Make it yours` : 'Make this home yours'}
-              style={({ pressed }) => ({
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: space.sm,
-                alignSelf: 'flex-start',
-                opacity: pressed ? 0.7 : 1,
-              })}>
-              {household?.members.length ? <AvatarStack people={household.members} size={26} /> : null}
-              <View style={{ flexShrink: 1 }}>
-                <Text variant="bodyStrong" numberOfLines={1}>
-                  {household?.name ?? 'Make this home yours'}
-                </Text>
-                {household?.motto ? (
-                  <Text variant="caption" tone="secondary" numberOfLines={1}>
-                    {household.motto}
-                  </Text>
-                ) : null}
-              </View>
-              <Icon name="create-outline" size={16} color={palette.textSecondary} />
-            </Pressable>
-          </Reveal>
+          ) : null}
         </View>
-      </View>
+        <Icon name="chevron-forward" size={18} color={palette.accents.coral.ink} />
+      </Pressable>
     </View>
   );
 }

@@ -14,6 +14,8 @@ import {
 
 import type { Member } from '@/features/types';
 
+import { secureRandomBytes } from '@/lib/random';
+
 import { inviteCode, type CloudItem, type CloudKind } from './mapping';
 
 /**
@@ -29,6 +31,8 @@ export type HouseholdInfo = { name: string; motto?: string; cover?: string };
 export type Account = { uid: string; name: string; color: Member['color']; role: Member['role'] };
 
 const INVITE_DAYS = 7;
+/** Codes end an hour early so a phone clock that runs a little fast still passes the 7-day rule. */
+const INVITE_MARGIN_MS = 3_600_000;
 
 const info = (h: HouseholdInfo) => ({
   name: h.name.trim().slice(0, 60),
@@ -63,12 +67,6 @@ export async function updateHousehold(db: Firestore, id: string, h: HouseholdInf
   await setDoc(ref, { ...info(h), createdBy, createdAt });
 }
 
-function randomBytes(n: number): Uint8Array {
-  const out = new Uint8Array(n);
-  globalThis.crypto.getRandomValues(out);
-  return out;
-}
-
 /** A join code that works for a week. */
 export async function createInvite(
   db: Firestore,
@@ -76,8 +74,8 @@ export async function createInvite(
   householdId: string,
   now = new Date(),
 ): Promise<{ code: string; expiresAt: Date }> {
-  const code = inviteCode(randomBytes);
-  const expiresAt = new Date(now.getTime() + INVITE_DAYS * 86_400_000 - 60_000);
+  const code = inviteCode(secureRandomBytes);
+  const expiresAt = new Date(now.getTime() + INVITE_DAYS * 86_400_000 - INVITE_MARGIN_MS);
   await setDoc(doc(db, 'invites', code), {
     householdId,
     createdBy: uid,
@@ -100,7 +98,9 @@ export async function joinHousehold(
   if (!invite?.exists()) throw new JoinError('That code didn’t work. Check it and try again.');
   const { householdId, expiresAt } = invite.data() as { householdId: string; expiresAt: Timestamp };
   if (expiresAt.toMillis() < Date.now()) throw new JoinError('That code has expired. Ask for a new one.');
-  await setDoc(doc(db, 'households', householdId, 'members', uid), {
+  // Already in this household (your own code, or a second tap): nothing to add.
+  const already = await getDoc(doc(db, 'households', householdId, 'members', uid)).catch(() => null);
+  if (!already?.exists()) await setDoc(doc(db, 'households', householdId, 'members', uid), {
     name: me.name.slice(0, 60),
     color: me.color,
     role: 'member',

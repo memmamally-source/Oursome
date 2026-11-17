@@ -139,7 +139,7 @@ export function PageTurn({ count, index, onIndexChange, renderPage, spread, page
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: '#2A1E17',
+        backgroundColor: '#102A43',
         opacity: t.interpolate({ inputRange: range, outputRange: out, extrapolate: 'clamp' }),
       }}
     />
@@ -266,7 +266,7 @@ export function PageTurn({ count, index, onIndexChange, renderPage, spread, page
             height: pageHeight,
             opacity: fade,
             borderRadius: 6,
-            shadowColor: '#2A1E17',
+            shadowColor: '#102A43',
             shadowOpacity: 0.18,
             shadowRadius: 18,
             shadowOffset: { width: 0, height: 10 },
@@ -283,7 +283,7 @@ export function PageTurn({ count, index, onIndexChange, renderPage, spread, page
                 bottom: 0,
                 left: pageWidth - 10,
                 width: 20,
-                backgroundColor: '#2A1E17',
+                backgroundColor: '#102A43',
                 opacity: 0.06,
               }}
             />

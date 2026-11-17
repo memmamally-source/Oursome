@@ -8,6 +8,7 @@ import { useShopping } from '@/features/shopping/store';
 import { useSpace } from '@/features/space/store';
 import { useTasks } from '@/features/tasks/store';
 import type { CalendarSource, Space } from '@/features/types';
+import { secureId } from '@/lib/random';
 import { accentKeys } from '@/theme/tokens';
 
 import * as api from './api';
@@ -261,10 +262,14 @@ export async function shareFamily(spaceId: string): Promise<void> {
   const me = await requireUser();
   const space = useSpace.getState().spaces.find((s) => s.id === spaceId);
   if (!space) return;
-  await api.createHousehold(db, me, space.id, { name: space.name, motto: space.motto, cover: space.cover }, meFor());
+  // A new online household every time: sharing again after "Stop sharing" must not
+  // collide with the old one (only its members may write to it).
+  const cloudId = `${space.id}-${secureId(12)}`;
+  await api.createHousehold(db, me, cloudId, { name: space.name, motto: space.motto, cover: space.cover }, meFor());
   lastInfo.set(space.id, infoKey(space));
   useCloud.getState().setSynced(space.id, new Map());
-  useSpace.getState().linkCloud(space.id, space.id);
+  useCloud.getState().clearInvite(space.id);
+  useSpace.getState().linkCloud(space.id, cloudId);
 }
 
 export async function inviteToFamily(spaceId: string): Promise<{ code: string; expiresAt: Date }> {
@@ -279,6 +284,9 @@ export async function inviteToFamily(spaceId: string): Promise<{ code: string; e
 export async function joinFamily(code: string): Promise<string> {
   const me = await requireUser();
   const { id, info } = await api.joinHousehold(db, me, code, meFor());
+  // Already sharing this family on this phone (e.g. your own code, or the link opened twice).
+  const existing = useSpace.getState().spaces.find((s) => s.cloudId === id);
+  if (existing) return existing.name;
   const profile = meFor();
   useCloud.getState().setSynced(id, new Map());
   useSpace.getState().addCloudSpace({
@@ -304,6 +312,8 @@ export async function leaveFamily(spaceId: string): Promise<void> {
   await api.leaveHousehold(db, me, space.cloudId);
   useSpace.getState().linkCloud(spaceId, undefined);
   useCloud.getState().setSynced(spaceId, new Map());
+  // Its old invite code belongs to the household just left.
+  useCloud.getState().clearInvite(spaceId);
 }
 
 /**

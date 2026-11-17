@@ -63,7 +63,7 @@ type CardProps = {
 export function Card({ children, tint, style, padded = true, onPress, accessibilityLabel, elevated = true }: CardProps) {
   const { palette } = useTheme();
   const base: ViewStyle = {
-    // Stationery: ivory paper with a fine warm edge and a soft resting shadow.
+    // Cards: white with a fine cool edge and a soft resting shadow.
     backgroundColor: tint ? palette.accents[tint].soft : palette.surface,
     borderRadius: radius.xl,
     padding: padded ? space.lg : 0,

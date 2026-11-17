@@ -70,7 +70,7 @@ export function FamilySharing({ family, isAdmin }: { family: Space; isAdmin: boo
         <Button
           label="Sign in or create an account"
           size="sm"
-          accent="sunshine"
+          accent="coral"
           onPress={() => void auth.signOut().then(() => router.replace('/sign-up'))}
           style={{ alignSelf: 'flex-start' }}
         />
@@ -90,7 +90,7 @@ export function FamilySharing({ family, isAdmin }: { family: Space; isAdmin: boo
           label={busy ? 'Sharing…' : 'Share this family'}
           icon="cloud-upload-outline"
           size="sm"
-          accent="sunshine"
+          accent="coral"
           disabled={busy}
           onPress={() => run(() => shareFamily(family.id), `${family.name} is now shared`)}
           style={{ alignSelf: 'flex-start' }}
@@ -138,7 +138,7 @@ export function FamilySharing({ family, isAdmin }: { family: Space; isAdmin: boo
             label={invite ? 'New code' : 'Create an invite code'}
             icon="key-outline"
             size="sm"
-            accent="sunshine"
+            accent="coral"
             disabled={busy}
             onPress={() => run(() => inviteToFamily(family.id))}
           />

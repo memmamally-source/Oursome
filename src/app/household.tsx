@@ -107,7 +107,7 @@ export default function HouseholdScreen() {
             label="Add a birthday"
             icon="gift-outline"
             variant="soft"
-            accent="sunshine"
+            accent="coral"
             size="sm"
             onPress={() => router.push({ pathname: '/event/[id]', params: { id: 'new', important: '1', title: '’s birthday' } })}
           />

@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Wordmark } from '@/components/brand/Logo';
 import type { IconName } from '@/features/types';
+import { useKeyboardVisible } from '@/hooks/useKeyboardVisible';
 import { SIDEBAR_WIDTH, useLayout } from '@/hooks/useLayout';
 import { useCalendarFocus } from '@/features/calendar/focus';
 import { haptic } from '@/lib/haptics';
@@ -18,7 +19,7 @@ export const tabMeta: Record<string, TabMeta> = {
   index: { label: 'Today', icon: 'sunny-outline', activeIcon: 'sunny', accent: 'coral' },
   calendar: { label: 'Calendar', icon: 'calendar-clear-outline', activeIcon: 'calendar-clear', accent: 'sky' },
   tasks: { label: 'Tasks', icon: 'checkmark-circle-outline', activeIcon: 'checkmark-circle', accent: 'mint' },
-  space: { label: 'Our Space', icon: 'people-outline', activeIcon: 'people', accent: 'sunshine' },
+  space: { label: 'Our Space', icon: 'people-outline', activeIcon: 'people', accent: 'lavender' },
 };
 
 /** On the Calendar tab, things added from the + button go on the day picked there. */
@@ -62,6 +63,7 @@ function TabItem({ name, focused, onPress, wide }: { name: string; focused: bool
 export function TabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
   const { palette } = useTheme();
   const { isWide } = useLayout();
+  const keyboardUp = useKeyboardVisible();
   const routes = state.routes.filter((r) => tabMeta[r.name]);
   const compose = () => openComposer(state.routes[state.index]?.name === 'calendar');
   const go = (key: string) => {
@@ -91,6 +93,9 @@ export function TabBar({ state, navigateToTab, insets }: BottomTabBarProps) {
       </View>
     );
   }
+  // The floating bar would sit over a text field while typing (it comes back when the keyboard closes).
+  if (keyboardUp) return null;
+
 
   const mid = Math.ceil(routes.length / 2);
   const bottom = Math.max(insets.bottom, 10);

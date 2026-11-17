@@ -58,7 +58,7 @@ export function AlbumsSection() {
       <SectionHeader
         title="Photo albums"
         icon="images-outline"
-        accent="sunshine"
+        accent="coral"
         action={albums.length ? 'All albums' : undefined}
         onAction={() => router.push('/albums')}
       />

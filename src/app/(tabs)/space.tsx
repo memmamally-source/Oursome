@@ -64,7 +64,7 @@ export default function SpaceScreen() {
         <Button
           label="Or just add the people you plan with"
           variant="ghost"
-          accent="sunshine"
+          accent="lavender"
           icon="person-add-outline"
           onPress={() => router.push({ pathname: '/person/[id]', params: { id: 'new' } })}
           style={{ marginBottom: space.xl }}
@@ -73,7 +73,7 @@ export default function SpaceScreen() {
           <Button
             label="Join a family with an invite code"
             variant="ghost"
-            accent="sunshine"
+            accent="lavender"
             icon="key-outline"
             onPress={() => router.push('/join')}
             style={{ marginBottom: space.xl, marginTop: -space.md }}
@@ -110,7 +110,7 @@ export default function SpaceScreen() {
       {/* Hero */}
       <View
         style={{
-          backgroundColor: palette.accents.sunshine.soft,
+          backgroundColor: palette.accents.lavender.soft,
           borderRadius: radius.xxl,
           padding: space.xl,
           gap: space.lg,
@@ -125,7 +125,7 @@ export default function SpaceScreen() {
             width: 160,
             height: 160,
             borderRadius: 80,
-            backgroundColor: palette.accents.sunshine.base,
+            backgroundColor: palette.accents.lavender.base,
             opacity: 0.35,
           }}
         />
@@ -142,7 +142,7 @@ export default function SpaceScreen() {
           }}
         />
         <View>
-          <Text variant="overline" tone="sunshine">
+          <Text variant="overline" tone="lavender">
             {spaces.length > 1 ? 'Family' : 'Our Space'}
           </Text>
           <Text variant="title" accessibilityRole="header">
@@ -159,7 +159,7 @@ export default function SpaceScreen() {
               label={s.cloudId ? 'Sharing' : 'Invite'}
               icon={s.cloudId ? 'cloud-done-outline' : 'person-add-outline'}
               size="sm"
-              accent="sunshine"
+              accent="lavender"
               onPress={() => setShowInvite(!showInvite)}
             />
           ) : null}
@@ -174,7 +174,7 @@ export default function SpaceScreen() {
       <PeopleSection members={s.members} />
 
       {/* Announcements */}
-      <SectionHeader title="Noticeboard" icon="megaphone-outline" accent="sunshine" />
+      <SectionHeader title="Noticeboard" icon="megaphone-outline" accent="lavender" />
       <View style={{ gap: space.sm, marginBottom: space.xxl }}>
         <View
           style={{
@@ -196,7 +196,7 @@ export default function SpaceScreen() {
             accessibilityLabel="New announcement"
             style={{ flex: 1, fontFamily: fonts.body, fontSize: 16, color: palette.text, paddingVertical: space.md }}
           />
-          {note ? <Button label="Post" size="sm" accent="sunshine" onPress={post} /> : null}
+          {note ? <Button label="Post" size="sm" accent="lavender" onPress={post} /> : null}
         </View>
         {announcements.map((a) => {
           const author = s.members.find((m) => m.id === a.authorId);
@@ -204,7 +204,7 @@ export default function SpaceScreen() {
             <View
               key={a.id}
               style={{
-                backgroundColor: a.pinned ? palette.accents.sunshine.soft : palette.surface,
+                backgroundColor: a.pinned ? palette.accents.lavender.soft : palette.surface,
                 borderRadius: radius.lg,
                 padding: space.lg,
                 gap: space.sm,
@@ -226,7 +226,7 @@ export default function SpaceScreen() {
                     <Icon
                       name={a.pinned ? 'pin' : 'pin-outline'}
                       size={16}
-                      color={a.pinned ? palette.accents.sunshine.ink : palette.textTertiary}
+                      color={a.pinned ? palette.accents.lavender.ink : palette.textTertiary}
                     />
                   </Pressable>
                   {a.authorId === me?.id || isAdmin ? (
@@ -509,8 +509,8 @@ function FamilySwitcher() {
                 height: 52,
                 borderRadius: radius.pill,
                 borderWidth: 1.5,
-                borderColor: active ? palette.accents.sunshine.base : palette.border,
-                backgroundColor: active ? palette.accents.sunshine.soft : palette.surface,
+                borderColor: active ? palette.accents.lavender.base : palette.border,
+                backgroundColor: active ? palette.accents.lavender.soft : palette.surface,
                 opacity: pressed ? 0.8 : 1,
               })}>
               <AvatarStack people={f.members.slice(0, 3)} size={30} />

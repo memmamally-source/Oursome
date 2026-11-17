@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 
 import { cloudConfigured } from './config';
+import { cloudErrorMessage } from './mapping';
 
 /**
  * The only cloud module screens import directly. The Firebase SDK and the
@@ -19,8 +20,17 @@ export function CloudBoot() {
   return null;
 }
 
-export const shareFamily = async (spaceId: string) => (await engine()).shareFamily(spaceId);
-export const inviteToFamily = async (spaceId: string) => (await engine()).inviteToFamily(spaceId);
-export const joinFamily = async (code: string) => (await engine()).joinFamily(code);
-export const leaveFamily = async (spaceId: string) => (await engine()).leaveFamily(spaceId);
-export const deleteCloudAccount = async () => (await engine()).deleteCloudAccount();
+/** Runs a cloud action and turns any failure into words people can act on. */
+async function friendly<T>(work: () => Promise<T>): Promise<T> {
+  try {
+    return await work();
+  } catch (e) {
+    throw new Error(cloudErrorMessage(e));
+  }
+}
+
+export const shareFamily = (spaceId: string) => friendly(async () => (await engine()).shareFamily(spaceId));
+export const inviteToFamily = (spaceId: string) => friendly(async () => (await engine()).inviteToFamily(spaceId));
+export const joinFamily = (code: string) => friendly(async () => (await engine()).joinFamily(code));
+export const leaveFamily = (spaceId: string) => friendly(async () => (await engine()).leaveFamily(spaceId));
+export const deleteCloudAccount = () => friendly(async () => (await engine()).deleteCloudAccount());
