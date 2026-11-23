@@ -9,7 +9,8 @@ import { parseCapture } from '@/features/assistant/parser';
 import { isTaskFor } from '@/features/people/logic';
 import { useSettings } from '@/features/settings/store';
 import { useShopping } from '@/features/shopping/store';
-import { useSpace } from '@/features/space/store';
+import { SharingField } from '@/components/forms/SharingField';
+import { defaultFamilyId, useSpace } from '@/features/space/store';
 import { groupOpenTasks, taskGroupLabels } from '@/features/tasks/logic';
 import { useTasks } from '@/features/tasks/store';
 import type { IconName } from '@/features/types';
@@ -330,10 +331,17 @@ function ListsView() {
   const [color, setColor] = useState<AccentKey>('mint');
   const [icon, setIcon] = useState<IconName>('basket-outline');
   const [shared, setShared] = useState(hasSpace);
+  const [listFamily, setListFamily] = useState<string | undefined>(() => defaultFamilyId());
 
   const create = () => {
     if (!name.trim()) return;
-    const list = addList({ name: name.trim(), color, icon, visibility: shared && hasSpace ? 'shared' : 'private' });
+    const list = addList({
+      name: name.trim(),
+      color,
+      icon,
+      visibility: shared && hasSpace ? 'shared' : 'private',
+      spaceId: shared && hasSpace ? listFamily : undefined,
+    });
     setCreating(false);
     setName('');
     router.push({ pathname: '/shopping/[id]', params: { id: list.id } });
@@ -414,12 +422,13 @@ function ListsView() {
             ))}
           </View>
           {hasSpace ? (
-            <Chip
-              label={shared ? 'Shared with Our Space' : 'Private to you'}
-              icon={shared ? 'people' : 'lock-closed'}
-              accent="sunshine"
-              selected={shared}
-              onPress={() => setShared(!shared)}
+            <SharingField
+              bare
+              what="this list"
+              visibility={shared ? 'shared' : 'private'}
+              onVisibility={(v) => setShared(v === 'shared')}
+              spaceId={listFamily}
+              onFamily={setListFamily}
             />
           ) : null}
           <View style={{ flexDirection: 'row', gap: space.sm }}>

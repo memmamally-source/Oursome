@@ -8,7 +8,7 @@ import { accentKeys, type AccentKey } from '@/theme/tokens';
 
 import { recordActivity } from '@/features/activity/store';
 
-import { allPeople, migrateSpaces } from './families';
+import { allPeople, migrateSpaces, pickDefaultFamily } from './families';
 
 /** Local id for the signed-in user until Firebase uids arrive in Stage 2. */
 export const ME_ID = 'me';
@@ -150,9 +150,19 @@ export function memberById(people: Member[], id?: string): Member | undefined {
   return people.find((m) => m.id === id);
 }
 
-/** Shared items remember their family: the active one unless they already have one. */
+/**
+ * The family a newly shared item goes to when none was picked: the active one,
+ * unless it isn't shared online and another family is (sharing means "with my
+ * people", so it should reach them).
+ */
+export function defaultFamilyId(): string | undefined {
+  const { spaces, activeId } = useSpace.getState();
+  return pickDefaultFamily(spaces, activeId);
+}
+
+/** Shared items remember their family: the one picked, else the default above. */
 export function withFamily<T extends { visibility: Visibility; spaceId?: string }>(item: T): T {
   if (item.visibility !== 'shared' || item.spaceId) return item;
-  const id = useSpace.getState().activeId;
+  const id = defaultFamilyId();
   return id ? { ...item, spaceId: id } : item;
 }

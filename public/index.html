@@ -78,6 +78,24 @@
       #boot svg {
         animation: boot-pulse 1.8s ease-in-out infinite;
       }
+      #boot-by {
+        position: fixed;
+        right: 22px;
+        bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font: 400 13px/1 'NunitoSans_400Regular', system-ui, sans-serif;
+        letter-spacing: 0;
+        color: #5f6e82;
+      }
+      #boot-by b {
+        font: 700 14px/1 'NunitoSans_700Bold', system-ui, sans-serif;
+        color: #061f3e;
+      }
+      #boot-by img {
+        border-radius: 50%;
+      }
       #boot-slow {
         display: none;
         max-width: 280px;
@@ -112,6 +130,13 @@
         #boot-slow {
           color: #a9bacb;
         }
+        #boot-by b {
+          color: #eaf3fa;
+        }
+        #boot-by img {
+          background: #fff6e9;
+          padding: 3px;
+        }
       }
       @media (prefers-reduced-motion: reduce) {
         #boot svg {
@@ -134,6 +159,7 @@
   <path d="M 4 50 A 46 46 0 1 0 96 50 A 46 46 0 1 0 4 50 Z M 20 50 A 30 30 0 1 0 80 50 A 30 30 0 1 0 20 50 Z" fill-rule="evenodd" fill="url(#boot-ring)" mask="url(#boot-gap)"/>
   <path d="M 12.86 77.14 L 47.00 43.00 Q 50 40 53.00 43.00 L 87.14 77.14 A 46 46 0 0 1 12.86 77.14 Z" fill="url(#boot-house)" mask="url(#boot-win)"/></svg>
         <div>oursome</div>
+        <div id="boot-by" aria-label="by Karoo Fox">by <img src="__BASE__/icons/karoo-fox-256.png" width="34" height="34" alt="" /> <b>Karoo Fox</b></div>
         <div id="boot-slow">
           Taking longer than usual — your connection may be slow.<br />
           <button type="button" onclick="location.reload()">Try again</button>

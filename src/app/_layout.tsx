@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { Platform, Pressable, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { LaunchScreen } from '@/components/brand/LaunchScreen';
 import { OrbStage } from '@/components/brand/Orb';
 import { ConfirmHost } from '@/components/ui/ConfirmDialog';
 import { ToastHost } from '@/components/ui/Toast';
@@ -152,6 +153,8 @@ function AppNavigator() {
       <OrbStage />
       <ToastHost />
       <ConfirmHost />
+      {/* Opening screen with the Karoo Fox credit; fades out by itself. */}
+      <LaunchScreen />
     </NavigationThemeProvider>
   );
 }

@@ -4,10 +4,11 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { TextInput, View } from 'react-native';
 
+import { SharingField } from '@/components/forms/SharingField';
 import { ChipRow, DatePicker, Field, RepeatPicker, ReminderPicker, TimePicker } from '@/components/forms/Fields';
-import { Button, Chip, ModalHeader, ModalScreen, Segmented, SettingRow, Text } from '@/components/ui';
+import { Button, Chip, ModalHeader, ModalScreen, SettingRow, Text } from '@/components/ui';
 import { PERSONAL_CALENDAR_ID, useCalendar } from '@/features/calendar/store';
-import { useSpace } from '@/features/space/store';
+import { defaultFamilyId, useSpace } from '@/features/space/store';
 import { haptic } from '@/lib/haptics';
 import { combine, dateKeyOf, deviceTimeZone, formatTime, minutesOfDay, timeFromMinutes, timeKeyOf, todayKey } from '@/lib/dates';
 import { fonts, radius, space, useTheme } from '@/theme';
@@ -55,6 +56,7 @@ export default function EventEditor() {
     existing ? (existing.reminderMinutes ?? null) : params.allDay ? null : 30,
   );
   const [visibility, setVisibility] = useState(existing?.visibility ?? 'private');
+  const [spaceId, setSpaceId] = useState<string | undefined>(existing?.spaceId ?? defaultFamilyId());
   const [important, setImportant] = useState(existing ? !!existing.isImportantDate : !!params.important);
   const [going, setGoing] = useState<string[]>(existing?.participantIds ?? []);
 
@@ -78,6 +80,7 @@ export default function EventEditor() {
       recurrence,
       reminderMinutes,
       visibility: hasSpace ? visibility : ('private' as const),
+      spaceId: hasSpace && visibility === 'shared' ? spaceId : undefined,
       isImportantDate: important,
       participantIds: going.length ? going : undefined,
       isDemo: existing?.isDemo,
@@ -189,20 +192,7 @@ export default function EventEditor() {
       </Field>
 
       {hasSpace ? (
-        <Field icon="people-outline" label="Sharing" accent="sunshine">
-          <Segmented
-            value={visibility}
-            onChange={setVisibility}
-            accent="sunshine"
-            options={[
-              { value: 'private', label: 'Private', icon: 'lock-closed-outline' },
-              { value: 'shared', label: 'Shared', icon: 'people-outline' },
-            ]}
-          />
-          <Text variant="caption" tone="tertiary">
-            {visibility === 'private' ? 'Only you can see this event.' : 'Everyone in your Our Space can see this event.'}
-          </Text>
-        </Field>
+        <SharingField visibility={visibility} onVisibility={setVisibility} spaceId={spaceId} onFamily={setSpaceId} what="this event" />
       ) : null}
 
       <Field icon="location-outline" label="Location" accent="coral">
