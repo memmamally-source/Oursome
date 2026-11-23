@@ -1,6 +1,6 @@
 import type { Space } from '@/features/types';
 
-import { allPeople, belongsTo, familyOf, migrateSpaces } from '../families';
+import { allPeople, belongsTo, familyOf, migrateSpaces, pickDefaultFamily } from '../families';
 
 const home: Space = {
   id: 's_home',
@@ -49,5 +49,19 @@ describe('families', () => {
     expect(migrateSpaces(undefined)).toEqual({ spaces: [], activeId: null });
     expect(migrateSpaces({ spaces: [home, parents], activeId: 's_par' }).activeId).toBe('s_par');
     expect(migrateSpaces({ spaces: [home], activeId: 'gone' }).activeId).toBe('s_home');
+  });
+});
+
+describe('pickDefaultFamily', () => {
+  const fam = (id: string, cloudId?: string) => ({ id, cloudId, name: id, members: [], announcements: [], createdAt: '' }) as unknown as Space;
+  it('uses the active family when it is shared online', () => {
+    expect(pickDefaultFamily([fam('a', 'ca'), fam('b', 'cb')], 'b')).toBe('b');
+  });
+  it('prefers a family shared online over an active one that is only on this phone', () => {
+    expect(pickDefaultFamily([fam('home'), fam('shared', 'c1')], 'home')).toBe('shared');
+  });
+  it('falls back to the active family when none is online, and to nothing without families', () => {
+    expect(pickDefaultFamily([fam('a'), fam('b')], 'b')).toBe('b');
+    expect(pickDefaultFamily([], null)).toBeUndefined();
   });
 });

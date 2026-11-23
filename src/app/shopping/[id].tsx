@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Animated, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { confirmAction } from '@/components/ui/ConfirmDialog';
@@ -7,6 +7,7 @@ import { Icon } from '@/components/ui/Icon';
 import { toast } from '@/components/ui/Toast';
 import { useFoldAway } from '@/components/ui/useFoldAway';
 
+import { SharingField } from '@/components/forms/SharingField';
 import { Button, Card, Checkbox, EmptyState, IconButton, Screen, Segmented, Text } from '@/components/ui';
 import { frequentItems, groupItems, manualOrder, shoppingCategoryMeta } from '@/features/shopping/logic';
 import { useShopping } from '@/features/shopping/store';
@@ -25,6 +26,9 @@ export default function ShoppingListScreen() {
   const { addItem, togglePurchased, removeItem, clearPurchased, toggleFavourite, removeList, updateList, moveItem } =
     useShopping.getState();
   const hasSpace = useSpace((s) => !!s.space);
+  const spaces = useSpace((s) => s.spaces);
+  const [sharingOpen, setSharingOpen] = useState(false);
+  const nameRef = useRef<React.ComponentRef<typeof TextInput>>(null);
   const [draft, setDraft] = useState('');
   // The name being edited; null when not editing.
   const [name, setName] = useState<string | null>(null);
@@ -44,6 +48,7 @@ export default function ShoppingListScreen() {
   }
 
   const tone = palette.accents[list.color];
+  const familyName = (spaces.find((f) => f.id === list.spaceId) ?? spaces[0])?.name ?? 'Our Space';
   const saveName = () => {
     const next = name?.trim();
     if (next && next !== list.name) updateList(list.id, { name: next });
@@ -92,15 +97,30 @@ export default function ShoppingListScreen() {
           {hasSpace ? (
             <IconButton
               icon={list.visibility === 'shared' ? 'people' : 'lock-closed'}
-              label={list.visibility === 'shared' ? 'Shared. Make private' : 'Private. Share with Our Space'}
+              label={list.visibility === 'shared' ? `Shared with ${familyName}. Change who can see it` : 'Private. Choose who can see it'}
               variant="soft"
-              accent="sunshine"
-              onPress={() => updateList(list.id, { visibility: list.visibility === 'shared' ? 'private' : 'shared' })}
+              accent="lavender"
+              onPress={() => setSharingOpen(!sharingOpen)}
             />
           ) : null}
           <IconButton icon="trash-outline" label="Delete list" onPress={confirmDelete} />
         </View>
       </View>
+
+      {sharingOpen && hasSpace ? (
+        <Card style={{ gap: space.sm, marginBottom: space.lg }}>
+          <Text variant="subheading">Who can see this list?</Text>
+          <SharingField
+            bare
+            what="this list"
+            visibility={list.visibility}
+            spaceId={list.spaceId}
+            onVisibility={(visibility) => updateList(list.id, { visibility })}
+            onFamily={(spaceId) => updateList(list.id, { visibility: 'shared', spaceId })}
+          />
+          <Button label="Done" size="sm" variant="ghost" accent="coral" onPress={() => setSharingOpen(false)} style={{ alignSelf: 'flex-end' }} />
+        </Card>
+      ) : null}
 
       <View style={{ backgroundColor: tone.soft, borderRadius: radius.xxl, padding: space.xl, gap: space.sm, marginBottom: space.xl }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
@@ -111,6 +131,7 @@ export default function ShoppingListScreen() {
           <View style={{ flex: 1 }}>
             {/* Tap the name to rename the list. */}
             <TextInput
+              ref={nameRef}
               value={name ?? list.name}
               onChangeText={setName}
               onBlur={saveName}
@@ -121,10 +142,12 @@ export default function ShoppingListScreen() {
               style={{ fontFamily: fonts.display, fontSize: 28, lineHeight: 34, color: palette.text, padding: 0 }}
             />
             <Text variant="callout" color={tone.ink}>
-              {open.length} to get · {list.visibility === 'shared' ? 'Shared with Our Space' : 'Private'}
+              {open.length} to get · {list.visibility === 'shared' ? `Shared with ${familyName}` : 'Private'}
             </Text>
           </View>
-          <Icon name="create-outline" size={18} color={tone.ink} />
+          <Pressable onPress={() => nameRef.current?.focus()} accessibilityRole="button" accessibilityLabel="Rename list" hitSlop={12}>
+            <Icon name="create-outline" size={20} color={tone.ink} />
+          </Pressable>
         </View>
       </View>
 

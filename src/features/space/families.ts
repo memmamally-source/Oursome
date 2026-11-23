@@ -36,3 +36,11 @@ export function migrateSpaces(persisted: unknown): { spaces: Space[]; activeId: 
   const activeId = p.activeId && spaces.some((s) => s.id === p.activeId) ? p.activeId : (spaces[0]?.id ?? null);
   return { spaces, activeId };
 }
+
+/** Pure core of defaultFamilyId (see store.ts): active family, unless only another one is shared online. */
+export function pickDefaultFamily(spaces: Space[], activeId: string | null): string | undefined {
+  const active = spaces.find((s) => s.id === activeId) ?? spaces[0];
+  if (!active) return undefined;
+  if (active.cloudId) return active.id;
+  return spaces.find((s) => s.cloudId)?.id ?? active.id;
+}

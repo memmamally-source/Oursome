@@ -176,6 +176,14 @@ Not done: an in-app review prompt (needs a native module), a community forum and
 
 Tests: 298 unit tests (contrast, secure random, invite codes, error wording, sign-in rules), 19 emulator rules tests (incl. re-share, double join, clock skew, revocation, isolation), and a 23-step browser run through the emulators (device-account move, wrong password, reset link, sessions, share → stop → share, join twice). Not tried on a phone yet.
 
+## Version 1.1.1: family choice, list sharing, launch screen (23 Nov 2026)
+
+From Rufaida's testing:
+- **Lists not sharing:** new lists and events always went to the *active* family; if that one wasn't shared online, nothing synced. Shared items now default to the active family only if it's online, otherwise the family that is (`pickDefaultFamily`, tested), and you can pick the family yourself.
+- **Choose which Our Space:** `components/forms/SharingField.tsx` (Private / Shared, plus a chip per family when there's more than one, and a plain note when that family isn't shared online yet). Used by the event form, the new-list form and the list screen's people button, which now opens "Who can see this list?" instead of just toggling. The list's pencil now focuses the name.
+- **Launch screen:** `components/brand/LaunchScreen.tsx` shows the Oursome mark and name for ~1.3 s after the splash, with "by Karoo Fox" (fox from the Karoo Fox logo pack, on a cream badge in dark mode per its guide) bottom right, then fades (instant with Reduce Motion). The web loading screen shows the same credit.
+- **Play warning:** a config plugin marks `android.hardware.screen.portrait` as not required, so landscape-only devices can install.
+
 ## Known gaps / outstanding
 
 - Not tested on a physical iPhone/Android device (all testing is the web build in Chromium).
